@@ -1,0 +1,162 @@
+:root {
+    --primary: #166534;
+    --secondary: #fbbf24;
+}
+
+body {
+    background-color: #f0fdf4;
+    background-image: radial-gradient(#dcfce7 2.5px, transparent 2.5px);
+    background-size: 30px 30px;
+    font-family: 'Quicksand', sans-serif;
+    color: #1f2937;
+}
+
+header, nav {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+}
+
+.brand-font { font-family: 'Fredoka One', cursive; letter-spacing: 0.5px; }
+
+@keyframes progress { from { width: 0; } to { width: 100%; } }
+@keyframes bounce-subtle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5%); } }
+@keyframes timer { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.animate-fadeIn { animation: fadeIn 0.4s ease-out forwards; }
+.btn-bounce { transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.btn-bounce:active { transform: scale(0.92); }
+.btn-bounce:hover { transform: scale(1.02); }
+
+@keyframes shiny-anim {
+    0% { box-shadow: 0 0 5px #fbbf24; }
+    50% { box-shadow: 0 0 15px #fbbf24; }
+    100% { box-shadow: 0 0 5px #fbbf24; }
+}
+
+.shiny-card { animation: shiny-anim 3s infinite; border: 2px solid #fbbf24; }
+
+.mythic-card { animation: mythic-anim 4s infinite; border: 4px solid #a855f7; background: linear-gradient(135deg, #faf5ff, #ffffff); }
+@keyframes mythic-anim {
+    0% { box-shadow: 0 0 10px #a855f7; }
+    50% { box-shadow: 0 0 25px #c084fc, inset 0 0 15px #e9d5ff; }
+    100% { box-shadow: 0 0 10px #a855f7; }
+}
+
+#splashScreen {
+    position: fixed; inset: 0; background: var(--primary); z-index: 9999;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    transition: opacity 0.5s;
+}
+
+.parental-gate {
+    position: fixed; inset: 0; background: rgba(22, 101, 52, 0.95);
+    backdrop-filter: blur(8px); z-index: 9999; display: none;
+    align-items: center; justify-content: center;
+}
+
+.tab-active { color: var(--primary); border-top: 3px solid var(--primary); padding-top: 11px; margin-top: -14px; }
+.select-pill.active { background-color: var(--primary); color: white; border-color: var(--primary); }
+
+.particle { position: fixed; pointer-events: none; z-index: 9999; animation: particle-anim 0.6s cubic-bezier(0, .9, .57, 1) forwards; }
+@keyframes particle-anim {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0); opacity: 0; }
+}
+
+.capy-slot { position: absolute; top: 50%; left: 50%; pointer-events: none; display: flex; align-items: center; justify-content: center; z-index: 10; text-shadow: 2px 2px 5px rgba(0,0,0,0.3); }
+.slot-head { transform: translate(-70%, -110%) rotate(-10deg); font-size: 5rem; z-index: 20; }
+.slot-eyes { transform: translate(-100%, -60%); font-size: 3.5rem; z-index: 25; }
+.slot-body { transform: translate(-20%, -20%); font-size: 6.5rem; z-index: 15; }
+.slot-hand { transform: translate(-120%, 0%) rotate(15deg); font-size: 4rem; z-index: 30; }
+.slot-feet { transform: translate(-40%, 40%); font-size: 2.5rem; display: flex; gap: 40px; z-index: 5; }
+
+.ad-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9999; display: none; align-items: center; justify-content: center; }
+
+/* Minigames Styles */
+.silhouette {
+    color: transparent;
+    text-shadow: 0 0 0 #1e3a8a; /* Escuro para formar a silhueta */
+    user-select: none;
+    transition: all 0.5s ease;
+}
+.silhouette.revealed {
+    color: initial;
+    text-shadow: none;
+    animation: bounce-in 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes bounce-in { 
+    0% { transform: scale(0); } 
+    50% { transform: scale(1.3); } 
+    100% { transform: scale(1); } 
+}
+
+/* Jogo da Memória */
+.memory-card {
+    perspective: 1000px;
+    cursor: pointer;
+    height: 70px;
+}
+.memory-card-inner {
+    position: relative; width: 100%; height: 100%;
+    transition: transform 0.5s; transform-style: preserve-3d;
+}
+.memory-card.flipped .memory-card-inner { transform: rotateY(180deg); }
+.memory-front, .memory-back {
+    position: absolute; width: 100%; height: 100%;
+    backface-visibility: hidden; display: flex; align-items: center; justify-content: center;
+    border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+.memory-front { background: #c084fc; transform: rotateY(0deg); font-size: 1.5rem; color: #fff; }
+.memory-back { background: #fff; transform: rotateY(180deg); font-size: 2rem; border: 2px solid #c084fc; }
+.memory-matched { opacity: 0.4; pointer-events: none; transform: scale(0.9); transition: all 0.5s ease; }
+
+/* Cards mais bonitos */
+.animal-card {
+    background: linear-gradient(to bottom, #ffffff, #f8fafc);
+    border: 1px solid rgba(22, 101, 52, 0.1);
+    box-shadow: 0 10px 25px -5px rgba(22, 101, 52, 0.05);
+}
+
+/* Modo Noturno (Night Mode) */
+body.night-mode {
+    background-color: #0f172a;
+    background-image: radial-gradient(#1e293b 2.5px, transparent 2.5px);
+    color: #cbd5e1;
+}
+body.night-mode header, body.night-mode nav {
+    background: rgba(15, 23, 42, 0.85) !important;
+}
+body.night-mode .animal-card {
+    background: linear-gradient(to bottom, #1e293b, #0f172a);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+body.night-mode .bg-white { background-color: #1e293b; color: #f8fafc; }
+body.night-mode .text-green-900 { color: #34d399; }
+body.night-mode .text-gray-600 { color: #94a3b8; }
+body.night-mode .bg-green-50 { background-color: #0f172a; border-color: #334155; }
+body.night-mode .text-amber-900 { color: #fbbf24; }
+body.night-mode .bg-blue-50, body.night-mode .bg-amber-50, body.night-mode .bg-purple-50 { background-color: #0f172a; border-color: #334155; }
+
+/* Álbum de Figurinhas */
+.sticker {
+    transition: all 0.3s ease;
+    filter: grayscale(100%) opacity(0.3) brightness(0);
+    transform: scale(0.9);
+}
+.sticker.collected {
+    filter: none;
+    transform: scale(1);
+    animation: bounce-in 0.5s ease;
+}
+
+/* Caixa Surpresa */
+@keyframes shake {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(10deg); }
+    50% { transform: rotate(-10deg); }
+    75% { transform: rotate(5deg); }
+    100% { transform: rotate(0deg); }
+}
+.box-shake { animation: shake 0.4s infinite; }

@@ -1,0 +1,17 @@
+{
+  "name": "A Capivara Aventureira",
+  "short_name": "Capivara",
+  "description": "Um diário de campo lúdico e gamificado para biólogos mirins explorarem a natureza.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#166534",
+  "theme_color": "#166534",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

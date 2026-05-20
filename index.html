@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#166534">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="Um diário de campo lúdico e gamificado para biólogos mirins explorarem a natureza com segurança.">
+    <title>A Capivara Aventureira</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.svg">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="min-h-screen flex flex-col pb-24 select-none">
+
+    <!-- TELA DE SPLASH -->
+    <div id="splashScreen">
+        <div class="text-8xl mb-4 animate-bounce">🦦</div>
+        <h1 class="brand-font text-white text-3xl text-center px-4">Capivara Aventureira</h1>
+        <p class="text-green-200 text-sm mt-1 brand-font">Edição Cientista Mirim</p>
+        <div class="mt-8 w-48 h-2 bg-green-900 rounded-full overflow-hidden">
+            <div class="h-full bg-yellow-400 w-0 animate-[progress_2s_ease-in-out_forwards]"></div>
+        </div>
+    </div>
+
+    <!-- TELA DE LOGIN / REGISTRO -->
+    <div id="authScreen" class="fixed inset-0 bg-green-900 z-[9000] hidden flex-col items-center justify-center p-6">
+        <div class="bg-white p-8 rounded-[3rem] shadow-2xl w-full max-w-sm text-center relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 text-9xl opacity-10">🌍</div>
+            <div class="text-6xl mb-4 animate-bounce" id="avatarPreviewAuth">🦦</div>
+            <h2 class="brand-font text-3xl text-green-900 mb-2">Crie seu Perfil!</h2>
+            <p class="text-xs font-bold text-gray-500 mb-6">Como devemos chamar você na floresta?</p>
+            
+            <input type="text" id="explorerName" placeholder="Seu Nome de Explorador" class="w-full bg-gray-50 border-2 border-green-100 rounded-2xl p-4 mb-4 text-center font-bold text-green-900 focus:outline-none focus:border-green-400 uppercase tracking-widest">
+            
+            <p class="text-xs font-bold text-gray-500 mb-2">Escolha seu Avatar:</p>
+            <div class="flex justify-center gap-3 mb-6">
+                <button onclick="selectAvatar('🐸', this)" class="avatar-btn text-3xl p-3 bg-gray-100 rounded-2xl border-2 border-transparent transition-all shadow-sm">🐸</button>
+                <button onclick="selectAvatar('🦋', this)" class="avatar-btn text-3xl p-3 bg-gray-100 rounded-2xl border-2 border-transparent transition-all shadow-sm">🦋</button>
+                <button onclick="selectAvatar('🦜', this)" class="avatar-btn text-3xl p-3 bg-gray-100 rounded-2xl border-2 border-transparent transition-all shadow-sm">🦜</button>
+                <button onclick="selectAvatar('🐆', this)" class="avatar-btn text-3xl p-3 bg-gray-100 rounded-2xl border-2 border-transparent transition-all shadow-sm">🐆</button>
+            </div>
+            
+            <button onclick="loginExplorer()" class="w-full bg-green-600 hover:bg-green-700 text-white font-black py-4 rounded-2xl text-lg uppercase tracking-wider btn-bounce shadow-md">Começar Aventura!</button>
+            
+            <div class="flex items-center gap-4 my-4">
+                <div class="h-px bg-gray-200 flex-1"></div>
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">OU</span>
+                <div class="h-px bg-gray-200 flex-1"></div>
+            </div>
+
+            <button onclick="loginWithGoogle()" class="w-full bg-white text-gray-600 font-bold py-4 rounded-2xl flex items-center justify-center gap-3 border-2 border-gray-100 hover:bg-gray-50 transition-all btn-bounce shadow-sm">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo" class="w-5 h-5">
+                Continuar com o Google
+            </button>
+        </div>
+    </div>
+
+    <!-- NOTIFICAÇÃO IN-GAME (SUBSTITUTO PARA ALERTS) -->
+    <div id="customToast" class="fixed top-20 left-1/2 -translate-x-1/2 z-[200] transform -translate-y-20 opacity-0 transition-all duration-300 bg-amber-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 font-bold border-2 border-amber-400 text-sm">
+        <span id="toastIcon">🎉</span>
+        <span id="toastMessage">Incrível!</span>
+    </div>
+
+    <!-- HEADER -->
+    <header class="bg-white p-4 sticky top-0 z-40 border-b border-green-100 shadow-sm">
+        <div class="max-w-md mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <!-- Mascote Interativo (Guarda-roupa) -->
+                <button onclick="openCloset()" class="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center shadow-inner border-2 border-amber-200 relative active:scale-95 transition-transform overflow-hidden">
+                    <span class="text-3xl z-0 absolute">🦦</span>
+                    <!-- Acessórios do Topo (Cabeça e Olhos) -->
+                    <div id="headerMascotAccessories" class="absolute inset-0 pointer-events-none z-10">
+                        <span id="headerHeadLayer" class="absolute text-xl top-[-3px] left-1/2 -translate-x-1/2"></span>
+                        <span id="headerEyesLayer" class="absolute text-sm top-[12px] left-1/2 -translate-x-1/2"></span>
+                    </div>
+                    <span class="absolute -bottom-1 -right-1 bg-yellow-400 text-[8px] p-0.5 rounded-full border border-amber-600 shadow-sm"><i class="fas fa-tshirt text-amber-900"></i></span>
+                </button>
+                <div>
+                    <h1 id="headerName" class="brand-font text-green-900 text-lg leading-none">A Capivara</h1>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="text-[9px] font-black text-white bg-green-600 px-2 py-0.5 rounded-full uppercase">Lvl <span id="userLevel">1</span></span>
+                        <div class="w-20 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                            <div id="xpProgress" class="h-full bg-green-500 transition-all duration-700" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Moedas e Ofensivas -->
+            <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1 bg-amber-50 px-2.5 py-1.5 rounded-full border border-amber-200 shadow-sm">
+                    <span class="text-sm">🌰</span>
+                    <span id="seedCoins" class="brand-font text-xs text-amber-900">0</span>
+                </div>
+                <div class="flex items-center gap-1 bg-orange-50 px-2 py-1.5 rounded-full border border-orange-200 shadow-sm">
+                    <span>🌳</span>
+                    <span id="streakCount" class="brand-font text-xs text-orange-700">1d</span>
+                </div>
+                <button onclick="toggleSafetyGuide()" class="w-9 h-9 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center shadow-sm">
+                    <i class="fas fa-shield-alt text-sm"></i>
+                </button>
+                <button onclick="openParentalGate('settings')" class="w-9 h-9 bg-gray-100 text-gray-600 rounded-full flex items-center justify-center shadow-sm">
+                    <i class="fas fa-cog text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN VIEWS -->
+    <main class="flex-grow p-4 max-w-md mx-auto w-full">
+        <!-- DIÁRIO / COLEÇÃO -->
+        <section id="homeView" class="space-y-4">
+            <div class="flex justify-between items-end">
+                <h2 class="brand-font text-xl text-green-800">Minha Coleção</h2>
+                <span id="animalCount" class="text-[10px] font-bold text-green-600 bg-white px-3 py-1 rounded-full shadow-sm border border-green-50">0 Descobertas</span>
+            </div>
+            
+            <div id="animalsGrid" class="grid grid-cols-1 gap-5 pb-10"></div>
+            
+            <div id="emptyState" class="text-center py-20 opacity-40">
+                <div class="text-7xl mb-4 animate-bounce">🌿</div>
+                <p class="brand-font text-green-900 text-lg">O quintal espera por você!</p>
+                <p class="text-xs">Toque no + brilhante para registrar um animal.</p>
+            </div>
+        </section>
+
+        <!-- LAB, STATS & MINI-QUIZ -->
+        <section id="labView" class="hidden space-y-6">
+            <div class="bg-green-800 p-6 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
+                <h2 class="brand-font text-2xl relative z-10">Eco-Laboratório</h2>
+                <p class="text-[10px] opacity-80 uppercase tracking-widest font-bold">Pesquisa e Saberes</p>
+                <div class="absolute -right-4 -bottom-4 text-8xl opacity-10 rotate-12">🔬</div>
+            </div>
+
+            <!-- MINI-QUIZ DO DIA -->
+            <div class="bg-amber-50/50 p-6 rounded-[2rem] border-2 border-amber-200 shadow-sm space-y-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="brand-font text-sm text-amber-900 flex items-center gap-2">
+                        <i class="fas fa-lightbulb"></i> Desafio do Biólogo Diário
+                    </h3>
+                    <span class="text-[9px] bg-amber-200 text-amber-950 font-bold px-2.5 py-1 rounded-full">Bônus: +15 🌰</span>
+                </div>
+                
+                <div id="quizContainer" class="space-y-3">
+                    <p id="quizQuestion" class="text-xs font-bold text-gray-700 leading-relaxed">Carregando pergunta ecológica...</p>
+                    <div id="quizOptions" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- GRAFICO DE BIODIVERSIDADE -->
+            <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-green-50">
+                <h3 class="brand-font text-sm text-green-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-chart-pie"></i> Biodiversidade Catalogada
+                </h3>
+                <div id="statsBreakdown" class="space-y-4"></div>
+            </div>
+
+            <div class="space-y-3">
+                <h3 class="brand-font text-sm text-green-800 px-2">Missões de Campo</h3>
+                <div id="missionsList" class="space-y-3"></div>
+            </div>
+        </section>
+
+        <!-- ALBUM DE FIGURINHAS -->
+        <section id="albumView" class="hidden space-y-6 pb-10">
+            <div class="bg-gradient-to-r from-green-500 to-emerald-600 p-8 rounded-[3rem] text-white shadow-xl relative overflow-hidden">
+                <h2 class="brand-font text-3xl relative z-10">Álbum Oficial</h2>
+                <p class="text-[10px] opacity-90 font-bold mt-1 relative z-10 uppercase tracking-widest">Colete todos os animais da nossa Fauna!</p>
+                <div class="absolute -right-4 -bottom-4 text-8xl opacity-20 rotate-12">📖</div>
+            </div>
+            
+            <div class="bg-white rounded-[2.5rem] p-6 shadow-sm border-2 border-green-100">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="brand-font text-lg text-green-900">Suas Figurinhas</h3>
+                    <span id="albumCount" class="text-[10px] bg-green-100 text-green-800 font-black px-2 py-1 rounded-full shadow-sm">0/0</span>
+                </div>
+                <div id="albumGrid" class="grid grid-cols-4 gap-3">
+                    <!-- Stickers injected via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- MINIGAMES HUB -->
+        <section id="gamesView" class="hidden space-y-6 pb-10">
+            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-8 rounded-[3rem] text-white shadow-xl relative overflow-hidden">
+                <h2 class="brand-font text-3xl relative z-10">Arcade Natural</h2>
+                <p class="text-[10px] opacity-90 font-bold mt-1 relative z-10 uppercase tracking-widest">Jogue, aprenda e ganhe sementes!</p>
+                <div class="absolute -right-4 -bottom-4 text-8xl opacity-20 rotate-12">🎮</div>
+            </div>
+
+            <!-- Silhouette Game -->
+            <div class="bg-white rounded-[2.5rem] p-6 shadow-sm border-2 border-blue-100 relative overflow-hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="brand-font text-lg text-blue-900">Quem é esse Animal?</h3>
+                    <span class="text-[10px] bg-blue-100 text-blue-800 font-black px-2 py-1 rounded-full shadow-sm">+15 🌰</span>
+                </div>
+                <div class="bg-blue-50 rounded-3xl h-40 flex items-center justify-center mb-4 shadow-inner border border-blue-100">
+                    <span id="silhouetteEmoji" class="text-7xl silhouette">🦋</span>
+                </div>
+                <div id="silhouetteOptions" class="grid grid-cols-2 gap-3">
+                    <!-- Buttons injected via JS -->
+                </div>
+            </div>
+
+            <!-- Memory Game -->
+            <div class="bg-white rounded-[2.5rem] p-6 shadow-sm border-2 border-purple-100 relative overflow-hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="brand-font text-lg text-purple-900">Jogo da Memória</h3>
+                    <span class="text-[10px] bg-purple-100 text-purple-800 font-black px-2 py-1 rounded-full shadow-sm">+50 🌰</span>
+                </div>
+                <div id="memoryGameGrid" class="grid grid-cols-4 gap-2 mb-4">
+                    <!-- Cards injected via JS -->
+                </div>
+                <button id="memoryStartBtn" onclick="startMemoryGame()" class="w-full py-4 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold transition-all btn-bounce shadow-md uppercase tracking-wider text-xs">INICIAR PARTIDA</button>
+            </div>
+            <!-- Endless Trivia -->
+            <div class="bg-white rounded-[2.5rem] p-6 shadow-sm border-2 border-orange-100 relative overflow-hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="brand-font text-lg text-orange-900">Quiz Sem Fim</h3>
+                    <span class="text-[10px] bg-orange-100 text-orange-800 font-black px-2 py-1 rounded-full shadow-sm">+5 🌰</span>
+                </div>
+                <div id="endlessQuizContainer" class="bg-orange-50 rounded-3xl p-5 mb-4 shadow-inner border border-orange-100">
+                    <!-- Endless Quiz injected via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- TROFÉUS -->
+        <section id="badgesView" class="hidden space-y-4 text-center">
+            <div class="bg-amber-900 p-8 rounded-[3rem] text-white shadow-2xl relative overflow-hidden">
+                <div class="text-5xl mb-2">🏆</div>
+                <h2 class="brand-font text-2xl">Mural de Troféus</h2>
+                <p class="text-xs opacity-70">Sua jornada de descobertas e conquistas</p>
+                <div class="absolute -left-6 -bottom-6 text-7xl opacity-5">🏆</div>
+            </div>
+            <div id="badgesGrid" class="grid grid-cols-2 gap-4 pb-10"></div>
+        </section>
+    </main>
+
+    <!-- NAVEGAÇÃO -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-green-100 p-4 flex justify-around items-center z-50">
+        <button onclick="showView('home')" id="navHome" class="flex flex-col items-center gap-1 text-gray-400 tab-active">
+            <i class="fas fa-book text-lg"></i><span class="text-[9px] font-bold uppercase">Diário</span>
+        </button>
+        <button onclick="showView('lab')" id="navLab" class="flex flex-col items-center gap-1 text-gray-400">
+            <i class="fas fa-microscope text-lg"></i><span class="text-[9px] font-bold uppercase">Lab</span>
+        </button>
+        
+        <!-- Botão de Captura Pulsante -->
+        <button onclick="openCaptureForm()" class="bg-green-600 text-white w-16 h-16 rounded-full flex items-center justify-center -mt-14 border-8 border-[#f0fdf4] shadow-2xl btn-bounce hover:bg-green-700 animate-pulse transition-transform">
+            <i class="fas fa-plus text-2xl"></i>
+        </button>
+        
+        <button onclick="showView('games')" id="navGames" class="flex flex-col items-center gap-1 text-gray-400">
+            <i class="fas fa-gamepad text-lg"></i><span class="text-[9px] font-bold uppercase">Jogos</span>
+        </button>
+
+        <button onclick="showView('album')" id="navAlbum" class="flex flex-col items-center gap-1 text-gray-400">
+            <i class="fas fa-book text-lg"></i><span class="text-[9px] font-bold uppercase">Álbum</span>
+        </button>
+
+        <button onclick="showView('badges')" id="navBadges" class="flex flex-col items-center gap-1 text-gray-400">
+            <i class="fas fa-medal text-lg"></i><span class="text-[9px] font-bold uppercase">Troféus</span>
+        </button>
+    </nav>
+
+    <!-- MODAL DO GUARDA-ROUPA (CUSTOMIZAÇÃO DA CAPIVARA CORPO INTEIRO) -->
+    <div id="closetModal" class="fixed inset-0 z-[100] hidden bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+        <div class="bg-white w-full max-w-2xl rounded-[3rem] p-6 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center">
+                <h3 class="brand-font text-xl text-amber-900 flex items-center gap-2">
+                    <i class="fas fa-tshirt"></i> Guarda-Roupa de Campo
+                </h3>
+                <button onclick="closeCloset()" class="text-gray-300 hover:text-gray-500 text-2xl"><i class="fas fa-times-circle"></i></button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                <!-- Painel de Corpo Inteiro -->
+                <div class="bg-gradient-to-b from-green-50 to-green-100/50 p-4 rounded-3xl flex flex-col items-center border border-green-200/50 relative shadow-inner">
+                    <span class="absolute top-3 left-4 text-[9px] font-black uppercase text-green-800 tracking-wider">Mascote Ativo</span>
+                    
+                    <div class="capy-visualizer my-4">
+                        <!-- Desenho da Capivara Corpo Inteiro em SVG -->
+                        <svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-md">
+                            <!-- Patas/Pés -->
+                            <ellipse cx="65" cy="165" rx="14" ry="10" fill="#451a03" />
+                            <ellipse cx="135" cy="165" rx="14" ry="10" fill="#451a03" />
+                            
+                            <!-- Corpo -->
+                            <ellipse cx="100" cy="115" rx="64" ry="48" fill="#78350f" />
+                            <ellipse cx="100" cy="115" rx="54" ry="38" fill="#854d0e" /> <!-- Destaque do peito -->
+                            
+                            <!-- Cabeça -->
+                            <ellipse cx="100" cy="65" rx="38" ry="30" fill="#78350f" />
+                            
+                            <!-- Focinho -->
+                            <ellipse cx="100" cy="74" rx="22" ry="14" fill="#451a03" />
+                            <circle cx="92" cy="72" r="3" fill="#1f2937" />
+                            <circle cx="108" cy="72" r="3" fill="#1f2937" />
+                            
+                            <!-- Olhos -->
+                            <circle cx="84" cy="58" r="4.5" fill="#000" />
+                            <circle cx="85.5" cy="56.5" r="1.5" fill="#fff" />
+                            <circle cx="116" cy="58" r="4.5" fill="#000" />
+                            <circle cx="117.5" cy="56.5" r="1.5" fill="#fff" />
+                            
+                            <!-- Orelhas -->
+                            <ellipse cx="66" cy="48" rx="8" ry="13" fill="#451a03" transform="rotate(-15 66 48)" />
+                            <ellipse cx="134" cy="48" rx="8" ry="13" fill="#451a03" transform="rotate(15 134 48)" />
+                            
+                            <!-- Bochechas Coradas -->
+                            <ellipse cx="74" cy="70" rx="6" ry="3.5" fill="#f87171" opacity="0.4" />
+                            <ellipse cx="126" cy="70" rx="6" ry="3.5" fill="#f87171" opacity="0.4" />
+                        </svg>
+
+                        <!-- Camadas de Acessórios Interativas do Closet (Multi-Slots) -->
+                        <span id="closetSlotHead" class="capy-slot slot-head"></span>
+                        <span id="closetSlotEyes" class="capy-slot slot-eyes"></span>
+                        <span id="closetSlotBody" class="capy-slot slot-body"></span>
+                        <span id="closetSlotHand" class="capy-slot slot-hand"></span>
+                        <div id="closetSlotFeet" class="capy-slot slot-feet">
+                            <span class="foot-l"></span>
+                            <span class="foot-r"></span>
+                        </div>
+                    </div>
+                    
+                    <p class="text-[10px] text-green-900 font-bold text-center mt-2">Dica: Equipe vários itens científicos ao mesmo tempo! 🎒🔍👓</p>
+                </div>
+                
+                <!-- Lista de Itens do Guarda-Roupa -->
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h4 class="brand-font text-xs text-amber-950 uppercase tracking-wider">Equipamentos Científicos</h4>
+                        <button onclick="unequipAll()" class="text-[9px] font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded-full border border-red-200 hover:bg-red-100 transition-colors">Desequipar Tudo</button>
+                    </div>
+                    <div id="accessoriesGrid" class="grid grid-cols-2 gap-3 max-h-[40vh] overflow-y-auto pr-1"></div>
+                </div>
+                <button onclick="buyMysteryBox()" class="w-full mt-4 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white py-4 rounded-2xl brand-font shadow-lg btn-bounce text-sm uppercase tracking-wider"><i class="fas fa-box-open mr-2"></i> Caixa Surpresa (75🌰)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TRAVA PARENTAL -->
+    <div id="parentalGate" class="parental-gate flex-col">
+        <div class="bg-white rounded-[2.5rem] p-8 w-full max-w-xs text-center space-y-6">
+            <h3 class="brand-font text-xl text-green-900">Área de Adultos</h3>
+            <p class="text-xs text-gray-500">Para continuar, peça para um adulto resolver:</p>
+            <div id="mathQuestion" class="brand-font text-3xl bg-green-50 py-4 rounded-2xl text-green-800"></div>
+            <input type="number" id="gateAnswer" placeholder="Resposta" class="w-full p-4 border-2 border-gray-100 rounded-2xl text-center outline-none focus:border-green-500">
+            <button onclick="checkParentalGate()" class="w-full bg-green-600 text-white py-4 rounded-2xl font-bold btn-bounce">Confirmar</button>
+            <button onclick="closeParentalGate()" class="text-xs text-gray-400">Voltar</button>
+        </div>
+    </div>
+
+    <!-- CONFIGURAÇÕES / PRIVACIDADE -->
+    <div id="settingsModal" class="fixed inset-0 z-[100] hidden bg-black/60 flex items-center justify-center p-6">
+        <div class="bg-white w-full max-w-sm rounded-[3rem] p-8 space-y-6 shadow-2xl">
+            <div class="flex justify-between items-center">
+                <h3 class="brand-font text-xl text-green-900">Configurações</h3>
+                <button onclick="document.getElementById('settingsModal').classList.add('hidden')" class="text-2xl text-gray-300">×</button>
+            </div>
+            <div class="space-y-3">
+                <button onclick="showPrivacy()" class="w-full text-left p-4 bg-gray-50 rounded-2xl flex items-center justify-between font-bold text-sm">
+                    <span>Política de Privacidade</span>
+                    <i class="fas fa-chevron-right text-xs opacity-30"></i>
+                </button>
+                <button onclick="confirmDeleteData()" class="w-full text-left p-4 bg-red-50 text-red-600 rounded-2xl flex items-center justify-between font-bold text-sm">
+                    <span class="uppercase">Apagar meus dados</span>
+                    <i class="fas fa-trash text-xs"></i>
+                </button>
+            </div>
+            <p class="text-[8px] text-center text-gray-400">Versão 1.5.0 (Google Play Compliant)</p>
+        </div>
+    </div>
+
+    <!-- CAPTURA FORM -->
+    <div id="captureModal" class="fixed inset-0 z-[100] hidden bg-green-900/60 backdrop-blur-sm flex items-end justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-[3rem] p-8 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center">
+                <h3 class="brand-font text-xl text-green-900">Nova Descoberta!</h3>
+                <button onclick="closeCaptureForm()" class="text-gray-300 hover:text-gray-500 text-2xl"><i class="fas fa-times-circle"></i></button>
+            </div>
+            
+            <div class="bg-orange-50 p-3 rounded-2xl border border-orange-100 flex items-center gap-3">
+                <span class="text-2xl">⚠️</span>
+                <p class="text-[10px] text-orange-900 font-bold leading-tight uppercase">Regra da Capivara:<br>Olhar sim, tocar nunca!</p>
+            </div>
+            
+            <!-- Campo de Upload (Opcional) -->
+            <input type="file" id="photoInput" accept="image/*" class="hidden" onchange="previewImage(this)">
+            <label id="imagePreviewContainer">
+                <label for="photoInput" id="imagePreview" class="w-full h-40 border-4 border-dashed border-green-100 rounded-[2.5rem] flex flex-col items-center justify-center bg-green-50 overflow-hidden cursor-pointer group hover:bg-green-100/50 transition-colors">
+                    <i class="fas fa-camera text-4xl text-green-200 group-hover:scale-110 transition-transform"></i>
+                    <span class="text-[10px] font-bold text-green-500 mt-2 uppercase">Subir Foto (Opcional)</span>
+                </label>
+            </label>
+            
+            <!-- Nome do Animal -->
+            <div class="space-y-1">
+                <label class="text-[10px] font-black text-green-800 ml-2 uppercase">Quem você viu?</label>
+                <input type="text" id="animalName" placeholder="Ex: Borboleta, Formiga, Gato..." class="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 text-sm outline-none font-semibold focus:border-green-500 transition-colors">
+            </div>
+
+            <!-- Categoria do Animal -->
+            <div class="space-y-2">
+                <label class="text-[10px] font-black text-green-800 ml-2 uppercase">Tipo de Amiguinho</label>
+                <div id="categorySelection" class="flex flex-wrap gap-2">
+                    <div onclick="selectOption('category', 'inseto', this)" class="select-pill bg-white shadow-sm px-3.5 py-2.5 rounded-xl text-[10px] font-bold border border-gray-100">🐞 Inseto</div>
+                    <div onclick="selectOption('category', 'ave', this)" class="select-pill bg-white shadow-sm px-3.5 py-2.5 rounded-xl text-[10px] font-bold border border-gray-100">🐦 Ave</div>
+                    <div onclick="selectOption('category', 'mamifero', this)" class="select-pill bg-white shadow-sm px-3.5 py-2.5 rounded-xl text-[10px] font-bold border border-gray-100">🐵 Mamífero</div>
+                    <div onclick="selectOption('category', 'felino', this)" class="select-pill bg-white shadow-sm px-3.5 py-2.5 rounded-xl text-[10px] font-bold border border-gray-100">🐆 Felino</div>
+                    <div onclick="selectOption('category', 'reptil', this)" class="select-pill bg-white shadow-sm px-3.5 py-2.5 rounded-xl text-[10px] font-bold border border-gray-100">🦎 Réptil</div>
+                    <div onclick="selectOption('category', 'anfibio', this)" class="select-pill bg-white shadow-sm px-3.5 py-2.5 rounded-xl text-[10px] font-bold border border-gray-100">🐸 Anfíbio</div>
+                    <div onclick="selectOption('category', 'aracnideo', this)" class="select-pill bg-white shadow-sm px-3.5 py-2.5 rounded-xl text-[10px] font-bold border border-gray-100">🕷️ Aracnídeo</div>
+                </div>
+            </div>
+
+            <!-- Onde foi encontrado -->
+            <div class="space-y-2">
+                <label class="text-[10px] font-black text-green-800 ml-2 uppercase">Aonde você o encontrou?</label>
+                <div id="locationSelection" class="flex flex-wrap gap-2">
+                    <div onclick="selectOption('location', 'quintal', this)" class="select-pill bg-white shadow-sm px-3.5 py-2.5 rounded-xl text-[10px] font-bold border border-gray-100">🏠 Quintal</div>
+                    <div onclick="selectOption('location', 'parque', this)" class="select-pill bg-white shadow-sm px-3.5 py-2.5 rounded-xl text-[10px] font-bold border border-gray-100">🌳 Parque</div>
+                    <div onclick="selectOption('location', 'escola', this)" class="select-pill bg-white shadow-sm px-3.5 py-2.5 rounded-xl text-[10px] font-bold border border-gray-100">🏫 Escola</div>
+                </div>
+            </div>
+
+            <!-- Campo de texto (Opcional - Ajuda a IA) -->
+            <div class="space-y-1">
+                <label class="text-[10px] font-black text-green-800 ml-2 uppercase">O que ele estava fazendo? (Opcional)</label>
+                <textarea id="animalDescription" placeholder="Ex: Estava comendo uma folha verde pertinho do vaso..." class="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 text-sm outline-none font-semibold focus:border-green-500 transition-colors h-16 resize-none"></textarea>
+            </div>
+
+            <button id="saveBtn" onclick="saveDiscovery()" class="w-full bg-green-700 hover:bg-green-800 text-white py-4 rounded-3xl brand-font shadow-lg btn-bounce">CATALOGAR DESCOBERTA!</button>
+        </div>
+    </div>
+
+    <!-- ANÚNCIO SIMULADO (CINE CAPIVARA) -->
+    <div id="adModal" class="ad-overlay">
+        <div class="bg-white rounded-[3rem] p-10 w-full max-w-xs text-center space-y-6 relative overflow-hidden shadow-2xl">
+            <div class="absolute top-0 left-0 h-1.5 bg-amber-500 w-full origin-left animate-[timer_5s_linear_forwards]"></div>
+            <h3 class="brand-font text-2xl text-green-900 italic">Cine Capivara</h3>
+            <div class="w-full aspect-video bg-gray-900 rounded-[2rem] flex flex-col items-center justify-center text-white text-4xl p-4">
+                <span>🎬</span>
+                <span class="text-[10px] uppercase text-amber-400 mt-2 font-black tracking-widest">Vídeo de Patrocínio</span>
+            </div>
+            <p class="text-[10px] text-gray-400 font-bold uppercase">Aguarde o vídeo para liberar a curiosidade premium...</p>
+            <button id="closeAdBtn" disabled class="w-full py-4 rounded-2xl bg-gray-100 text-gray-400 font-bold transition-all">AGUARDE...</button>
+        </div>
+    </div>
+
+    <!-- GUIA DE SEGURANÇA -->
+    <div id="safetyGuide" class="fixed inset-0 z-[150] hidden bg-green-900/95 backdrop-blur-md flex items-center justify-center p-6">
+        <div class="bg-white w-full max-w-sm rounded-[3.5rem] p-10 space-y-6 relative shadow-2xl">
+            <div class="absolute -top-10 left-1/2 -translate-x-1/2 w-20 h-20 bg-white rounded-full flex items-center justify-center text-4xl shadow-xl border-4 border-green-700">🛡️</div>
+            <h2 class="brand-font text-2xl text-center pt-4 text-green-900">Manual da Capivara</h2>
+            <div class="space-y-4 text-[11px] font-bold">
+                <div class="p-4 bg-blue-50 rounded-2xl flex gap-3 items-center"><span class="text-2xl">👫</span><p>EXPLORE SEMPRE COM PAPAI OU MAMÃE POR PERTO!</p></div>
+                <div class="p-4 bg-orange-50 rounded-2xl flex gap-3 items-center"><span class="text-2xl">🚫</span><p>NUNCA TOQUE EM ANIMAIS SELVAGENS OU INSETOS!</p></div>
+                <div class="p-4 bg-green-50 rounded-2xl flex gap-3 items-center"><span class="text-2xl">👟</span><p>SEMPRE USE TÊNIS PARA PROTEGER OS SEUS PÉS!</p></div>
+                <div class="p-4 bg-yellow-50 rounded-2xl flex gap-3 items-center"><span class="text-2xl">🧴</span><p>USE REPELENTE E PROTETOR SOLAR NO SOL!</p></div>
+            </div>
+            <button onclick="toggleSafetyGuide()" class="w-full bg-green-700 hover:bg-green-800 text-white py-5 rounded-3xl brand-font shadow-xl btn-bounce">ENTENDIDO!</button>
+        </div>
+    </div>
+
+    <!-- DAILY REWARD MODAL -->
+    <div id="dailyRewardModal" class="fixed inset-0 z-[200] hidden bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-[3rem] p-8 text-center space-y-5 shadow-2xl relative overflow-hidden transform transition-transform scale-0" id="dailyRewardContent">
+            <div class="absolute -top-10 -right-10 text-9xl opacity-10 rotate-12">🎁</div>
+            <h3 class="brand-font text-2xl text-amber-900">Bônus Diário!</h3>
+            <p class="text-xs text-gray-500 font-bold">Obrigado por voltar à natureza hoje!</p>
+            
+            <div class="bg-amber-100 rounded-3xl p-6 flex flex-col items-center justify-center border-4 border-amber-200">
+                <span class="text-5xl mb-2 animate-bounce">🌰</span>
+                <span class="brand-font text-3xl text-amber-800">+<span id="dailyRewardAmount">25</span></span>
+                <span class="text-[10px] font-black uppercase text-amber-600 mt-1">Sementes ganhas</span>
+            </div>
+            
+            <button onclick="claimDailyReward()" class="w-full bg-amber-500 hover:bg-amber-600 text-white py-4 rounded-3xl brand-font shadow-lg btn-bounce text-lg">RESGATAR!</button>
+        </div>
+    </div>
+
+    <!-- DETECTIVE MODAL (No Photo Validation) -->
+    <div id="detectiveModal" class="fixed inset-0 bg-green-900/95 backdrop-blur-sm z-[100] hidden flex-col items-center justify-center p-6" style="display: none;">
+        <div class="bg-white rounded-[3rem] p-8 w-full max-w-sm text-center shadow-2xl relative overflow-hidden">
+            <div class="absolute -right-6 -bottom-6 text-8xl opacity-10 rotate-12">🔍</div>
+            <div class="text-6xl mb-4 relative z-10 animate-bounce">🧐</div>
+            <h3 class="brand-font text-2xl text-green-900 leading-tight mb-2 relative z-10">Desafio do Detetive!</h3>
+            <p class="text-xs font-bold text-gray-500 mb-6 relative z-10">Como você não tirou uma foto, precisa provar que viu o animal! O que ele estava fazendo quando você o encontrou?</p>
+            <div class="space-y-3 relative z-10">
+                <button onclick="passDetectiveChallenge('Comendo/Buscando Comida')" class="w-full p-4 bg-amber-50 border border-amber-200 hover:bg-amber-100 text-amber-900 font-bold rounded-2xl transition-all btn-bounce text-sm">Comendo / Bebendo 🍃</button>
+                <button onclick="passDetectiveChallenge('Em movimento rápido')" class="w-full p-4 bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-900 font-bold rounded-2xl transition-all btn-bounce text-sm">Andando / Voando 💨</button>
+                <button onclick="passDetectiveChallenge('Estava parado observando')" class="w-full p-4 bg-purple-50 border border-purple-200 hover:bg-purple-100 text-purple-900 font-bold rounded-2xl transition-all btn-bounce text-sm">Dormindo / Parado 😴</button>
+            </div>
+            <button onclick="closeDetectiveModal()" class="mt-6 text-[10px] text-gray-400 font-bold uppercase tracking-wider underline relative z-10">Voltar para a câmera</button>
+        </div>
+    </div>
+
+    <!-- CAMERA USAGE WARNING MODAL -->
+    <div id="cameraWarningModal" class="fixed inset-0 bg-green-900/95 z-[9999] hidden flex-col items-center justify-center p-6">
+        <div class="bg-white p-8 rounded-[3rem] text-center max-w-sm shadow-xl relative overflow-hidden">
+            <div class="absolute -right-6 -bottom-6 text-8xl opacity-10 rotate-12">📸</div>
+            <div class="text-6xl mb-4 relative z-10 animate-bounce">🛡️</div>
+            <h3 class="brand-font text-2xl text-amber-600 mb-2 relative z-10">Uso da Câmera</h3>
+            <p class="text-xs text-gray-600 font-bold mb-6 relative z-10">Para registrar animais, este aplicativo usará a câmera do celular. <br><br><b>Atenção Pais:</b> As fotos ficam salvas APENAS neste aparelho e nunca são enviadas para a internet.</p>
+            <div class="flex flex-col gap-3 relative z-10">
+                <button onclick="acceptCamera()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-2xl btn-bounce uppercase tracking-wider text-sm shadow-md">Concordar e Abrir</button>
+                <button onclick="cancelCamera()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold py-3 rounded-2xl btn-bounce uppercase text-[10px]">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PRIVACY POLICY MODAL -->
+    <div id="privacyModal" class="fixed inset-0 bg-black/80 z-[9999] hidden flex-col items-center justify-center p-6">
+        <div class="bg-white p-8 rounded-[2rem] text-center max-w-sm shadow-2xl">
+            <h3 class="brand-font text-2xl text-green-900 mb-4">Política de Privacidade 🛡️</h3>
+            <p class="text-[11px] text-gray-600 font-bold mb-6 text-left leading-relaxed">
+                <b>1. Segurança de Dados:</b> Este aplicativo é projetado para crianças (Designed for Families). Não coletamos NENHUM dado pessoal, e-mail ou número de telefone.<br><br>
+                <b>2. Câmera e Fotos:</b> Todas as fotos tiradas e o progresso do jogo são gravados localmente (na memória interna do seu navegador/celular). Nenhum dado é transmitido para nossos servidores.<br><br>
+                <b>3. Compartilhamento:</b> Qualquer ação de compartilhar informações com terceiros é bloqueada por um Controle Parental (desafio matemático).
+            </p>
+            <button onclick="closePrivacy()" class="w-full bg-green-600 hover:bg-green-700 text-white font-black py-4 rounded-xl uppercase btn-bounce shadow-md">Estou Seguro!</button>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
