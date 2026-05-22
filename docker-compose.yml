@@ -1,0 +1,95 @@
+services:
+  capivara_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: capivara_app
+    restart: always
+    depends_on:
+      capivara_db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      JWT_SECRET: ${JWT_SECRET:-troque-esta-chave-em-producao}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      DB_HOST: capivara_db
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-capivara}
+      DB_USER: ${DB_USER:-capivara_user}
+      DB_PASSWORD: ${DB_PASSWORD:-troque-esta-senha}
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://capivara.aporttec.com}
+    networks:
+      - traefik
+      - capivara_internal
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.capivara.rule: "Host(`capivara.aporttec.com`)"
+      traefik.http.routers.capivara.entrypoints: "websecure"
+      traefik.http.routers.capivara.tls.certresolver: "myresolver"
+      traefik.http.services.capivara.loadbalancer.server.port: "3000"
+      traefik.docker.network: traefik
+
+  capivara_db:
+    image: mariadb:11.4
+    container_name: capivara_db
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-troque-root-password}
+      MARIADB_DATABASE: ${DB_NAME:-capivara}
+      MARIADB_USER: ${DB_USER:-capivara_user}
+      MARIADB_PASSWORD: ${DB_PASSWORD:-troque-esta-senha}
+    volumes:
+      - capivara_db_data:/var/lib/mysql
+    command:
+      - --innodb-buffer-pool-size=256M
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    networks:
+      - capivara_internal
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-uroot", "-p${DB_ROOT_PASSWORD:-troque-root-password}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
+  capivara_phpmyadmin:
+    image: phpmyadmin:5-apache
+    container_name: capivara_phpmyadmin
+    restart: always
+    depends_on:
+      capivara_db:
+        condition: service_healthy
+    environment:
+      PMA_HOST: capivara_db
+      PMA_PORT: 3306
+      PMA_USER: ${DB_USER:-capivara_user}
+      PMA_PASSWORD: ${DB_PASSWORD:-troque-esta-senha}
+      PMA_ABSOLUTE_URI: https://phpmyadmin.capivara.aporttec.com/
+      UPLOAD_LIMIT: 64M
+    networks:
+      - traefik
+      - capivara_internal
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.capivara-pma.rule: "Host(`phpmyadmin.capivara.aporttec.com`)"
+      traefik.http.routers.capivara-pma.entrypoints: "websecure"
+      traefik.http.routers.capivara-pma.tls.certresolver: "myresolver"
+      traefik.http.services.capivara-pma.loadbalancer.server.port: "80"
+      traefik.docker.network: traefik
+
+networks:
+  traefik:
+    external: true
+  capivara_internal:
+    driver: bridge
+
+volumes:
+  capivara_db_data:

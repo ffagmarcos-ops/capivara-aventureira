@@ -1,0 +1,25 @@
+{
+  "name": "capivara-aventureira-api",
+  "version": "1.0.0",
+  "description": "Capivara Aventureira com API Node.js e MariaDB",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.1",
+    "helmet": "^7.2.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "mysql2": "^3.15.3",
+    "sequelize": "^6.37.7"
+  }
+}

@@ -1,2 +1,9 @@
 tmp_gh/
 .DS_Store
+node_modules/
+.env
+.env.*
+!.env.example
+npm-debug.log*
+dist/
+coverage/

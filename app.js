@@ -48,8 +48,212 @@ const quizBank = [
     { q: 'O que o jacaré usa para nadar muito rápido?', o: ['🐊 Sua cauda forte', '🎈 Suas orelhas', '🦘 Suas asas'], a: 0 }
 ];
 
+const API_BASE = '/api';
+let authToken = localStorage.getItem('capy_token') || '';
+let apiOnline = false;
+
 let currentUser = JSON.parse(localStorage.getItem('capy_user')) || null;
 let tempAvatar = '🦦';
+
+function slugifyName(input) {
+    return String(input || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '.')
+        .replace(/^\.+|\.+$/g, '')
+        .slice(0, 30) || 'explorador';
+}
+
+async function apiRequest(path, options = {}) {
+    const headers = options.headers ? { ...options.headers } : {};
+    if (!headers['Content-Type'] && options.body) headers['Content-Type'] = 'application/json';
+    if (authToken) headers.Authorization = `Bearer ${authToken}`;
+
+    const response = await fetch(`${API_BASE}${path}`, { ...options, headers });
+    if (!response.ok) {
+        let message = `Erro ${response.status}`;
+        try {
+            const data = await response.json();
+            if (data && data.error) message = data.error;
+        } catch (e) {}
+        throw new Error(message);
+    }
+
+    if (response.status === 204) return null;
+    return response.json();
+}
+
+function mapAnimalFromApi(row) {
+    const captured = row.capturedAt ? new Date(row.capturedAt) : new Date();
+    const name = row.animalName || row.name || 'Animal';
+    const nameKey = name.toLowerCase();
+    const curioKey = Object.keys(curioData).find(k => nameKey.includes(k));
+    const curio = curioKey ? curioData[curioKey] : 'Possui superpoderes da natureza e ajuda o meio ambiente!';
+
+    return {
+        id: row.id,
+        name,
+        category: row.category || 'desconhecido',
+        location: row.location || 'natureza',
+        photo: row.photoBase64 || null,
+        curiosity: curio,
+        description: row.notes || '',
+        timestamp: captured.toLocaleDateString('pt-BR'),
+        premiumUnlocked: Boolean(row.premiumUnlocked),
+        rarity: 'comum',
+        capturedAt: captured.toISOString(),
+        createdEpoch: captured.getTime()
+    };
+}
+
+async function syncAnimalsFromApi() {
+    const rows = await apiRequest('/animals');
+    animals = rows.map(mapAnimalFromApi);
+}
+
+async function syncAccessoriesFromApi() {
+    const rows = await apiRequest('/accessories');
+    ownedAccessories = rows.filter(x => x.owned).map(x => x.code);
+    equippedAccessories = { head: null, eyes: null, body: null, hand: null, feet: null };
+    rows.filter(x => x.equipped).forEach(x => {
+        equippedAccessories[x.slot] = x.code;
+    });
+}
+
+function getGameStatePayload() {
+    return {
+        guardianXP,
+        seedCoins,
+        currentStreak,
+        lastVisitDate,
+        quizDoneDate,
+        userLevelMemo,
+        activeMissions,
+        cameraAccepted: Boolean(localStorage.getItem('capy_cam_accepted'))
+    };
+}
+
+function applyGameStatePayload(state) {
+    if (!state || typeof state !== 'object') return;
+
+    guardianXP = Number(state.guardianXP || 0);
+    seedCoins = Number(state.seedCoins || 0);
+    currentStreak = Number(state.currentStreak || 0);
+    lastVisitDate = state.lastVisitDate || '';
+    quizDoneDate = state.quizDoneDate || '';
+    userLevelMemo = Number(state.userLevelMemo || 1);
+    activeMissions = state.activeMissions || activeMissions;
+
+    if (state.cameraAccepted) {
+        localStorage.setItem('capy_cam_accepted', 'true');
+    }
+
+    localStorage.setItem('capy_xpPlay', guardianXP);
+    localStorage.setItem('capy_seeds', seedCoins);
+    localStorage.setItem('capy_streak', currentStreak);
+    localStorage.setItem('capy_last_visit', lastVisitDate);
+    localStorage.setItem('capy_quiz_done', quizDoneDate);
+    localStorage.setItem('capy_level', userLevelMemo);
+    localStorage.setItem('capy_missions', JSON.stringify(activeMissions));
+}
+
+let stateSyncTimer = null;
+let stateSyncInFlight = false;
+
+async function syncGameStateFromApi() {
+    const state = await apiRequest('/me/state');
+    applyGameStatePayload(state);
+}
+
+async function pushGameStateToApi() {
+    if (!authToken || stateSyncInFlight) return;
+    stateSyncInFlight = true;
+    try {
+        await apiRequest('/me/state', {
+            method: 'PUT',
+            body: JSON.stringify(getGameStatePayload())
+        });
+    } catch (error) {
+        console.warn('Falha ao salvar progresso na API:', error.message);
+    } finally {
+        stateSyncInFlight = false;
+    }
+}
+
+async function flushGameStateSync() {
+    if (!authToken) return;
+    if (stateSyncTimer) {
+        clearTimeout(stateSyncTimer);
+        stateSyncTimer = null;
+    }
+    await apiRequest('/me/state', {
+        method: 'PUT',
+        body: JSON.stringify(getGameStatePayload())
+    });
+}
+
+function scheduleGameStateSync(delayMs = 700) {
+    if (!authToken) return;
+    if (stateSyncTimer) clearTimeout(stateSyncTimer);
+    stateSyncTimer = setTimeout(() => {
+        pushGameStateToApi();
+    }, delayMs);
+}
+
+async function hydrateRemoteState() {
+    if (!authToken) return;
+    try {
+        const [me] = await Promise.all([
+            apiRequest('/me'),
+            syncAnimalsFromApi(),
+            syncAccessoriesFromApi(),
+            syncGameStateFromApi()
+        ]);
+        currentUser = {
+            name: me.user.name,
+            avatar: me.user.avatar,
+            email: me.user.email,
+            id: me.user.id
+        };
+        localStorage.setItem('capy_user', JSON.stringify(currentUser));
+        apiOnline = true;
+    } catch (error) {
+        apiOnline = false;
+        console.warn('Falha ao sincronizar com API:', error.message);
+    }
+}
+
+async function authenticateExplorer(name, avatar, isGoogle) {
+    const slug = slugifyName(name);
+    const email = `${slug}${isGoogle ? '.g' : ''}@capivara.aporttec.com`;
+    const password = `Capy#${slug}2026`;
+
+    let auth;
+    try {
+        auth = await apiRequest('/auth/login', {
+            method: 'POST',
+            body: JSON.stringify({ email, password })
+        });
+    } catch (loginError) {
+        auth = await apiRequest('/auth/register', {
+            method: 'POST',
+            body: JSON.stringify({ name, email, password, avatar })
+        });
+    }
+
+    authToken = auth.token;
+    localStorage.setItem('capy_token', authToken);
+    currentUser = {
+        id: auth.user.id,
+        name: auth.user.name,
+        avatar: auth.user.avatar,
+        email: auth.user.email,
+        isGoogle: Boolean(isGoogle)
+    };
+    localStorage.setItem('capy_user', JSON.stringify(currentUser));
+    await hydrateRemoteState();
+}
 
 function selectAvatar(emoji, btn) {
     playSound('click'); tempAvatar = emoji;
@@ -60,29 +264,36 @@ function selectAvatar(emoji, btn) {
     document.getElementById('avatarPreviewAuth').innerText = tempAvatar;
 }
 
-function loginExplorer() {
+async function loginExplorer() {
     const name = document.getElementById('explorerName').value.trim();
     if (!name) return showToast("Digite seu nome!", "⚠️");
-    playSound('success');
-    currentUser = { name, avatar: tempAvatar, isGoogle: false };
-    localStorage.setItem('capy_user', JSON.stringify(currentUser));
-    document.getElementById('authScreen').style.display = 'none';
-    renderApp(); createConfetti();
-    setTimeout(() => { showToast(`Bem-vindo, ${name}!`, tempAvatar); }, 800);
+    try {
+        playSound('success');
+        await authenticateExplorer(name, tempAvatar, false);
+        document.getElementById('authScreen').style.display = 'none';
+        renderApp(); createConfetti();
+        setTimeout(() => { showToast(`Bem-vindo, ${currentUser.name}!`, tempAvatar); }, 800);
+    } catch (error) {
+        showToast(`Falha no login: ${error.message}`, "⚠️");
+    }
 }
 
-function loginWithGoogle() {
+async function loginWithGoogle() {
     playSound('click');
     showToast("Conectando ao Google Play...", "🔄");
     // Simulação do Fluxo OAuth do Google Play Games
-    setTimeout(() => {
-        playSound('success');
-        const randomID = Math.floor(Math.random() * 9999);
-        currentUser = { name: `Explorador${randomID}`, avatar: '🎮', isGoogle: true };
-        localStorage.setItem('capy_user', JSON.stringify(currentUser));
-        document.getElementById('authScreen').style.display = 'none';
-        renderApp(); createConfetti();
-        setTimeout(() => { showToast(`Sincronizado com o Google!`, "🎮"); }, 800);
+    setTimeout(async () => {
+        try {
+            playSound('success');
+            const randomID = Math.floor(Math.random() * 9999);
+            const name = `Explorador${randomID}`;
+            await authenticateExplorer(name, '🎮', true);
+            document.getElementById('authScreen').style.display = 'none';
+            renderApp(); createConfetti();
+            setTimeout(() => { showToast(`Sincronizado com o Google!`, "🎮"); }, 800);
+        } catch (error) {
+            showToast(`Falha no login Google: ${error.message}`, "⚠️");
+        }
     }, 1500);
 }
 
@@ -164,6 +375,7 @@ function checkStreaks() {
         lastVisitDate = today;
         localStorage.setItem('capy_streak', currentStreak);
         localStorage.setItem('capy_last_visit', today);
+        scheduleGameStateSync();
         setTimeout(() => {
             playSound('success');
             document.getElementById('dailyRewardModal').classList.remove('hidden');
@@ -175,6 +387,7 @@ function checkStreaks() {
 
 function claimDailyReward() {
     playSound('coin'); seedCoins += 25; localStorage.setItem('capy_seeds', seedCoins);
+    scheduleGameStateSync();
     const modal = document.getElementById('dailyRewardContent');
     modal.classList.remove('scale-100'); modal.classList.add('scale-0');
     setTimeout(() => { document.getElementById('dailyRewardModal').classList.add('hidden'); showToast("+25 sementes hoje!", "🌟"); renderApp(); }, 300);
@@ -228,6 +441,7 @@ function guessSilhouette(guess, btn) {
         btn.classList.replace('text-blue-900', 'text-white');
         seedCoins += 15; guardianXP += 10;
         localStorage.setItem('capy_seeds', seedCoins); localStorage.setItem('capy_xpPlay', guardianXP);
+        scheduleGameStateSync();
         showToast("Acertou! +15 🌰", "🌟"); renderApp(); createConfetti();
         setTimeout(loadSilhouetteGame, 2500);
     } else {
@@ -276,6 +490,7 @@ function checkMemoryMatch() {
         if (matchedPairs === memoryEmojis.length) {
             playSound('levelup'); seedCoins += 50; guardianXP += 30;
             localStorage.setItem('capy_seeds', seedCoins); localStorage.setItem('capy_xpPlay', guardianXP);
+            scheduleGameStateSync();
             showToast("Você ganhou! +50 🌰", "🧠"); renderApp(); createConfetti();
             document.getElementById('memoryStartBtn').innerText = "JOGAR NOVAMENTE (+50🌰)";
             document.getElementById('memoryStartBtn').style.display = 'block';
@@ -306,6 +521,7 @@ function answerQuiz(selected, correct) {
         playSound('success'); seedCoins += 15; guardianXP += 20;
         localStorage.setItem('capy_seeds', seedCoins); localStorage.setItem('capy_xpPlay', guardianXP);
         quizDoneDate = new Date().toDateString(); localStorage.setItem('capy_quiz_done', quizDoneDate);
+        scheduleGameStateSync();
         document.getElementById('quizContainer').innerHTML = `<div class="text-center py-4 bg-green-100 rounded-3xl p-4 border border-green-300 animate-bounce"><span class="text-3xl">🎉 ACERTOU!</span><p class="text-xs text-green-800 font-bold mt-2">+15 🌰 Sementes e 20 XP!</p></div>`;
         showToast("Resposta Certa!", "🎯"); renderApp();
     } else { playSound('click'); showToast("Tente novamente!", "❌"); event.target.closest('button').classList.add('border-red-400', 'bg-red-50'); }
@@ -340,18 +556,88 @@ function updateFullBodyVisuals() {
     document.getElementById('headerHeadLayer').innerText = h ? h.emoji : ''; document.getElementById('headerEyesLayer').innerText = e ? e.emoji : '';
 }
 
-function buyAccessory(id, price) {
+async function buyAccessory(id, price) {
     playSound('click');
     if (seedCoins >= price) {
-        seedCoins -= price; ownedAccessories.push(id); localStorage.setItem('capy_seeds', seedCoins); localStorage.setItem('capy_owned_acc', JSON.stringify(ownedAccessories));
+        if (authToken) {
+            try {
+                await flushGameStateSync();
+                const purchaseResult = await apiRequest(`/accessories/${id}/purchase`, { method: 'POST' });
+                if (typeof purchaseResult.seedCoins === 'number') {
+                    seedCoins = purchaseResult.seedCoins;
+                }
+            } catch (error) {
+                return showToast(`Erro na compra: ${error.message}`, '⚠️');
+            }
+        }
+
+        if (!authToken) {
+            seedCoins -= price;
+        }
+        if (!ownedAccessories.includes(id)) ownedAccessories.push(id);
+        localStorage.setItem('capy_seeds', seedCoins);
+        localStorage.setItem('capy_owned_acc', JSON.stringify(ownedAccessories));
+        scheduleGameStateSync();
+
+        if (authToken) await syncAccessoriesFromApi();
         playSound('success'); showToast("Item comprado!", "🎩"); renderCloset(); renderApp();
     } else showToast("Sementes insuficientes!", "🌰");
 }
-function equipAccessory(id, slot) { playSound('click'); equippedAccessories[slot] = id; localStorage.setItem('capy_equipped_slots', JSON.stringify(equippedAccessories)); showToast("Equipado!", "✨"); renderCloset(); renderApp(); }
-function unequipAccessory(slot) { playSound('click'); equippedAccessories[slot] = null; localStorage.setItem('capy_equipped_slots', JSON.stringify(equippedAccessories)); showToast("Removido!", "💨"); renderCloset(); renderApp(); }
-function unequipAll() { playSound('click'); equippedAccessories = { head: null, eyes: null, body: null, hand: null, feet: null }; localStorage.setItem('capy_equipped_slots', JSON.stringify(equippedAccessories)); showToast("Limpo!", "💨"); renderCloset(); renderApp(); }
+async function equipAccessory(id, slot) {
+    playSound('click');
+    if (authToken) {
+        try {
+            await apiRequest(`/accessories/${id}/equip`, { method: 'POST' });
+            await syncAccessoriesFromApi();
+        } catch (error) {
+            return showToast(`Erro ao equipar: ${error.message}`, '⚠️');
+        }
+    } else {
+        equippedAccessories[slot] = id;
+    }
+    localStorage.setItem('capy_equipped_slots', JSON.stringify(equippedAccessories));
+    scheduleGameStateSync();
+    showToast("Equipado!", "✨");
+    renderCloset(); renderApp();
+}
 
-window.onload = () => {
+async function unequipAccessory(slot) {
+    playSound('click');
+    if (authToken) {
+        try {
+            await apiRequest(`/accessories/unequip/${slot}`, { method: 'POST' });
+            await syncAccessoriesFromApi();
+        } catch (error) {
+            return showToast(`Erro ao remover: ${error.message}`, '⚠️');
+        }
+    } else {
+        equippedAccessories[slot] = null;
+    }
+    localStorage.setItem('capy_equipped_slots', JSON.stringify(equippedAccessories));
+    scheduleGameStateSync();
+    showToast("Removido!", "💨");
+    renderCloset(); renderApp();
+}
+
+async function unequipAll() {
+    playSound('click');
+    if (authToken) {
+        try {
+            await apiRequest('/accessories/unequip-all', { method: 'POST' });
+            await syncAccessoriesFromApi();
+        } catch (error) {
+            return showToast(`Erro ao limpar: ${error.message}`, '⚠️');
+        }
+    } else {
+        equippedAccessories = { head: null, eyes: null, body: null, hand: null, feet: null };
+    }
+    localStorage.setItem('capy_equipped_slots', JSON.stringify(equippedAccessories));
+    scheduleGameStateSync();
+    showToast("Limpo!", "💨");
+    renderCloset(); renderApp();
+}
+
+window.onload = async () => {
     playSound('click');
     setTimeout(() => { 
         document.getElementById('splashScreen').style.opacity = '0'; 
@@ -363,6 +649,7 @@ window.onload = () => {
             }
         }, 500); 
     }, 2000);
+    await hydrateRemoteState();
     checkTimeOfDay(); checkStreaks(); renderApp(); loadDailyQuiz();
     loadSilhouetteGame(); loadEndlessQuiz();
     if (!sessionStorage.getItem('safetySeen') && currentUser) { setTimeout(toggleSafetyGuide, 2500); sessionStorage.setItem('safetySeen', 'true'); }
@@ -415,6 +702,7 @@ function openCaptureForm() {
 }
 function acceptCamera() {
     playSound('success'); localStorage.setItem('capy_cam_accepted', 'true');
+    scheduleGameStateSync();
     document.getElementById('cameraWarningModal').classList.add('hidden'); document.getElementById('cameraWarningModal').style.display = 'none';
     document.getElementById('captureModal').classList.remove('hidden');
 }
@@ -445,14 +733,16 @@ function previewImage(input) {
 
 let pendingDiscovery = null;
 
-function saveDiscovery() {
+async function saveDiscovery() {
     const name = document.getElementById('animalName').value; const desc = document.getElementById('animalDescription').value;
     if (!name || !selectedCategory) return showToast("Preencha nome e tipo!", "⚠️");
     
     // Filtro Anti-Spam: Se registrar mais de 3 em 1 minuto, bloqueia.
     const now = Date.now();
     if (animals.length >= 3) {
-        if (now - animals[0].id < 60000 && now - animals[2].id < 60000) {
+        const recent0 = animals[0].createdEpoch || new Date(animals[0].capturedAt || now).getTime();
+        const recent2 = animals[2].createdEpoch || new Date(animals[2].capturedAt || now).getTime();
+        if (now - recent0 < 60000 && now - recent2 < 60000) {
             playSound('click');
             return showToast("Muito rápido! Descanse os olhos 1 minuto.", "⏳");
         }
@@ -466,15 +756,15 @@ function saveDiscovery() {
         return;
     }
 
-    finalizeDiscovery(name, desc);
+    await finalizeDiscovery(name, desc);
 }
 
-function passDetectiveChallenge(observation) {
+async function passDetectiveChallenge(observation) {
     playSound('success');
     document.getElementById('detectiveModal').classList.add('hidden');
     document.getElementById('detectiveModal').style.display = 'none';
     const finalDesc = pendingDiscovery.desc ? `${pendingDiscovery.desc} (Ação: ${observation})` : `(Ação: ${observation})`;
-    finalizeDiscovery(pendingDiscovery.name, finalDesc);
+    await finalizeDiscovery(pendingDiscovery.name, finalDesc);
     pendingDiscovery = null;
 }
 
@@ -485,7 +775,7 @@ function closeDetectiveModal() {
     pendingDiscovery = null;
 }
 
-function finalizeDiscovery(name, desc) {
+async function finalizeDiscovery(name, desc) {
     // Validador de Categoria Biológica
     let finalCategory = selectedCategory;
     if (typeof getCorrectCategory === 'function') {
@@ -507,8 +797,47 @@ function finalizeDiscovery(name, desc) {
     const rand = Math.random(); let rarity = 'comum';
     if (rand < 0.02) rarity = 'mitico'; else if (rand < 0.10) rarity = 'brilhante';
 
-    const newAnimal = { id: Date.now(), name: name, category: finalCategory, location: selectedLocation || 'natureza', photo: currentPhoto, curiosity: curio, description: desc, timestamp: new Date().toLocaleDateString('pt-BR'), premiumUnlocked: false, rarity: rarity };
-    animals.unshift(newAnimal);
+    let createdAnimal = {
+        id: Date.now(),
+        name: name,
+        category: finalCategory,
+        location: selectedLocation || 'natureza',
+        photo: currentPhoto,
+        curiosity: curio,
+        description: desc,
+        timestamp: new Date().toLocaleDateString('pt-BR'),
+        premiumUnlocked: false,
+        rarity: rarity,
+        createdEpoch: Date.now()
+    };
+
+    if (authToken) {
+        try {
+            const created = await apiRequest('/animals', {
+                method: 'POST',
+                body: JSON.stringify({
+                    animalName: name,
+                    category: finalCategory,
+                    location: selectedLocation || 'natureza',
+                    notes: desc,
+                    photoBase64: currentPhoto,
+                    premiumUnlocked: false,
+                    capturedAt: new Date().toISOString()
+                })
+            });
+
+            createdAnimal = {
+                ...mapAnimalFromApi(created),
+                curiosity: curio,
+                description: desc,
+                rarity
+            };
+        } catch (error) {
+            return showToast(`Erro ao salvar na API: ${error.message}`, '⚠️');
+        }
+    }
+
+    animals.unshift(createdAnimal);
     let xp = 35, sd = 10;
     
     // Punição leve: Se não tiver foto, ganha menos recursos para incentivar tirar fotos.
@@ -521,6 +850,7 @@ function finalizeDiscovery(name, desc) {
     guardianXP += xp; seedCoins += sd;
     try { localStorage.setItem('capy_vPlay', JSON.stringify(animals)); localStorage.setItem('capy_xpPlay', guardianXP); localStorage.setItem('capy_seeds', seedCoins); }
     catch (e) { animals.shift(); return showToast("Memória cheia!", "⚠️"); }
+    scheduleGameStateSync();
     closeCaptureForm(); renderApp(); createConfetti();
 }
 
@@ -541,9 +871,19 @@ function startAd(id) {
     
     setTimeout(() => {
         btn.disabled = false; btn.innerText = "VER DADOS ECOLÓGICOS!"; btn.className = "w-full py-4 rounded-2xl bg-green-600 text-white font-bold animate-pulse btn-bounce shadow-lg";
-        btn.onclick = () => {
+        btn.onclick = async () => {
             const animal = animals.find(a => a.id === currentAdAnimalId);
             if (animal) { animal.premiumUnlocked = true; }
+            if (animal && authToken) {
+                try {
+                    await apiRequest(`/animals/${animal.id}`, {
+                        method: 'PUT',
+                        body: JSON.stringify({ premiumUnlocked: true })
+                    });
+                } catch (error) {
+                    showToast(`Erro ao atualizar premium: ${error.message}`, '⚠️');
+                }
+            }
             localStorage.setItem('capy_vPlay', JSON.stringify(animals));
             document.getElementById('adModal').style.display = 'none';
             playSound('success'); renderApp(); createConfetti();
@@ -567,11 +907,13 @@ function executeShare() {
 function claimMission(id) {
     playSound('coin'); const t = activeMissions.tasks.find(x => x.id === id); const base = missionsPool.find(m => m.id === id);
     if(t && !t.claimed) { t.claimed = true; seedCoins += base.reward; localStorage.setItem('capy_seeds', seedCoins); localStorage.setItem('capy_missions', JSON.stringify(activeMissions)); showToast(`Missão cumprida!`, "🌟"); renderApp(); }
+    scheduleGameStateSync();
 }
 
 function renderApp() {
     const level = Math.floor(guardianXP / 100) + 1;
     if (level > userLevelMemo) { playSound('levelup'); showToast(`SUBIU DE NÍVEL! +50 Sementes`, "👑"); seedCoins += 50; localStorage.setItem('capy_seeds', seedCoins); userLevelMemo = level; localStorage.setItem('capy_level', userLevelMemo); }
+    scheduleGameStateSync();
 
     if (currentUser) {
         document.getElementById('headerName').innerText = `Olá, ${currentUser.name}! ${currentUser.avatar}`;
@@ -684,6 +1026,7 @@ function answerEndlessQuiz(selected, correct, btn) {
     if (selected === correct) {
         playSound('coin'); seedCoins += 5; guardianXP += 5;
         localStorage.setItem('capy_seeds', seedCoins); localStorage.setItem('capy_xpPlay', guardianXP);
+        scheduleGameStateSync();
         btn.classList.replace('bg-white', 'bg-green-500'); btn.classList.replace('text-orange-800', 'text-white');
         showToast("+5 Sementes!", "💡"); renderApp();
         setTimeout(loadEndlessQuiz, 1000);
@@ -697,6 +1040,7 @@ function buyMysteryBox() {
     playSound('click');
     if (seedCoins >= 75) {
         seedCoins -= 75; localStorage.setItem('capy_seeds', seedCoins); renderApp();
+        scheduleGameStateSync();
         const modal = document.getElementById('closetModal').querySelector('.bg-white');
         modal.classList.add('box-shake');
         setTimeout(() => {
@@ -722,6 +1066,7 @@ function buyMysteryBox() {
                 seedCoins += 25; rewardMsg = "Sementes perdidas. +25🌰"; icon = "🌰"; playSound('coin');
             }
             localStorage.setItem('capy_seeds', seedCoins);
+            scheduleGameStateSync();
             showToast(rewardMsg, icon); renderCloset(); renderApp();
         }, 500);
     } else {
@@ -750,7 +1095,7 @@ function updateBadges() {
     const stats = { inseto: 0, ave: 0, mamifero: 0, reptil: 0 }; animals.forEach(a => { if (stats[a.category] !== undefined) stats[a.category]++; });
     const qc = animals.filter(a => a.location === 'quintal').length; const pc = animals.filter(a => a.location === 'parque').length; const ec = animals.filter(a => a.location === 'escola').length;
     const sc = animals.filter(a => a.rarity === 'brilhante').length; const mc = animals.filter(a => a.rarity === 'mitico').length; const prc = animals.filter(a => a.premiumUnlocked).length;
-    const level = Math.floor(guardianXP / 100) + 1; const hours = animals.map(a => new Date(a.id).getHours());
+    const level = Math.floor(guardianXP / 100) + 1; const hours = animals.map(a => new Date(a.capturedAt || a.createdEpoch || Date.now()).getHours());
     const morn = hours.filter(h => h >= 5 && h < 9).length; const night = hours.filter(h => h >= 18 || h < 5).length;
     const photo = animals.filter(a => a.photo).length; const bio = stats.inseto > 0 && stats.ave > 0 && stats.mamifero > 0 ? 1 : 0;
     const pAcc = ownedAccessories.length; const aAcc = accessories.length;
