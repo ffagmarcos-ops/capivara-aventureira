@@ -313,6 +313,7 @@ let selectedLocation = '';
 let currentAdAnimalId = null;
 let pendingAction = null;
 let audioCtx = null;
+let audioUnlocked = false;
 
 const missionsPool = [
     { id: 'm1', l: 'Missão Diária', d: 'Faça 1 descoberta hoje', check: () => animals.some(a => a.timestamp === new Date().toLocaleDateString('pt-BR')), reward: 15 },
@@ -325,9 +326,28 @@ const missionsPool = [
 let activeMissions = JSON.parse(localStorage.getItem('capy_missions')) || null;
 
 // Audio System
-function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+function initAudio() {
+    if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        audioCtx = new AudioContextClass();
+    }
+}
+
+function unlockAudio() {
+    try {
+        initAudio();
+        if (!audioCtx) return;
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        audioUnlocked = true;
+    } catch (e) {}
+}
+
 function playSound(type) {
     try {
+        if (!audioUnlocked) return;
         initAudio(); if (!audioCtx) return;
         const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
         osc.connect(gain); gain.connect(audioCtx.destination); const now = audioCtx.currentTime;
@@ -350,6 +370,9 @@ function playSound(type) {
         }
     } catch (e) {}
 }
+
+window.addEventListener('pointerdown', unlockAudio, { once: true });
+window.addEventListener('keydown', unlockAudio, { once: true });
 
 function showToast(message, icon = '🎉') {
     const toast = document.getElementById('customToast');
@@ -638,7 +661,6 @@ async function unequipAll() {
 }
 
 window.onload = async () => {
-    playSound('click');
     setTimeout(() => { 
         document.getElementById('splashScreen').style.opacity = '0'; 
         setTimeout(() => {

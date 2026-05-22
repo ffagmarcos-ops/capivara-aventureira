@@ -15,9 +15,30 @@ const accessoriesRoutes = require('./routes/accessories');
 
 const app = express();
 
+const cspDirectives = {
+  defaultSrc: ["'self'"],
+  baseUri: ["'self'"],
+  objectSrc: ["'none'"],
+  frameAncestors: ["'self'"],
+  scriptSrc: ["'self'", 'https://cdn.tailwindcss.com'],
+  styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+  imgSrc: ["'self'", 'data:'],
+  fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com'],
+  connectSrc: ["'self'"],
+  manifestSrc: ["'self'"],
+  upgradeInsecureRequests: []
+};
+
 app.set('trust proxy', 1);
 
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: cspDirectives
+    },
+    crossOriginResourcePolicy: false
+  })
+);
 app.use(express.json({ limit: '2mb' }));
 app.use(morgan('combined'));
 
