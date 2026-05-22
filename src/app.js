@@ -16,17 +16,18 @@ const accessoriesRoutes = require('./routes/accessories');
 const app = express();
 
 const cspDirectives = {
-  defaultSrc: ["'self'"],
-  baseUri: ["'self'"],
-  objectSrc: ["'none'"],
-  frameAncestors: ["'self'"],
-  scriptSrc: ["'self'", 'https://cdn.tailwindcss.com'],
-  styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-  imgSrc: ["'self'", 'data:'],
-  fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com'],
-  connectSrc: ["'self'"],
-  manifestSrc: ["'self'"],
-  upgradeInsecureRequests: []
+  "default-src": ["'self'"],
+  "base-uri": ["'self'"],
+  "object-src": ["'none'"],
+  "frame-ancestors": ["'self'"],
+  "script-src": ["'self'", 'https://cdn.tailwindcss.com'],
+  "script-src-attr": ["'unsafe-inline'"],
+  "style-src": ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+  "img-src": ["'self'", 'data:'],
+  "font-src": ["'self'", 'data:', 'https://fonts.gstatic.com'],
+  "connect-src": ["'self'"],
+  "manifest-src": ["'self'"],
+  "form-action": ["'self'"]
 };
 
 app.set('trust proxy', 1);
@@ -34,6 +35,7 @@ app.set('trust proxy', 1);
 app.use(
   helmet({
     contentSecurityPolicy: {
+      useDefaults: false,
       directives: cspDirectives
     },
     crossOriginResourcePolicy: false

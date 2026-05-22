@@ -70,8 +70,7 @@ services:
     environment:
       PMA_HOST: capivara_db
       PMA_PORT: 3306
-      PMA_USER: ${DB_USER:-capivara_user}
-      PMA_PASSWORD: ${DB_PASSWORD:-troque-esta-senha}
+      PMA_ARBITRARY: 0
       PMA_ABSOLUTE_URI: https://phpmyadmin.capivara.aporttec.com/
       UPLOAD_LIMIT: 64M
     networks:

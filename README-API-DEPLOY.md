@@ -87,6 +87,8 @@ Dominios configurados com labels Traefik:
 - `https://capivara.aporttec.com`
 - `https://phpmyadmin.capivara.aporttec.com`
 
+O phpMyAdmin esta configurado para exigir autenticacao manual (sem auto-login).
+
 ## 7) Observacao de seguranca
 
 Troque todos os valores default antes de producao.
