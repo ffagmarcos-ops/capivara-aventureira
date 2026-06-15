@@ -53,7 +53,7 @@ let authToken = localStorage.getItem('capy_token') || '';
 let apiOnline = false;
 
 let currentUser = JSON.parse(localStorage.getItem('capy_user')) || null;
-let tempAvatar = '🦦';
+let tempAvatar = '🦫';
 
 function slugifyName(input) {
     return String(input || '')
@@ -261,7 +261,7 @@ async function authenticateExplorer(name, avatar, isGoogle) {
         currentUser = {
             id: 'local_' + Date.now(),
             name: name,
-            avatar: avatar || '🦦',
+            avatar: avatar || '🦫',
             email: email,
             isGoogle: Boolean(isGoogle),
             isLocal: true

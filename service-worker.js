@@ -1,4 +1,4 @@
-const CACHE_NAME = 'capivara-v2';
+const CACHE_NAME = 'capivara-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -7,7 +7,8 @@ const ASSETS = [
   './data.js',
   './manifest.json',
   './icon.svg',
-  './google-g.svg'
+  './google-g.svg',
+  './forest_background.png'
 ];
 
 self.addEventListener('install', event => {

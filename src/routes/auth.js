@@ -35,7 +35,7 @@ router.post('/auth/register', async (req, res, next) => {
       name,
       email: email.toLowerCase(),
       passwordHash,
-      avatar: avatar || '🦦'
+      avatar: avatar || '🦫'
     });
 
     return res.status(201).json({
