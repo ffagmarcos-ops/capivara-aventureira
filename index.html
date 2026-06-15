@@ -24,7 +24,32 @@
 
     <!-- TELA DE SPLASH -->
     <div id="splashScreen">
-        <div class="text-8xl mb-4 animate-bounce">🦦</div>
+        <div class="w-32 h-32 mb-4 animate-bounce">
+            <svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-md">
+                <!-- Orelhas -->
+                <ellipse cx="72" cy="38" rx="10" ry="14" fill="#C07335" transform="rotate(-15 72 38)" />
+                <ellipse cx="128" cy="38" rx="10" ry="14" fill="#C07335" transform="rotate(15 128 38)" />
+                <ellipse cx="72" cy="38" rx="6" ry="10" fill="#593617" transform="rotate(-15 72 38)" />
+                <ellipse cx="128" cy="38" rx="6" ry="10" fill="#593617" transform="rotate(15 128 38)" />
+                <!-- Cabeça -->
+                <path d="M72,44 C56,48 52,74 58,92 C62,104 72,110 100,110 C128,110 138,104 142,92 C148,74 144,48 128,44 C112,40 88,40 72,44 Z" fill="#C07335" />
+                <!-- Bochechas rosadas -->
+                <ellipse cx="68" cy="78" rx="8" ry="4.5" fill="#F87171" opacity="0.3" />
+                <ellipse cx="132" cy="78" rx="8" ry="4.5" fill="#F87171" opacity="0.3" />
+                <!-- Focinho -->
+                <path d="M84,80 C84,68 92,64 100,64 C108,64 116,68 116,80 C116,92 108,96 100,96 C92,96 84,92 84,80 Z" fill="#593617" />
+                <ellipse cx="94" cy="78" rx="2" ry="3.5" fill="#2B1607" />
+                <ellipse cx="106" cy="78" rx="2" ry="3.5" fill="#2B1607" />
+                <!-- Olhos -->
+                <circle cx="72" cy="64" r="5.5" fill="#1A1A1A" />
+                <circle cx="128" cy="64" r="5.5" fill="#1A1A1A" />
+                <circle cx="74" cy="62" r="2.2" fill="#FFFFFF" />
+                <circle cx="130" cy="62" r="2.2" fill="#FFFFFF" />
+                <!-- Sorriso -->
+                <path d="M92,100 Q100,105 108,100" fill="none" stroke="#3D2005" stroke-width="2.5" stroke-linecap="round" />
+                <rect x="98.5" y="100.5" width="3" height="2.5" fill="#FFFFFF" rx="0.5" />
+            </svg>
+        </div>
         <h1 class="brand-font text-white text-3xl text-center px-4">Capivara Aventureira</h1>
         <p class="text-green-200 text-sm mt-1 brand-font">Edição Cientista Mirim</p>
         <div class="mt-8 w-48 h-2 bg-green-900 rounded-full overflow-hidden">
@@ -33,10 +58,35 @@
     </div>
 
     <!-- TELA DE LOGIN / REGISTRO -->
-    <div id="authScreen" class="fixed inset-0 bg-green-900 z-[9000] hidden flex-col items-center justify-center p-6">
-        <div class="bg-white p-8 rounded-[3rem] shadow-2xl w-full max-w-sm text-center relative overflow-hidden">
+    <div id="authScreen" class="fixed inset-0 z-[9000] hidden flex-col items-center justify-center p-6">
+        <div class="bg-white/90 backdrop-blur-md p-8 rounded-[3rem] shadow-2xl w-full max-w-sm text-center relative overflow-hidden border border-white/20">
             <div class="absolute -right-10 -bottom-10 text-9xl opacity-10">🌍</div>
-            <div class="text-6xl mb-4 animate-bounce" id="avatarPreviewAuth">🦦</div>
+            <div class="w-24 h-24 mx-auto mb-4 animate-bounce" id="avatarPreviewAuth">
+                <svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-md">
+                    <!-- Orelhas -->
+                    <ellipse cx="72" cy="38" rx="10" ry="14" fill="#C07335" transform="rotate(-15 72 38)" />
+                    <ellipse cx="128" cy="38" rx="10" ry="14" fill="#C07335" transform="rotate(15 128 38)" />
+                    <ellipse cx="72" cy="38" rx="6" ry="10" fill="#593617" transform="rotate(-15 72 38)" />
+                    <ellipse cx="128" cy="38" rx="6" ry="10" fill="#593617" transform="rotate(15 128 38)" />
+                    <!-- Cabeça -->
+                    <path d="M72,44 C56,48 52,74 58,92 C62,104 72,110 100,110 C128,110 138,104 142,92 C148,74 144,48 128,44 C112,40 88,40 72,44 Z" fill="#C07335" />
+                    <!-- Bochechas rosadas -->
+                    <ellipse cx="68" cy="78" rx="8" ry="4.5" fill="#F87171" opacity="0.3" />
+                    <ellipse cx="132" cy="78" rx="8" ry="4.5" fill="#F87171" opacity="0.3" />
+                    <!-- Focinho -->
+                    <path d="M84,80 C84,68 92,64 100,64 C108,64 116,68 116,80 C116,92 108,96 100,96 C92,96 84,92 84,80 Z" fill="#593617" />
+                    <ellipse cx="94" cy="78" rx="2" ry="3.5" fill="#2B1607" />
+                    <ellipse cx="106" cy="78" rx="2" ry="3.5" fill="#2B1607" />
+                    <!-- Olhos -->
+                    <circle cx="72" cy="64" r="5.5" fill="#1A1A1A" />
+                    <circle cx="128" cy="64" r="5.5" fill="#1A1A1A" />
+                    <circle cx="74" cy="62" r="2.2" fill="#FFFFFF" />
+                    <circle cx="130" cy="62" r="2.2" fill="#FFFFFF" />
+                    <!-- Sorriso -->
+                    <path d="M92,100 Q100,105 108,100" fill="none" stroke="#3D2005" stroke-width="2.5" stroke-linecap="round" />
+                    <rect x="98.5" y="100.5" width="3" height="2.5" fill="#FFFFFF" rx="0.5" />
+                </svg>
+            </div>
             <h2 class="brand-font text-3xl text-green-900 mb-2">Crie seu Perfil!</h2>
             <p class="text-xs font-bold text-gray-500 mb-6">Como devemos chamar você na floresta?</p>
             
@@ -77,13 +127,36 @@
             <div class="flex items-center gap-3">
                 <!-- Mascote Interativo (Guarda-roupa) -->
                 <button onclick="openCloset()" class="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center shadow-inner border-2 border-amber-200 relative active:scale-95 transition-transform overflow-hidden">
-                    <span class="text-3xl z-0 absolute">🦦</span>
+                    <svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-sm absolute inset-0 p-1 z-0">
+                        <!-- Orelhas -->
+                        <ellipse cx="72" cy="38" rx="10" ry="14" fill="#C07335" transform="rotate(-15 72 38)" />
+                        <ellipse cx="128" cy="38" rx="10" ry="14" fill="#C07335" transform="rotate(15 128 38)" />
+                        <ellipse cx="72" cy="38" rx="6" ry="10" fill="#593617" transform="rotate(-15 72 38)" />
+                        <ellipse cx="128" cy="38" rx="6" ry="10" fill="#593617" transform="rotate(15 128 38)" />
+                        <!-- Cabeça -->
+                        <path d="M72,44 C56,48 52,74 58,92 C62,104 72,110 100,110 C128,110 138,104 142,92 C148,74 144,48 128,44 C112,40 88,40 72,44 Z" fill="#C07335" />
+                        <!-- Bochechas rosadas -->
+                        <ellipse cx="68" cy="78" rx="8" ry="4.5" fill="#F87171" opacity="0.3" />
+                        <ellipse cx="132" cy="78" rx="8" ry="4.5" fill="#F87171" opacity="0.3" />
+                        <!-- Focinho -->
+                        <path d="M84,80 C84,68 92,64 100,64 C108,64 116,68 116,80 C116,92 108,96 100,96 C92,96 84,92 84,80 Z" fill="#593617" />
+                        <ellipse cx="94" cy="78" rx="2" ry="3.5" fill="#2B1607" />
+                        <ellipse cx="106" cy="78" rx="2" ry="3.5" fill="#2B1607" />
+                        <!-- Olhos -->
+                        <circle cx="72" cy="64" r="5.5" fill="#1A1A1A" />
+                        <circle cx="128" cy="64" r="5.5" fill="#1A1A1A" />
+                        <circle cx="74" cy="62" r="2.2" fill="#FFFFFF" />
+                        <circle cx="130" cy="62" r="2.2" fill="#FFFFFF" />
+                        <!-- Sorriso -->
+                        <path d="M92,100 Q100,105 108,100" fill="none" stroke="#3D2005" stroke-width="2.5" stroke-linecap="round" />
+                        <rect x="98.5" y="100.5" width="3" height="2.5" fill="#FFFFFF" rx="0.5" />
+                    </svg>
                     <!-- Acessórios do Topo (Cabeça e Olhos) -->
                     <div id="headerMascotAccessories" class="absolute inset-0 pointer-events-none z-10">
                         <span id="headerHeadLayer" class="absolute text-xl top-[-3px] left-1/2 -translate-x-1/2"></span>
                         <span id="headerEyesLayer" class="absolute text-sm top-[12px] left-1/2 -translate-x-1/2"></span>
                     </div>
-                    <span class="absolute -bottom-1 -right-1 bg-yellow-400 text-[8px] p-0.5 rounded-full border border-amber-600 shadow-sm"><i class="fas fa-tshirt text-amber-900"></i></span>
+                    <span class="absolute -bottom-1 -right-1 bg-yellow-400 text-[8px] p-0.5 rounded-full border border-amber-600 shadow-sm z-20"><i class="fas fa-tshirt text-amber-900"></i></span>
                 </button>
                 <div>
                     <h1 id="headerName" class="brand-font text-green-900 text-lg leading-none">A Capivara</h1>
@@ -292,35 +365,53 @@
                     <div class="capy-visualizer my-4">
                         <!-- Desenho da Capivara Corpo Inteiro em SVG -->
                         <svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-md">
-                            <!-- Patas/Pés -->
-                            <ellipse cx="65" cy="165" rx="14" ry="10" fill="#451a03" />
-                            <ellipse cx="135" cy="165" rx="14" ry="10" fill="#451a03" />
-                            
-                            <!-- Corpo -->
-                            <ellipse cx="100" cy="115" rx="64" ry="48" fill="#78350f" />
-                            <ellipse cx="100" cy="115" rx="54" ry="38" fill="#854d0e" /> <!-- Destaque do peito -->
-                            
-                            <!-- Cabeça -->
-                            <ellipse cx="100" cy="65" rx="38" ry="30" fill="#78350f" />
-                            
-                            <!-- Focinho -->
-                            <ellipse cx="100" cy="74" rx="22" ry="14" fill="#451a03" />
-                            <circle cx="92" cy="72" r="3" fill="#1f2937" />
-                            <circle cx="108" cy="72" r="3" fill="#1f2937" />
-                            
-                            <!-- Olhos -->
-                            <circle cx="84" cy="58" r="4.5" fill="#000" />
-                            <circle cx="85.5" cy="56.5" r="1.5" fill="#fff" />
-                            <circle cx="116" cy="58" r="4.5" fill="#000" />
-                            <circle cx="117.5" cy="56.5" r="1.5" fill="#fff" />
-                            
+                            <!-- Pés/Patas -->
+                            <path d="M62,174 C62,164 78,164 78,174 Z" fill="#593617" />
+                            <path d="M138,174 C138,164 122,164 122,174 Z" fill="#593617" />
+                            <ellipse cx="70" cy="176" rx="8" ry="4" fill="#3D2005" />
+                            <ellipse cx="130" cy="176" rx="8" ry="4" fill="#3D2005" />
+
+                            <!-- Alças da Mochila (Atrás do corpo) -->
+                            <path d="M68,110 C50,115 48,145 66,155" fill="none" stroke="#76A035" stroke-width="10" stroke-linecap="round" />
+                            <path d="M132,110 C150,115 152,145 134,155" fill="none" stroke="#76A035" stroke-width="10" stroke-linecap="round" />
+
+                            <!-- Corpo com Camiseta Azul -->
+                            <path d="M66,110 C52,120 54,150 64,170 L136,170 C146,150 148,120 134,110 Z" fill="#3B82F6" />
+                            <ellipse cx="100" cy="110" rx="18" ry="5" fill="#C07335" /> <!-- Pescoço -->
+
+                            <!-- Mangas e Braços -->
+                            <path d="M66,110 C50,115 45,130 52,142" fill="none" stroke="#3B82F6" stroke-width="14" stroke-linecap="round" />
+                            <path d="M134,110 C150,115 155,130 148,142" fill="none" stroke="#3B82F6" stroke-width="14" stroke-linecap="round" />
+                            <circle cx="48" cy="144" r="8" fill="#C07335" />
+                            <circle cx="152" cy="144" r="8" fill="#C07335" />
+
                             <!-- Orelhas -->
-                            <ellipse cx="66" cy="48" rx="8" ry="13" fill="#451a03" transform="rotate(-15 66 48)" />
-                            <ellipse cx="134" cy="48" rx="8" ry="13" fill="#451a03" transform="rotate(15 134 48)" />
-                            
-                            <!-- Bochechas Coradas -->
-                            <ellipse cx="74" cy="70" rx="6" ry="3.5" fill="#f87171" opacity="0.4" />
-                            <ellipse cx="126" cy="70" rx="6" ry="3.5" fill="#f87171" opacity="0.4" />
+                            <ellipse cx="72" cy="38" rx="10" ry="14" fill="#C07335" transform="rotate(-15 72 38)" />
+                            <ellipse cx="128" cy="38" rx="10" ry="14" fill="#C07335" transform="rotate(15 128 38)" />
+                            <ellipse cx="72" cy="38" rx="6" ry="10" fill="#593617" transform="rotate(-15 72 38)" />
+                            <ellipse cx="128" cy="38" rx="6" ry="10" fill="#593617" transform="rotate(15 128 38)" />
+
+                            <!-- Cabeça -->
+                            <path d="M72,44 C56,48 52,74 58,92 C62,104 72,110 100,110 C128,110 138,104 142,92 C148,74 144,48 128,44 C112,40 88,40 72,44 Z" fill="#C07335" />
+
+                            <!-- Bochechas rosadas -->
+                            <ellipse cx="68" cy="78" rx="8" ry="4.5" fill="#F87171" opacity="0.3" />
+                            <ellipse cx="132" cy="78" rx="8" ry="4.5" fill="#F87171" opacity="0.3" />
+
+                            <!-- Focinho/Snout -->
+                            <path d="M84,80 C84,68 92,64 100,64 C108,64 116,68 116,80 C116,92 108,96 100,96 C92,96 84,92 84,80 Z" fill="#593617" />
+                            <ellipse cx="94" cy="78" rx="2" ry="3.5" fill="#2B1607" />
+                            <ellipse cx="106" cy="78" rx="2" ry="3.5" fill="#2B1607" />
+
+                            <!-- Olhos -->
+                            <circle cx="72" cy="64" r="5.5" fill="#1A1A1A" />
+                            <circle cx="128" cy="64" r="5.5" fill="#1A1A1A" />
+                            <circle cx="74" cy="62" r="2.2" fill="#FFFFFF" />
+                            <circle cx="130" cy="62" r="2.2" fill="#FFFFFF" />
+
+                            <!-- Sorriso e Dente -->
+                            <path d="M92,100 Q100,105 108,100" fill="none" stroke="#3D2005" stroke-width="2.5" stroke-linecap="round" />
+                            <rect x="98.5" y="100.5" width="3" height="2.5" fill="#FFFFFF" rx="0.5" />
                         </svg>
 
                         <!-- Camadas de Acessórios Interativas do Closet (Multi-Slots) -->

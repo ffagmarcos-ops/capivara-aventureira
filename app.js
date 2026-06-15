@@ -231,28 +231,44 @@ async function authenticateExplorer(name, avatar, isGoogle) {
 
     let auth;
     try {
-        auth = await apiRequest('/auth/login', {
-            method: 'POST',
-            body: JSON.stringify({ email, password })
-        });
-    } catch (loginError) {
-        auth = await apiRequest('/auth/register', {
-            method: 'POST',
-            body: JSON.stringify({ name, email, password, avatar })
-        });
-    }
+        try {
+            auth = await apiRequest('/auth/login', {
+                method: 'POST',
+                body: JSON.stringify({ email, password })
+            });
+        } catch (loginError) {
+            auth = await apiRequest('/auth/register', {
+                method: 'POST',
+                body: JSON.stringify({ name, email, password, avatar })
+            });
+        }
 
-    authToken = auth.token;
-    localStorage.setItem('capy_token', authToken);
-    currentUser = {
-        id: auth.user.id,
-        name: auth.user.name,
-        avatar: auth.user.avatar,
-        email: auth.user.email,
-        isGoogle: Boolean(isGoogle)
-    };
-    localStorage.setItem('capy_user', JSON.stringify(currentUser));
-    await hydrateRemoteState();
+        authToken = auth.token;
+        localStorage.setItem('capy_token', authToken);
+        currentUser = {
+            id: auth.user.id,
+            name: auth.user.name,
+            avatar: auth.user.avatar,
+            email: auth.user.email,
+            isGoogle: Boolean(isGoogle)
+        };
+        localStorage.setItem('capy_user', JSON.stringify(currentUser));
+        await hydrateRemoteState();
+    } catch (apiError) {
+        console.warn('API indisponível, iniciando em modo local offline:', apiError.message);
+        authToken = null;
+        localStorage.removeItem('capy_token');
+        currentUser = {
+            id: 'local_' + Date.now(),
+            name: name,
+            avatar: avatar || '🦦',
+            email: email,
+            isGoogle: Boolean(isGoogle),
+            isLocal: true
+        };
+        localStorage.setItem('capy_user', JSON.stringify(currentUser));
+        showToast("Modo Offline Ativado! 📶❌", "⚠️");
+    }
 }
 
 function selectAvatar(emoji, btn) {
