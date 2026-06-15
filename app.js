@@ -280,7 +280,15 @@ function selectAvatar(emoji, btn) {
     document.getElementById('avatarPreviewAuth').innerText = tempAvatar;
 }
 
+function openPrivacyFromLogin() {
+    playSound('click');
+    document.getElementById('privacyModal').classList.remove('hidden');
+    document.getElementById('privacyModal').style.display = 'flex';
+}
+
 async function loginExplorer() {
+    const consent = document.getElementById('parentalConsent').checked;
+    if (!consent) return showToast("É necessário a permissão dos pais/responsáveis!", "⚠️");
     const name = document.getElementById('explorerName').value.trim();
     if (!name) return showToast("Digite seu nome!", "⚠️");
     try {
@@ -295,6 +303,8 @@ async function loginExplorer() {
 }
 
 async function loginWithGoogle() {
+    const consent = document.getElementById('parentalConsent').checked;
+    if (!consent) return showToast("É necessário a permissão dos pais/responsáveis!", "⚠️");
     playSound('click');
     showToast("Conectando ao Google Play...", "🔄");
     // Simulação do Fluxo OAuth do Google Play Games
@@ -392,7 +402,12 @@ window.addEventListener('keydown', unlockAudio, { once: true });
 
 function showToast(message, icon = '🎉') {
     const toast = document.getElementById('customToast');
-    document.getElementById('toastIcon').innerText = icon;
+    const toastIcon = document.getElementById('toastIcon');
+    if (icon.endsWith('.png')) {
+        toastIcon.innerHTML = `<img src="${icon}" class="w-6 h-6 object-contain inline-block -mt-0.5 animate-bounce">`;
+    } else {
+        toastIcon.innerText = icon;
+    }
     document.getElementById('toastMessage').innerText = message;
     toast.classList.remove('opacity-0', '-translate-y-20');
     toast.classList.add('opacity-100', 'translate-y-0');
@@ -481,7 +496,7 @@ function guessSilhouette(guess, btn) {
         seedCoins += 15; guardianXP += 10;
         localStorage.setItem('capy_seeds', seedCoins); localStorage.setItem('capy_xpPlay', guardianXP);
         scheduleGameStateSync();
-        showToast("Acertou! +15 🌰", "🌟"); renderApp(); createConfetti();
+        showToast("Acertou! +15 sementes!", "seed_coin.png"); renderApp(); createConfetti();
         setTimeout(loadSilhouetteGame, 2500);
     } else {
         playSound('click');
@@ -530,8 +545,8 @@ function checkMemoryMatch() {
             playSound('levelup'); seedCoins += 50; guardianXP += 30;
             localStorage.setItem('capy_seeds', seedCoins); localStorage.setItem('capy_xpPlay', guardianXP);
             scheduleGameStateSync();
-            showToast("Você ganhou! +50 🌰", "🧠"); renderApp(); createConfetti();
-            document.getElementById('memoryStartBtn').innerText = "JOGAR NOVAMENTE (+50🌰)";
+            showToast("Você ganhou! +50 sementes!", "seed_coin.png"); renderApp(); createConfetti();
+            document.getElementById('memoryStartBtn').innerText = "JOGAR NOVAMENTE (+50 sementes)";
             document.getElementById('memoryStartBtn').style.display = 'block';
             isMemoryPlaying = false;
         }
@@ -561,7 +576,7 @@ function answerQuiz(selected, correct) {
         localStorage.setItem('capy_seeds', seedCoins); localStorage.setItem('capy_xpPlay', guardianXP);
         quizDoneDate = new Date().toDateString(); localStorage.setItem('capy_quiz_done', quizDoneDate);
         scheduleGameStateSync();
-        document.getElementById('quizContainer').innerHTML = `<div class="text-center py-4 bg-green-100 rounded-3xl p-4 border border-green-300 animate-bounce"><span class="text-3xl">🎉 ACERTOU!</span><p class="text-xs text-green-800 font-bold mt-2">+15 🌰 Sementes e 20 XP!</p></div>`;
+        document.getElementById('quizContainer').innerHTML = `<div class="text-center py-4 bg-green-100 rounded-3xl p-4 border border-green-300 animate-bounce"><span class="text-3xl">🎉 ACERTOU!</span><p class="text-xs text-green-800 font-bold mt-2">+15 <img src="seed_coin.png" class="w-3.5 h-3.5 object-contain inline-block -mt-0.5"> Sementes e 20 XP!</p></div>`;
         showToast("Resposta Certa!", "🎯"); renderApp();
     } else { playSound('click'); showToast("Tente novamente!", "❌"); event.target.closest('button').classList.add('border-red-400', 'bg-red-50'); }
 }
@@ -575,7 +590,7 @@ function renderCloset() {
         const isOwned = ownedAccessories.includes(a.id); const isEquipped = equippedAccessories[a.slot] === a.id;
         let btn = isEquipped ? `<button onclick="unequipAccessory('${a.slot}')" class="text-[9px] bg-red-500 hover:bg-red-600 text-white font-bold px-2.5 py-1.5 rounded-full uppercase btn-bounce">Remover</button>` : 
                  isOwned ? `<button onclick="equipAccessory('${a.id}', '${a.slot}')" class="text-[9px] bg-green-600 hover:bg-green-700 text-white font-bold px-2.5 py-1.5 rounded-full uppercase btn-bounce">Equipar</button>` : 
-                 `<button onclick="buyAccessory('${a.id}', ${a.price})" class="text-[9px] bg-yellow-500 hover:bg-yellow-600 text-amber-950 font-black px-2.5 py-1.5 rounded-full uppercase shadow btn-bounce">Comprar ${a.price}🌰</button>`;
+                 `<button onclick="buyAccessory('${a.id}', ${a.price})" class="text-[9px] bg-yellow-500 hover:bg-yellow-600 text-amber-950 font-black px-2.5 py-1.5 rounded-full uppercase shadow btn-bounce flex items-center justify-center gap-1 mx-auto">Comprar ${a.price} <img src="seed_coin.png" class="w-3 h-3 object-contain inline-block"></button>`;
         return `<div class="accessory-item border-2 rounded-2xl p-4 flex flex-col items-center text-center justify-between gap-2 ${isEquipped ? 'equipped' : 'border-gray-100'}"><span class="text-3xl h-8 flex items-center justify-center">${a.emoji}</span><div><p class="text-[10px] font-black text-amber-950">${a.label}</p><span class="text-[8px] bg-amber-100 text-amber-800 font-semibold px-1.5 py-0.5 rounded-full uppercase">${a.slot}</span></div>${btn}</div>`;
     }).join('');
 }
@@ -620,7 +635,7 @@ async function buyAccessory(id, price) {
 
         if (authToken) await syncAccessoriesFromApi();
         playSound('success'); showToast("Item comprado!", "🎩"); renderCloset(); renderApp();
-    } else showToast("Sementes insuficientes!", "🌰");
+    } else showToast("Sementes insuficientes!", "seed_coin.png");
 }
 async function equipAccessory(id, slot) {
     playSound('click');
@@ -1093,7 +1108,7 @@ function buyMysteryBox() {
                     ownedAccessories.push(won.id); localStorage.setItem('capy_owned_acc', JSON.stringify(ownedAccessories));
                     rewardMsg = `Você tirou: ${won.label}!`; icon = won.emoji; playSound('levelup');
                 } else {
-                    seedCoins += 150; rewardMsg = "Baú de Ouro! +150🌰"; icon = "💰"; playSound('coin');
+                    seedCoins += 150; rewardMsg = "Baú de Ouro! +150 sementes"; icon = "seed_coin.png"; playSound('coin');
                 }
             } else if (rand < 0.45) {
                 // 30% chance XP
@@ -1101,14 +1116,14 @@ function buyMysteryBox() {
                 rewardMsg = "Livro Mágico! +200 XP"; icon = "📖"; playSound('success');
             } else {
                 // 55% chance refund small
-                seedCoins += 25; rewardMsg = "Sementes perdidas. +25🌰"; icon = "🌰"; playSound('coin');
+                seedCoins += 25; rewardMsg = "Sementes perdidas. +25 sementes"; icon = "seed_coin.png"; playSound('coin');
             }
             localStorage.setItem('capy_seeds', seedCoins);
             scheduleGameStateSync();
             showToast(rewardMsg, icon); renderCloset(); renderApp();
         }, 500);
     } else {
-        showToast("Precisa de 75 sementes!", "📦");
+        showToast("Precisa de 75 sementes!", "mystery_box.png");
     }
 }
 
@@ -1123,7 +1138,7 @@ function updateStats() {
     if (activeMissions) {
         document.getElementById('missionsList').innerHTML = activeMissions.tasks.map(t => {
             const base = missionsPool.find(m => m.id === t.id); const isCompleted = base.check();
-            let btn = t.claimed ? `<span class="text-[9px] bg-green-100 text-green-700 font-black px-3 py-1.5 rounded-full"><i class="fas fa-check"></i> FEITO</span>` : isCompleted ? `<button onclick="claimMission('${t.id}')" class="text-[9px] bg-amber-400 hover:bg-amber-500 text-amber-950 font-black px-3 py-1.5 rounded-full btn-bounce shadow-md tracking-wider">RESGATAR +${base.reward}</button>` : `<span class="text-[9px] bg-gray-100 text-gray-400 font-black px-3 py-1.5 rounded-full shadow-inner">+${base.reward}🌰</span>`;
+            let btn = t.claimed ? `<span class="text-[9px] bg-green-100 text-green-700 font-black px-3 py-1.5 rounded-full"><i class="fas fa-check"></i> FEITO</span>` : isCompleted ? `<button onclick="claimMission('${t.id}')" class="text-[9px] bg-amber-400 hover:bg-amber-500 text-amber-950 font-black px-3 py-1.5 rounded-full btn-bounce shadow-md tracking-wider">RESGATAR +${base.reward}</button>` : `<span class="text-[9px] bg-gray-100 text-gray-400 font-black px-3 py-1.5 rounded-full shadow-inner flex items-center gap-1">+${base.reward} <img src="seed_coin.png" class="w-3.5 h-3.5 object-contain inline-block"></span>`;
             return `<div class="p-4 rounded-[2rem] flex items-center gap-4 ${isCompleted ? 'bg-green-50 border-2 border-green-200' : 'bg-white shadow-sm border border-gray-100'} transition-colors"><div class="w-12 h-12 rounded-2xl flex-shrink-0 flex items-center justify-center text-xl ${isCompleted ? 'bg-gradient-to-br from-green-400 to-green-600 text-white shadow-lg' : 'bg-gray-50 text-gray-300'}"><i class="fas ${t.claimed ? 'fa-check-double' : (isCompleted ? 'fa-gift' : 'fa-star')}"></i></div><div class="flex-grow"><p class="text-[11px] font-black uppercase text-green-900">${base.l}</p><p class="text-[9px] text-gray-500 font-bold leading-tight mt-0.5">${base.d}</p></div>${btn}</div>`;
         }).join('');
     }
