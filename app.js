@@ -1,35 +1,35 @@
 // CONFIGURAÇÃO DOS ACESSÓRIOS DO GUARDA-ROUPA
 const accessories = [
-    { id: 'explorer_hat', label: 'Chapéu de Trilha', emoji: '🤠', price: 15, slot: 'head' },
-    { id: 'safari_helmet', label: 'Capacete Safári', emoji: '🪖', price: 50, slot: 'head' },
-    { id: 'beanie', label: 'Gorro de Frio', emoji: '🧶', price: 80, slot: 'head' },
-    { id: 'crown', label: 'Coroa da Floresta', emoji: '👑', price: 500, slot: 'head' },
+    { id: 'explorer_hat', label: 'Chapéu de Trilha', emoji: '🤠', image: 'acc_explorer_hat.png', price: 15, slot: 'head' },
+    { id: 'safari_helmet', label: 'Capacete Safári', emoji: '🪖', image: 'acc_safari_helmet.png', price: 50, slot: 'head' },
+    { id: 'beanie', label: 'Gorro de Frio', emoji: '🧶', image: 'acc_beanie.png', price: 80, slot: 'head' },
+    { id: 'crown', label: 'Coroa da Floresta', emoji: '👑', image: 'acc_crown.png', price: 500, slot: 'head' },
     { id: 'flower', label: 'Flor Nativa', emoji: '🌺', price: 20, slot: 'head' },
     { id: 'cap', label: 'Boné do Guarda', emoji: '🧢', price: 40, slot: 'head' },
     { id: 'wizard', label: 'Chapéu Mágico', emoji: '🧙', price: 600, slot: 'head' },
     { id: 'headphones', label: 'Fones de Ouvido', emoji: '🎧', price: 90, slot: 'head' },
     
-    { id: 'glasses', label: 'Óculos Cientista', emoji: '👓', price: 30, slot: 'eyes' },
-    { id: 'sunglasses', label: 'Óculos de Sol', emoji: '🕶️', price: 45, slot: 'eyes' },
-    { id: 'goggles', label: 'Óculos Mergulho', emoji: '🥽', price: 100, slot: 'eyes' },
+    { id: 'glasses', label: 'Óculos Cientista', emoji: '👓', image: 'acc_glasses.png', price: 30, slot: 'eyes' },
+    { id: 'sunglasses', label: 'Óculos de Sol', emoji: '🕶️', image: 'acc_sunglasses.png', price: 45, slot: 'eyes' },
+    { id: 'goggles', label: 'Óculos Mergulho', emoji: '🥽', image: 'acc_goggles.png', price: 100, slot: 'eyes' },
     { id: 'monocle', label: 'Monóculo Clássico', emoji: '🧐', price: 150, slot: 'eyes' },
     
-    { id: 'magnifier', label: 'Lupa do Biólogo', emoji: '🔍', price: 45, slot: 'hand' },
-    { id: 'compass', label: 'Bússola', emoji: '🧭', price: 75, slot: 'hand' },
-    { id: 'flashlight', label: 'Lanterna', emoji: '🔦', price: 90, slot: 'hand' },
-    { id: 'net', label: 'Rede de Insetos', emoji: '🕸️', price: 135, slot: 'hand' },
+    { id: 'magnifier', label: 'Lupa do Biólogo', emoji: '🔍', image: 'acc_magnifier.png', price: 45, slot: 'hand' },
+    { id: 'compass', label: 'Bússola', emoji: '🧭', image: 'acc_compass.png', price: 75, slot: 'hand' },
+    { id: 'flashlight', label: 'Lanterna', emoji: '🔦', image: 'acc_flashlight.png', price: 90, slot: 'hand' },
+    { id: 'net', label: 'Rede de Insetos', emoji: '🕸️', image: 'acc_net.png', price: 135, slot: 'hand' },
     { id: 'map', label: 'Mapa das Matas', emoji: '🗺️', price: 195, slot: 'hand' },
     { id: 'microscope', label: 'Microscópio', emoji: '🔬', price: 230, slot: 'hand' },
-    { id: 'notebook', label: 'Diário Científico', emoji: '📓', price: 280, slot: 'hand' },
-    { id: 'camera', label: 'Câmera Pro', emoji: '📷', price: 350, slot: 'hand' },
-    { id: 'walkie_talkie', label: 'Rádio Amador', emoji: '📻', price: 400, slot: 'hand' },
+    { id: 'notebook', label: 'Diário Científico', emoji: '📓', image: 'acc_notebook.png', price: 280, slot: 'hand' },
+    { id: 'camera', label: 'Câmera Pro', emoji: '📷', image: 'acc_camera.png', price: 350, slot: 'hand' },
+    { id: 'walkie_talkie', label: 'Rádio Amador', emoji: '📻', image: 'acc_walkie_talkie.png', price: 400, slot: 'hand' },
     { id: 'potion', label: 'Poção de Cura', emoji: '🧪', price: 450, slot: 'hand' },
     { id: 'sword', label: 'Espada de Graveto', emoji: '🗡️', price: 500, slot: 'hand' },
     { id: 'guitar', label: 'Violão de Acampamento', emoji: '🎸', price: 600, slot: 'hand' },
     
-    { id: 'backpack', label: 'Mochila de Campo', emoji: '🎒', price: 60, slot: 'body' },
-    { id: 'vest', label: 'Colete de Guarda', emoji: '🦺', price: 110, slot: 'body' },
-    { id: 'lab_coat', label: 'Jaleco de Ciência', emoji: '🥼', price: 250, slot: 'body' },
+    { id: 'backpack', label: 'Mochila de Campo', emoji: '🎒', image: 'acc_backpack.png', price: 60, slot: 'body' },
+    { id: 'vest', label: 'Colete de Guarda', emoji: '🦺', image: 'acc_vest.png', price: 110, slot: 'body' },
+    { id: 'lab_coat', label: 'Jaleco de Ciência', emoji: '🥼', image: 'acc_lab_coat.png', price: 250, slot: 'body' },
     { id: 'tie', label: 'Gravata Borboleta', emoji: '🎀', price: 150, slot: 'body' },
     { id: 'scarf', label: 'Cachecol de Lã', emoji: '🧣', price: 120, slot: 'body' },
     
@@ -591,7 +591,8 @@ function renderCloset() {
         let btn = isEquipped ? `<button onclick="unequipAccessory('${a.slot}')" class="text-[9px] bg-red-500 hover:bg-red-600 text-white font-bold px-2.5 py-1.5 rounded-full uppercase btn-bounce">Remover</button>` : 
                  isOwned ? `<button onclick="equipAccessory('${a.id}', '${a.slot}')" class="text-[9px] bg-green-600 hover:bg-green-700 text-white font-bold px-2.5 py-1.5 rounded-full uppercase btn-bounce">Equipar</button>` : 
                  `<button onclick="buyAccessory('${a.id}', ${a.price})" class="text-[9px] bg-yellow-500 hover:bg-yellow-600 text-amber-950 font-black px-2.5 py-1.5 rounded-full uppercase shadow btn-bounce flex items-center justify-center gap-1 mx-auto">Comprar ${a.price} <img src="seed_coin.png" class="w-3 h-3 object-contain inline-block"></button>`;
-        return `<div class="accessory-item border-2 rounded-2xl p-4 flex flex-col items-center text-center justify-between gap-2 ${isEquipped ? 'equipped' : 'border-gray-100'}"><span class="text-3xl h-8 flex items-center justify-center">${a.emoji}</span><div><p class="text-[10px] font-black text-amber-950">${a.label}</p><span class="text-[8px] bg-amber-100 text-amber-800 font-semibold px-1.5 py-0.5 rounded-full uppercase">${a.slot}</span></div>${btn}</div>`;
+        const iconHtml = a.image ? `<img src="${a.image}" class="w-12 h-12 object-contain select-none pointer-events-none drop-shadow-sm">` : `<span class="text-3xl">${a.emoji}</span>`;
+        return `<div class="accessory-item border-2 rounded-2xl p-4 flex flex-col items-center text-center justify-between gap-2 ${isEquipped ? 'equipped' : 'border-gray-100'}"><div class="h-12 flex items-center justify-center">${iconHtml}</div><div><p class="text-[10px] font-black text-amber-950">${a.label}</p><span class="text-[8px] bg-amber-100 text-amber-800 font-semibold px-1.5 py-0.5 rounded-full uppercase">${a.slot}</span></div>${btn}</div>`;
     }).join('');
 }
 
@@ -599,15 +600,56 @@ function updateFullBodyVisuals() {
     ['head', 'eyes', 'body', 'hand', 'feet'].forEach(slot => {
         const item = accessories.find(a => a.id === equippedAccessories[slot]);
         if (slot === 'feet') {
-            document.querySelector('#closetSlotFeet .foot-l').innerText = item ? item.emoji : '';
-            document.querySelector('#closetSlotFeet .foot-r').innerText = item ? item.emoji : '';
+            const footL = document.querySelector('#closetSlotFeet .foot-l');
+            const footR = document.querySelector('#closetSlotFeet .foot-r');
+            if (footL && footR) {
+                if (item) {
+                    if (item.image) {
+                        footL.innerHTML = `<img src="${item.image}" class="w-10 h-10 object-contain select-none pointer-events-none">`;
+                        footR.innerHTML = `<img src="${item.image}" class="w-10 h-10 object-contain select-none pointer-events-none">`;
+                    } else {
+                        footL.innerText = item.emoji;
+                        footR.innerText = item.emoji;
+                    }
+                } else {
+                    footL.innerText = '';
+                    footR.innerText = '';
+                }
+            }
         } else {
             const layer = document.getElementById('closetSlot' + slot.charAt(0).toUpperCase() + slot.slice(1));
-            if (layer) layer.innerText = item ? item.emoji : '';
+            if (layer) {
+                if (item) {
+                    if (item.image) {
+                        layer.innerHTML = `<img src="${item.image}" class="w-full h-full object-contain select-none pointer-events-none">`;
+                    } else {
+                        layer.innerText = item.emoji;
+                    }
+                } else {
+                    layer.innerText = '';
+                }
+            }
         }
     });
     const h = accessories.find(a => a.id === equippedAccessories['head']); const e = accessories.find(a => a.id === equippedAccessories['eyes']);
-    document.getElementById('headerHeadLayer').innerText = h ? h.emoji : ''; document.getElementById('headerEyesLayer').innerText = e ? e.emoji : '';
+    
+    const headLayer = document.getElementById('headerHeadLayer');
+    if (headLayer) {
+        if (h) {
+            headLayer.innerHTML = h.image ? `<img src="${h.image}" class="w-5 h-5 object-contain select-none pointer-events-none">` : h.emoji;
+        } else {
+            headLayer.innerHTML = '';
+        }
+    }
+    
+    const eyesLayer = document.getElementById('headerEyesLayer');
+    if (eyesLayer) {
+        if (e) {
+            eyesLayer.innerHTML = e.image ? `<img src="${e.image}" class="w-3.5 h-3.5 object-contain select-none pointer-events-none">` : e.emoji;
+        } else {
+            eyesLayer.innerHTML = '';
+        }
+    }
 }
 
 async function buyAccessory(id, price) {
