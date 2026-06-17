@@ -89,7 +89,7 @@ function mapAnimalFromApi(row) {
     const name = row.animalName || row.name || 'Animal';
     const nameKey = name.toLowerCase();
     const curioKey = Object.keys(curioData).find(k => nameKey.includes(k));
-    const curio = curioKey ? curioData[curioKey] : 'Possui superpoderes da natureza e ajuda o meio ambiente!';
+    const curio = curioKey ? curioData[curioKey] : (typeof getPremiumData === 'function' ? getPremiumData(name).funFact : 'Uma espécie incrível e cheia de segredos da nossa fauna!');
 
     return {
         id: row.id,
@@ -887,7 +887,7 @@ async function finalizeDiscovery(name, desc) {
     // Busca os dados (curioData agora vive no data.js)
     const nameKey = name.toLowerCase();
     const curioKey = Object.keys(curioData).find(k => nameKey.includes(k));
-    const curio = curioKey ? curioData[curioKey] : 'Possui superpoderes da natureza e ajuda o meio ambiente!';
+    const curio = curioKey ? curioData[curioKey] : (typeof getPremiumData === 'function' ? getPremiumData(name).funFact : 'Uma espécie incrível e cheia de segredos da nossa fauna!');
     
     const rand = Math.random(); let rarity = 'comum';
     if (rand < 0.02) rarity = 'mitico'; else if (rand < 0.10) rarity = 'brilhante';
