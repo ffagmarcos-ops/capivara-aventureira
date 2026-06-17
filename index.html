@@ -249,6 +249,41 @@
             </div>
         </section>
 
+        <!-- ECO-VILA DAS CAPIVARAS -->
+        <section id="vilaView" class="hidden space-y-6 pb-10">
+            <!-- Cabeçalho da Vila -->
+            <div class="relative rounded-[3rem] text-white shadow-xl overflow-hidden h-52 flex flex-col justify-end p-6 border-4 border-amber-950/20" style="background-image: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.2)), url('capy_village.png'); background-size: cover; background-position: center;">
+                <span class="absolute top-4 right-4 bg-amber-500/95 text-amber-950 font-black px-3 py-1 rounded-full text-[10px] tracking-wider uppercase border border-amber-300 shadow">Vila das Capivaras</span>
+                <h2 class="brand-font text-3xl leading-none">Eco-Vila</h2>
+                <p class="text-xs opacity-90 mt-1">Nível Total: <span id="villageTotalLevel" class="font-black">1</span> • Produção: <span id="villageTotalProd" class="font-black">0</span> sementes/h</p>
+            </div>
+
+            <!-- Painel de Colheita de Sementes -->
+            <div class="bg-gradient-to-r from-amber-500 to-amber-600 p-5 rounded-[2.5rem] text-white shadow-lg flex justify-between items-center relative overflow-hidden border border-amber-400">
+                <div class="space-y-1 relative z-10">
+                    <p class="text-[10px] font-black uppercase tracking-widest opacity-85">Sementes Acumuladas</p>
+                    <div class="flex items-center gap-1.5">
+                        <img src="seed_coin.png" class="w-6 h-6 object-contain">
+                        <span id="villageUnclaimed" class="brand-font text-2xl font-bold leading-none">0</span>
+                    </div>
+                </div>
+                <button onclick="claimVillageSeeds()" id="btnCollectSeeds" class="px-6 py-3 rounded-2xl bg-white text-amber-900 hover:bg-amber-50 font-black text-xs transition-all btn-bounce shadow-md tracking-wider uppercase disabled:opacity-50 disabled:pointer-events-none">
+                    Colher
+                </button>
+                <div class="absolute -right-4 -bottom-6 text-7xl opacity-15 rotate-12 pointer-events-none select-none">🌱</div>
+            </div>
+
+            <!-- Grade de Construções -->
+            <div class="space-y-4">
+                <h3 class="brand-font text-sm text-green-800 px-2 flex items-center gap-2">
+                    <i class="fas fa-tools"></i> Construir & Evoluir
+                </h3>
+                <div id="villageGrid" class="space-y-4">
+                    <!-- Buildings injected dynamically via app.js -->
+                </div>
+            </div>
+        </section>
+
         <!-- TROFÉUS -->
         <section id="badgesView" class="hidden space-y-4 text-center">
             <div class="bg-amber-900 p-8 rounded-[3rem] text-white shadow-2xl relative overflow-hidden">
@@ -268,6 +303,9 @@
         </button>
         <button onclick="showView('lab')" id="navLab" class="flex flex-col items-center gap-1 text-gray-400">
             <i class="fas fa-microscope text-lg"></i><span class="text-[9px] font-bold uppercase">Lab</span>
+        </button>
+        <button onclick="showView('vila')" id="navVila" class="flex flex-col items-center gap-1 text-gray-400">
+            <i class="fas fa-campground text-lg"></i><span class="text-[9px] font-bold uppercase">Vila</span>
         </button>
         
         <!-- Botão de Captura Pulsante -->

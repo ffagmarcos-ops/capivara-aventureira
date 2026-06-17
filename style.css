@@ -176,3 +176,35 @@ body.night-mode .bg-blue-50, body.night-mode .bg-amber-50, body.night-mode .bg-p
     100% { transform: rotate(0deg); }
 }
 .box-shake { animation: shake 0.4s infinite; }
+
+/* Estilos Especiais da Eco-Vila */
+#vilaView {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+.building-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.building-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 20px -8px rgba(22, 101, 52, 0.12);
+}
+
+/* Ajustes finos para a navegação inferior com 7 itens */
+@media (max-width: 480px) {
+    nav.fixed {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+    }
+    nav.fixed button {
+        font-size: 8px !important;
+    }
+    nav.fixed button i {
+        font-size: 15px !important;
+    }
+    nav.fixed button span {
+        font-size: 7px !important;
+        letter-spacing: -0.3px !important;
+    }
+}

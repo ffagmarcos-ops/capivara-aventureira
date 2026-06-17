@@ -733,6 +733,208 @@ async function unequipAll() {
     renderCloset(); renderApp();
 }
 
+// ==========================================
+// VILA DAS CAPIVARAS (ECO-VILA) LOGIC
+// ==========================================
+const defaultVillageState = {
+    buildings: {
+        townHall: { level: 1, name: 'Centro da Vila', cost: 100, costMultiplier: 1.5, baseBonus: 0.05, desc: 'Aumenta em 5% a produção de sementes das outras construções.' },
+        farm: { level: 0, name: 'Horta de Capim', cost: 50, costMultiplier: 1.4, baseBonus: 1, desc: 'Produz 1 semente/h passivamente.' },
+        docks: { level: 0, name: 'Doca de Pesca', cost: 150, costMultiplier: 1.4, baseBonus: 3, desc: 'Produz 3 sementes/h passivamente.' },
+        lab: { level: 0, name: 'Laboratório Ecológico', cost: 200, costMultiplier: 1.5, baseBonus: 0.10, desc: 'Aumenta em 10% todo o XP ganho.' },
+        tower: { level: 0, name: 'Torre de Vigia', cost: 250, costMultiplier: 1.5, baseBonus: 0.05, desc: 'Aumenta em 5% a chance de achar animais Brilhantes e Míticos.' }
+    },
+    unclaimedSeeds: 0,
+    lastClaimTime: Date.now()
+};
+
+let villageState = JSON.parse(localStorage.getItem('capy_village_state')) || defaultVillageState;
+if (!villageState.buildings || !villageState.buildings.townHall) {
+    villageState = defaultVillageState;
+}
+
+let unclaimedSeedsAccumulated = parseFloat(villageState.unclaimedSeeds || 0);
+
+function getVillageProductionRate() {
+    if (!villageState.buildings || !villageState.buildings.farm) return 0;
+    const farmProd = (villageState.buildings.farm.level * villageState.buildings.farm.baseBonus);
+    const docksProd = (villageState.buildings.docks.level * villageState.buildings.docks.baseBonus);
+    const rate = farmProd + docksProd;
+    const multiplier = 1 + (villageState.buildings.townHall.level * villageState.buildings.townHall.baseBonus);
+    return rate * multiplier;
+}
+
+function initVillageOfflineGains() {
+    const now = Date.now();
+    const lastClaim = villageState.lastClaimTime || now;
+    const secondsElapsed = Math.max(0, Math.floor((now - lastClaim) / 1000));
+    const rate = getVillageProductionRate();
+    const offlineGains = secondsElapsed * (rate / 3600);
+    
+    unclaimedSeedsAccumulated += offlineGains;
+    villageState.unclaimedSeeds = unclaimedSeedsAccumulated;
+    villageState.lastClaimTime = now;
+    localStorage.setItem('capy_village_state', JSON.stringify(villageState));
+    
+    if (Math.floor(offlineGains) >= 1) {
+        setTimeout(() => {
+            showToast(`Sua vila produziu +${Math.floor(offlineGains)} Sementes enquanto esteve fora! 🌾`, "🏡");
+        }, 3000);
+    }
+}
+
+function getBuildingUpgradeCost(key) {
+    const b = villageState.buildings[key];
+    return Math.floor(b.cost * Math.pow(b.costMultiplier, b.level));
+}
+
+function upgradeBuilding(key) {
+    const b = villageState.buildings[key];
+    const cost = getBuildingUpgradeCost(key);
+    if (seedCoins >= cost) {
+        playSound('levelup');
+        seedCoins -= cost;
+        b.level += 1;
+        villageState.lastClaimTime = Date.now();
+        villageState.unclaimedSeeds = unclaimedSeedsAccumulated;
+        localStorage.setItem('capy_seeds', seedCoins);
+        localStorage.setItem('capy_village_state', JSON.stringify(villageState));
+        showToast(`${b.name} evoluído para Lvl ${b.level}! 🛠️`, "🎉");
+        renderApp();
+    } else {
+        playSound('error');
+        showToast("Sementes insuficientes!", "⚠️");
+    }
+}
+
+function claimVillageSeeds() {
+    const claimable = Math.floor(unclaimedSeedsAccumulated);
+    if (claimable > 0) {
+        playSound('coin');
+        seedCoins += claimable;
+        unclaimedSeedsAccumulated -= claimable;
+        villageState.unclaimedSeeds = unclaimedSeedsAccumulated;
+        villageState.lastClaimTime = Date.now();
+        localStorage.setItem('capy_seeds', seedCoins);
+        localStorage.setItem('capy_village_state', JSON.stringify(villageState));
+        showToast(`Colheu +${claimable} Sementes! 🌾`, "🪙");
+        renderApp();
+    }
+}
+
+function renderVillage() {
+    const grid = document.getElementById('villageGrid');
+    if (!grid) return;
+    
+    let totalLevel = 0;
+    for (let k in villageState.buildings) {
+        totalLevel += villageState.buildings[k].level;
+    }
+    
+    const prodRate = getVillageProductionRate();
+    document.getElementById('villageTotalLevel').innerText = totalLevel;
+    document.getElementById('villageTotalProd').innerText = Math.round(prodRate);
+    document.getElementById('villageUnclaimed').innerText = Math.floor(unclaimedSeedsAccumulated);
+    
+    const collectBtn = document.getElementById('btnCollectSeeds');
+    if (collectBtn) {
+        collectBtn.disabled = Math.floor(unclaimedSeedsAccumulated) <= 0;
+    }
+    
+    grid.innerHTML = Object.keys(villageState.buildings).map(key => {
+        const b = villageState.buildings[key];
+        const cost = getBuildingUpgradeCost(key);
+        const canAfford = seedCoins >= cost;
+        
+        let emoji = '🏡';
+        if (key === 'farm') emoji = '🥬';
+        else if (key === 'docks') emoji = '🎣';
+        else if (key === 'lab') emoji = '🔬';
+        else if (key === 'tower') emoji = '🔭';
+        
+        let bonusText = '';
+        if (key === 'townHall') {
+            bonusText = `Bônus Geral: +${b.level * 5}%`;
+        } else if (key === 'farm') {
+            bonusText = `Produção: +${b.level * 1} sementes/h`;
+        } else if (key === 'docks') {
+            bonusText = `Produção: +${b.level * 3} sementes/h`;
+        } else if (key === 'lab') {
+            bonusText = `XP extra: +${b.level * 10}%`;
+        } else if (key === 'tower') {
+            bonusText = `Chance Raros: +${b.level * 5}%`;
+        }
+        
+        let nextBonusText = '';
+        const nextLvl = b.level + 1;
+        if (key === 'townHall') {
+            nextBonusText = `Lvl ${nextLvl}: +${nextLvl * 5}%`;
+        } else if (key === 'farm') {
+            nextBonusText = `Lvl ${nextLvl}: +${nextLvl * 1} sementes/h`;
+        } else if (key === 'docks') {
+            nextBonusText = `Lvl ${nextLvl}: +${nextLvl * 3} sementes/h`;
+        } else if (key === 'lab') {
+            nextBonusText = `Lvl ${nextLvl}: +${nextLvl * 10}%`;
+        } else if (key === 'tower') {
+            nextBonusText = `Lvl ${nextLvl}: +${nextLvl * 5}%`;
+        }
+        
+        const btnClass = canAfford 
+            ? 'bg-green-600 hover:bg-green-700 text-white shadow-md cursor-pointer' 
+            : 'bg-gray-100 text-gray-400 cursor-not-allowed';
+            
+        return `
+            <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all hover:shadow-md animate-fadeIn">
+                <div class="flex items-start gap-4">
+                    <div class="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center text-3xl border border-green-100 flex-shrink-0 shadow-inner">
+                        ${emoji}
+                    </div>
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <p class="brand-font text-green-900 text-sm leading-none">${b.name}</p>
+                            <span class="text-[9px] bg-green-100 text-green-800 font-black px-2 py-0.5 rounded-full">Lvl ${b.level}</span>
+                        </div>
+                        <p class="text-[9px] text-gray-500 font-bold leading-normal">${b.desc}</p>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="text-[8px] bg-amber-50 text-amber-800 font-black px-1.5 py-0.5 rounded-full shadow-sm">${bonusText}</span>
+                            <i class="fas fa-arrow-right text-[8px] text-gray-300"></i>
+                            <span class="text-[8px] bg-blue-50 text-blue-800 font-bold px-1.5 py-0.5 rounded-full shadow-sm">${nextBonusText}</span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="upgradeBuilding('${key}')" class="px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all btn-bounce ${btnClass} flex items-center gap-1">
+                    Melhorar: ${cost} <img src="seed_coin.png" class="w-3.5 h-3.5 object-contain inline-block -mt-0.5 ml-0.5">
+                </button>
+            </div>
+        `;
+    }).join('');
+}
+
+// Live ticking interval
+setInterval(() => {
+    const rate = getVillageProductionRate();
+    if (rate > 0) {
+        unclaimedSeedsAccumulated += rate / 3600;
+        const counterEl = document.getElementById('villageUnclaimed');
+        if (counterEl) {
+            counterEl.innerText = Math.floor(unclaimedSeedsAccumulated);
+            const collectBtn = document.getElementById('btnCollectSeeds');
+            if (collectBtn) {
+                collectBtn.disabled = Math.floor(unclaimedSeedsAccumulated) <= 0;
+            }
+        }
+    }
+}, 1000);
+
+// Auto save unclaimed seeds every 5 seconds
+setInterval(() => {
+    if (getVillageProductionRate() > 0) {
+        villageState.unclaimedSeeds = unclaimedSeedsAccumulated;
+        villageState.lastClaimTime = Date.now();
+        localStorage.setItem('capy_village_state', JSON.stringify(villageState));
+    }
+}, 5000);
+
 window.onload = async () => {
     setTimeout(() => { 
         document.getElementById('splashScreen').style.opacity = '0'; 
@@ -745,7 +947,7 @@ window.onload = async () => {
         }, 500); 
     }, 2000);
     await hydrateRemoteState();
-    checkTimeOfDay(); checkStreaks(); renderApp(); loadDailyQuiz();
+    checkTimeOfDay(); checkStreaks(); initVillageOfflineGains(); renderApp(); loadDailyQuiz();
     loadSilhouetteGame(); loadEndlessQuiz();
     if (!sessionStorage.getItem('safetySeen') && currentUser) { setTimeout(toggleSafetyGuide, 2500); sessionStorage.setItem('safetySeen', 'true'); }
 };
@@ -889,8 +1091,14 @@ async function finalizeDiscovery(name, desc) {
     const curioKey = Object.keys(curioData).find(k => nameKey.includes(k));
     const curio = curioKey ? curioData[curioKey] : (typeof getPremiumData === 'function' ? getPremiumData(name).funFact : 'Uma espécie incrível e cheia de segredos da nossa fauna!');
     
+    let bonusChance = 0;
+    if (villageState && villageState.buildings && villageState.buildings.tower) {
+        bonusChance = villageState.buildings.tower.level * villageState.buildings.tower.baseBonus;
+    }
+    const miticThreshold = 0.02 * (1 + bonusChance);
+    const shinyThreshold = 0.10 * (1 + bonusChance);
     const rand = Math.random(); let rarity = 'comum';
-    if (rand < 0.02) rarity = 'mitico'; else if (rand < 0.10) rarity = 'brilhante';
+    if (rand < miticThreshold) rarity = 'mitico'; else if (rand < shinyThreshold) rarity = 'brilhante';
 
     let createdAnimal = {
         id: Date.now(),
@@ -941,6 +1149,12 @@ async function finalizeDiscovery(name, desc) {
     if (rarity === 'mitico') { xp += 100; sd += 50; playSound('levelup'); showToast("MÍTICO! 🌌", "🦄"); }
     else if (rarity === 'brilhante') { xp += 25; sd += 20; playSound('success'); showToast("BRILHANTE! ✨", "💎"); }
     else { playSound('coin'); showToast("Catalogado!", "🐾"); }
+
+    let xpBonus = 1;
+    if (villageState && villageState.buildings && villageState.buildings.lab) {
+        xpBonus += villageState.buildings.lab.level * villageState.buildings.lab.baseBonus;
+    }
+    xp = Math.round(xp * xpBonus);
 
     guardianXP += xp; seedCoins += sd;
     try { localStorage.setItem('capy_vPlay', JSON.stringify(animals)); localStorage.setItem('capy_xpPlay', guardianXP); localStorage.setItem('capy_seeds', seedCoins); }
@@ -1017,6 +1231,7 @@ function renderApp() {
     document.getElementById('userLevel').innerText = level; document.getElementById('xpProgress').style.width = (guardianXP % 100) + '%';
     document.getElementById('animalCount').innerText = `${animals.length} Descobertas`; document.getElementById('seedCoins').innerText = seedCoins;
     updateFullBodyVisuals();
+    renderVillage();
 
     const grid = document.getElementById('animalsGrid');
     if (animals.length === 0) { document.getElementById('emptyState').classList.remove('hidden'); grid.innerHTML = ''; }
