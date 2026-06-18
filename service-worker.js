@@ -1,4 +1,4 @@
-const CACHE_NAME = 'capivara-v12';
+const CACHE_NAME = 'capivara-v14';
 const ASSETS = [
   './',
   './index.html',
@@ -18,6 +18,12 @@ const ASSETS = [
   './forest_background.png',
   './capybara_avatar.png',
   './capybara_mascot.png',
+  './capybara_mascot_clean.png',
+  './capy_set_explorer.png',
+  './capy_set_scientist.png',
+  './capy_set_wizard.png',
+  './capy_set_warrior.png',
+  './capy_set_musician.png',
   './splash_capybara.png',
   './seed_coin.png',
   './mystery_box.png',

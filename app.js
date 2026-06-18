@@ -603,31 +603,74 @@ function renderCloset() {
 }
 
 function updateFullBodyVisuals() {
+    const baseMascotImg = document.getElementById('closetMascotBase');
+    
+    // Detect active thematic sets (combos)
+    let activeSet = null;
+    if (equippedAccessories['head'] === 'explorer_hat' && equippedAccessories['body'] === 'backpack') {
+        activeSet = {
+            image: 'capy_set_explorer.png',
+            items: ['explorer_hat', 'sunglasses', 'backpack', 'compass', 'boots']
+        };
+    } else if (equippedAccessories['eyes'] === 'glasses' && equippedAccessories['body'] === 'lab_coat') {
+        activeSet = {
+            image: 'capy_set_scientist.png',
+            items: ['safari_helmet', 'glasses', 'lab_coat', 'microscope', 'sneakers']
+        };
+    } else if (equippedAccessories['head'] === 'wizard' && equippedAccessories['hand'] === 'potion') {
+        activeSet = {
+            image: 'capy_set_wizard.png',
+            items: ['wizard', 'monocle', 'scarf', 'potion', 'rain_boots']
+        };
+    } else if (equippedAccessories['head'] === 'crown' && equippedAccessories['hand'] === 'sword') {
+        activeSet = {
+            image: 'capy_set_warrior.png',
+            items: ['crown', 'vest', 'sword', 'skates']
+        };
+    } else if (equippedAccessories['head'] === 'headphones' && equippedAccessories['hand'] === 'guitar') {
+        activeSet = {
+            image: 'capy_set_musician.png',
+            items: ['headphones', 'sunglasses', 'scarf', 'guitar', 'socks']
+        };
+    }
+
+    if (baseMascotImg) {
+        if (activeSet) {
+            baseMascotImg.src = activeSet.image;
+        } else if (equippedAccessories['body']) {
+            baseMascotImg.src = 'capybara_mascot_clean.png';
+        } else {
+            baseMascotImg.src = 'capybara_mascot.png';
+        }
+    }
+
     ['head', 'eyes', 'body', 'hand', 'feet'].forEach(slot => {
         const item = accessories.find(a => a.id === equippedAccessories[slot]);
-        if (slot === 'feet') {
-            const slotEl = document.getElementById('closetSlotFeet');
-            if (slotEl) {
-                if (item) {
+        const layer = slot === 'feet' ? document.getElementById('closetSlotFeet') : document.getElementById('closetSlot' + slot.charAt(0).toUpperCase() + slot.slice(1));
+        
+        if (layer) {
+            const isDrawnInSet = activeSet && item && activeSet.items.includes(item.id);
+            
+            if (item && !isDrawnInSet) {
+                if (slot === 'feet') {
                     if (item.image) {
-                        slotEl.innerHTML = `<img src="${item.image}" class="acc-img acc-${item.id} w-full h-full object-contain select-none pointer-events-none">`;
+                        layer.innerHTML = `<img src="${item.image}" class="acc-img acc-${item.id} w-full h-full object-contain select-none pointer-events-none">`;
                     } else {
-                        slotEl.innerHTML = `<span class="foot-l">${item.emoji}</span><span class="foot-r">${item.emoji}</span>`;
+                        layer.innerHTML = `<span class="foot-l">${item.emoji}</span><span class="foot-r">${item.emoji}</span>`;
                     }
                 } else {
-                    slotEl.innerHTML = `<span class="foot-l"></span><span class="foot-r"></span>`;
-                }
-            }
-        } else {
-            const layer = document.getElementById('closetSlot' + slot.charAt(0).toUpperCase() + slot.slice(1));
-            if (layer) {
-                if (item) {
                     if (item.image) {
                         layer.innerHTML = `<img src="${item.image}" class="acc-img acc-${item.id} w-full h-full object-contain select-none pointer-events-none">`;
                     } else {
                         layer.innerText = item.emoji;
+                        layer.innerHTML = item.emoji;
                     }
+                }
+            } else {
+                if (slot === 'feet') {
+                    layer.innerHTML = `<span class="foot-l"></span><span class="foot-r"></span>`;
                 } else {
+                    layer.innerHTML = '';
                     layer.innerText = '';
                 }
             }
