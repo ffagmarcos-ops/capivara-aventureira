@@ -852,22 +852,63 @@ function guessSilhouette(guess, btn) {
     }
 }
 
-const memoryEmojis = ['🦋','🐞','🐸','🐢','🐝','🐌'];
+// Progressive Memory Game pool
+const memoryEmojisPool = ['🦋','🐌','🐢','🐞','🐸','🐝','🦦','🦜','🐒','🐆','🐺','🦉','🦇','🕷️','🐜','🐍','🐊','🐛','🦥','🦨','🦟','🦗','🦂','🦎'];
+let currentMemoryLevel = parseInt(localStorage.getItem('capy_memory_game_level')) || 1;
+let currentMemoryEmojis = []; // Emojis used in current game round
 let flippedCards = [];
 let matchedPairs = 0;
 let isMemoryPlaying = false;
+
+// Levels specifications
+const memoryLevelsSpec = {
+    1: { pairs: 4, cols: 'grid-cols-4', rewardSeeds: 15, rewardXP: 10, frontText: 'text-2xl', backText: 'text-3xl' },
+    2: { pairs: 6, cols: 'grid-cols-4', rewardSeeds: 25, rewardXP: 15, frontText: 'text-2xl', backText: 'text-3xl' },
+    3: { pairs: 8, cols: 'grid-cols-4', rewardSeeds: 35, rewardXP: 20, frontText: 'text-2xl', backText: 'text-3xl' },
+    4: { pairs: 10, cols: 'grid-cols-5', rewardSeeds: 45, rewardXP: 25, frontText: 'text-xl', backText: 'text-2xl' },
+    5: { pairs: 12, cols: 'grid-cols-6', rewardSeeds: 60, rewardXP: 35, frontText: 'text-lg', backText: 'text-xl' }
+};
+
+function updateMemoryGameUI() {
+    const levelInd = document.getElementById('memoryLevelIndicator');
+    const rewardInd = document.getElementById('memoryRewardIndicator');
+    const startBtn = document.getElementById('memoryStartBtn');
+    if (!levelInd || !rewardInd || !startBtn) return;
+
+    levelInd.innerText = `Nível ${currentMemoryLevel}/5`;
+    const spec = memoryLevelsSpec[currentMemoryLevel];
+    rewardInd.innerHTML = `+${spec.rewardSeeds} <img src="seed_coin.png" class="w-3.5 h-3.5 object-contain inline-block -mt-0.5">`;
+
+    if (!isMemoryPlaying) {
+        startBtn.innerText = currentMemoryLevel === 1 ? "INICIAR PARTIDA" : `INICIAR NÍVEL ${currentMemoryLevel}`;
+        startBtn.style.display = 'block';
+    }
+}
 
 function startMemoryGame() {
     playSound('click');
     if (isMemoryPlaying) return;
     isMemoryPlaying = true; matchedPairs = 0; flippedCards = [];
     document.getElementById('memoryStartBtn').style.display = 'none';
-    const deck = [...memoryEmojis, ...memoryEmojis].sort(() => 0.5 - Math.random());
-    document.getElementById('memoryGameGrid').innerHTML = deck.map(emoji => `
+
+    const spec = memoryLevelsSpec[currentMemoryLevel];
+    
+    // Select N random distinct emojis from pool
+    const shuffledPool = [...memoryEmojisPool].sort(() => 0.5 - Math.random());
+    currentMemoryEmojis = shuffledPool.slice(0, spec.pairs);
+
+    // Create deck with pairs and shuffle
+    const deck = [...currentMemoryEmojis, ...currentMemoryEmojis].sort(() => 0.5 - Math.random());
+
+    // Update Grid Columns class
+    const grid = document.getElementById('memoryGameGrid');
+    grid.className = `grid ${spec.cols} gap-2 mb-4`;
+
+    grid.innerHTML = deck.map(emoji => `
         <div class="memory-card" onclick="flipMemoryCard(this, '${emoji}')">
             <div class="memory-card-inner">
-                <div class="memory-front text-2xl">❓</div>
-                <div class="memory-back">${emoji}</div>
+                <div class="memory-front ${spec.frontText}">❓</div>
+                <div class="memory-back ${spec.backText}">${emoji}</div>
             </div>
         </div>
     `).join('');
@@ -887,14 +928,51 @@ function checkMemoryMatch() {
         playSound('success');
         c1.card.classList.add('memory-matched'); c2.card.classList.add('memory-matched');
         matchedPairs++;
-        if (matchedPairs === memoryEmojis.length) {
-            playSound('levelup'); seedCoins += 50; guardianXP += 30;
-            localStorage.setItem('capy_seeds', seedCoins); localStorage.setItem('capy_xpPlay', guardianXP);
+        
+        const spec = memoryLevelsSpec[currentMemoryLevel];
+        if (matchedPairs === spec.pairs) {
+            playSound('levelup');
+            
+            // Give rewards for current level
+            seedCoins += spec.rewardSeeds; 
+            guardianXP += spec.rewardXP;
+            localStorage.setItem('capy_seeds', seedCoins); 
+            localStorage.setItem('capy_xpPlay', guardianXP);
             scheduleGameStateSync();
-            showToast("Você ganhou! +50 sementes!", "seed_coin.png"); renderApp(); createConfetti();
-            document.getElementById('memoryStartBtn').innerText = "JOGAR NOVAMENTE (+50 sementes)";
-            document.getElementById('memoryStartBtn').style.display = 'block';
-            isMemoryPlaying = false;
+            createConfetti();
+
+            // Progress level
+            if (currentMemoryLevel < 5) {
+                showToast(`Nível ${currentMemoryLevel} Concluído! +${spec.rewardSeeds} sementes!`, "seed_coin.png");
+                currentMemoryLevel++;
+                localStorage.setItem('capy_memory_game_level', currentMemoryLevel);
+                
+                isMemoryPlaying = false;
+                updateMemoryGameUI();
+                renderApp();
+            } else {
+                // Completed Level 5: Boss/Victory bonus!
+                const bonusSeeds = 100;
+                seedCoins += bonusSeeds;
+                localStorage.setItem('capy_seeds', seedCoins);
+                
+                showToast(`Parabéns! Você zerou o Jogo da Memória! +100 sementes de bônus! 🏆`, "seed_coin.png");
+                
+                // Reset back to level 1
+                currentMemoryLevel = 1;
+                localStorage.setItem('capy_memory_game_level', currentMemoryLevel);
+                
+                isMemoryPlaying = false;
+                updateMemoryGameUI();
+                renderApp();
+                
+                // Change start button text to play again
+                const startBtn = document.getElementById('memoryStartBtn');
+                if (startBtn) {
+                    startBtn.innerText = "JOGAR NOVAMENTE (Nível 1)";
+                    startBtn.style.display = 'block';
+                }
+            }
         }
     } else {
         c1.card.classList.remove('flipped'); c2.card.classList.remove('flipped');
@@ -1552,7 +1630,7 @@ window.onload = async () => {
     }, 2000);
     await hydrateRemoteState();
     checkTimeOfDay(); checkStreaks(); initVillageOfflineGains(); renderApp(); loadDailyQuiz();
-    loadSilhouetteGame(); loadEndlessQuiz(); updateSoundModeUI();
+    loadSilhouetteGame(); loadEndlessQuiz(); updateSoundModeUI(); updateMemoryGameUI();
     if (!sessionStorage.getItem('safetySeen') && currentUser) { setTimeout(toggleSafetyGuide, 2500); sessionStorage.setItem('safetySeen', 'true'); }
 };
 

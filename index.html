@@ -229,8 +229,11 @@
             <!-- Memory Game -->
             <div class="bg-white rounded-[2.5rem] p-6 shadow-sm border-2 border-purple-100 relative overflow-hidden">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="brand-font text-lg text-purple-900">Jogo da Memória</h3>
-                    <span class="text-[10px] bg-purple-100 text-purple-800 font-black px-2 py-1 rounded-full shadow-sm flex items-center gap-1">+50 <img src="seed_coin.png" class="w-3.5 h-3.5 object-contain inline-block"></span>
+                    <div class="flex flex-col">
+                        <h3 class="brand-font text-lg text-purple-900 leading-none">Jogo da Memória</h3>
+                        <span id="memoryLevelIndicator" class="text-[9px] text-purple-500 font-black uppercase mt-1">Nível 1/5</span>
+                    </div>
+                    <span id="memoryRewardIndicator" class="text-[10px] bg-purple-100 text-purple-800 font-black px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1">+15 <img src="seed_coin.png" class="w-3.5 h-3.5 object-contain inline-block -mt-0.5"></span>
                 </div>
                 <div id="memoryGameGrid" class="grid grid-cols-4 gap-2 mb-4">
                     <!-- Cards injected via JS -->
