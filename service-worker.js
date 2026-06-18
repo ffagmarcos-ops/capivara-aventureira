@@ -1,4 +1,4 @@
-const CACHE_NAME = 'capivara-v6';
+const CACHE_NAME = 'capivara-v7';
 const ASSETS = [
   './',
   './index.html',
@@ -32,7 +32,22 @@ const ASSETS = [
   './acc_walkie_talkie.png',
   './acc_backpack.png',
   './acc_vest.png',
-  './acc_lab_coat.png'
+  './acc_lab_coat.png',
+  './capy_village_empty.png',
+  './bld_scaffolding.png',
+  './bld_townHall_lvl1.png',
+  './bld_townHall_lvl2.png',
+  './bld_townHall_lvl3.png',
+  './bld_farm_lvl1.png',
+  './bld_farm_lvl2.png',
+  './bld_docks_lvl1.png',
+  './bld_docks_lvl2.png',
+  './bld_lab_lvl1.png',
+  './bld_lab_lvl2.png',
+  './bld_tower_lvl1.png',
+  './bld_tower_lvl2.png',
+  './village_stream.ogg',
+  './village_birds.ogg'
 ];
 
 self.addEventListener('install', event => {
