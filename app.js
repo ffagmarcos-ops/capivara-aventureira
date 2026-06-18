@@ -368,6 +368,12 @@ function unlockAudio() {
             audioCtx.resume();
         }
         audioUnlocked = true;
+        
+        // Se estiver na aba da vila e o som estiver habilitado, inicia o som ambiente
+        const vilaView = document.getElementById('vilaView');
+        if (vilaView && !vilaView.classList.contains('hidden')) {
+            startVillageAmbient();
+        }
     } catch (e) {}
 }
 
@@ -822,6 +828,16 @@ function claimVillageSeeds() {
     }
 }
 
+function focusBuilding(key) {
+    const cardEl = document.getElementById(`card-${key}`);
+    if (cardEl) {
+        cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        cardEl.classList.remove('highlight-card');
+        void cardEl.offsetWidth; // Forçar reflow para reiniciar animação
+        cardEl.classList.add('highlight-card');
+    }
+}
+
 function renderVillage() {
     const grid = document.getElementById('villageGrid');
     if (!grid) return;
@@ -839,6 +855,28 @@ function renderVillage() {
     const collectBtn = document.getElementById('btnCollectSeeds');
     if (collectBtn) {
         collectBtn.disabled = Math.floor(unclaimedSeedsAccumulated) <= 0;
+    }
+    
+    // Atualiza os elementos visuais dos prédios no mapa
+    for (let key in villageState.buildings) {
+        const b = villageState.buildings[key];
+        const visualEl = document.getElementById(`visual-${key}`);
+        if (visualEl) {
+            let spriteLvl = b.level;
+            if (key === 'townHall') {
+                spriteLvl = Math.min(3, b.level);
+            } else {
+                spriteLvl = Math.min(2, b.level);
+            }
+            
+            let imgSrc = '';
+            if (spriteLvl === 0) {
+                imgSrc = 'bld_scaffolding.png';
+            } else {
+                imgSrc = `bld_${key}_lvl${spriteLvl}.png`;
+            }
+            visualEl.src = imgSrc;
+        }
     }
     
     grid.innerHTML = Object.keys(villageState.buildings).map(key => {
@@ -884,7 +922,7 @@ function renderVillage() {
             : 'bg-gray-100 text-gray-400 cursor-not-allowed';
             
         return `
-            <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all hover:shadow-md animate-fadeIn">
+            <div id="card-${key}" class="building-card bg-white p-5 rounded-[2rem] shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all hover:shadow-md animate-fadeIn">
                 <div class="flex items-start gap-4">
                     <div class="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center text-3xl border border-green-100 flex-shrink-0 shadow-inner">
                         ${emoji}
@@ -908,6 +946,7 @@ function renderVillage() {
             </div>
         `;
     }).join('');
+    updateAmbientSoundButton();
 }
 
 // Live ticking interval
@@ -958,6 +997,78 @@ function checkTimeOfDay() {
     else document.body.classList.remove('night-mode');
 }
 
+let villageAmbientStream = null;
+let villageAmbientBirds = null;
+let villageAmbientPlaying = false;
+let villageAmbientState = localStorage.getItem('capy_village_ambient') === 'true'; // preferência do usuário
+
+function initVillageAmbient() {
+    if (!villageAmbientStream) {
+        villageAmbientStream = new Audio('village_stream.ogg');
+        villageAmbientStream.loop = true;
+        villageAmbientStream.volume = 0.35;
+    }
+    if (!villageAmbientBirds) {
+        villageAmbientBirds = new Audio('village_birds.ogg');
+        villageAmbientBirds.loop = true;
+        villageAmbientBirds.volume = 0.25;
+    }
+}
+
+function startVillageAmbient() {
+    if (!villageAmbientState) {
+        updateAmbientSoundButton();
+        return;
+    }
+    initVillageAmbient();
+    
+    // Tocar apenas se o áudio estiver desbloqueado (interação do usuário)
+    if (audioUnlocked) {
+        villageAmbientStream.play().catch(() => {});
+        villageAmbientBirds.play().catch(() => {});
+        villageAmbientPlaying = true;
+        updateAmbientSoundButton();
+    }
+}
+
+function stopVillageAmbient() {
+    if (villageAmbientStream) {
+        villageAmbientStream.pause();
+    }
+    if (villageAmbientBirds) {
+        villageAmbientBirds.pause();
+    }
+    villageAmbientPlaying = false;
+    updateAmbientSoundButton();
+}
+
+function toggleVillageAmbient() {
+    playSound('click');
+    villageAmbientState = !villageAmbientState;
+    localStorage.setItem('capy_village_ambient', villageAmbientState);
+    
+    if (villageAmbientState) {
+        startVillageAmbient();
+    } else {
+        stopVillageAmbient();
+    }
+}
+
+function updateAmbientSoundButton() {
+    const btn = document.getElementById('btnAmbientSound');
+    if (!btn) return;
+    
+    if (villageAmbientState && villageAmbientPlaying) {
+        btn.innerHTML = `<i class="fas fa-volume-up text-xs text-green-600 animate-pulse"></i>`;
+        btn.classList.add('bg-green-50', 'border-green-300');
+        btn.classList.remove('bg-white/90', 'border-green-200');
+    } else {
+        btn.innerHTML = `<i class="fas fa-volume-mute text-xs text-gray-400"></i>`;
+        btn.classList.remove('bg-green-50', 'border-green-300');
+        btn.classList.add('bg-white/90', 'border-green-200');
+    }
+}
+
 function showView(view) {
     playSound('click');
     document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
@@ -965,6 +1076,12 @@ function showView(view) {
     document.getElementById(view + 'View').classList.remove('hidden');
     document.getElementById('nav' + view.charAt(0).toUpperCase() + view.slice(1)).classList.add('tab-active');
     window.scrollTo(0, 0);
+    
+    if (view === 'vila') {
+        startVillageAmbient();
+    } else {
+        stopVillageAmbient();
+    }
 }
 
 function openParentalGate(action) {
