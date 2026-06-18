@@ -1289,6 +1289,90 @@ function closePrivacy() { playSound('click'); document.getElementById('privacyMo
 function confirmDeleteData() { playSound('click'); document.getElementById('settingsModal').classList.add('hidden'); openParentalGate('delete'); }
 function toggleSafetyGuide() { playSound('click'); document.getElementById('safetyGuide').classList.toggle('hidden'); }
 
+let cameraStream = null;
+
+async function startCamera() {
+    const video = document.getElementById('cameraVideo');
+    const placeholder = document.getElementById('cameraPlaceholder');
+    const previewContainer = document.getElementById('photoPreviewContainer');
+    const controls = document.getElementById('cameraControls');
+    const btnCapture = document.getElementById('btnCapturePhoto');
+    const btnRetake = document.getElementById('btnRetakePhoto');
+
+    // Reset preview
+    previewContainer.classList.add('hidden');
+    btnRetake.classList.add('hidden');
+    btnCapture.classList.remove('hidden');
+
+    try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            throw new Error("Câmera não suportada neste navegador.");
+        }
+        
+        // Request video stream preferred environment camera (back camera)
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } },
+            audio: false
+        });
+        
+        video.srcObject = cameraStream;
+        video.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        controls.classList.remove('hidden');
+        playSound('success');
+    } catch (err) {
+        console.error("Erro ao abrir a câmera: ", err);
+        showToast("Câmera indisponível. Use a galeria!", "⚠️");
+        // Trigger standard file selector
+        document.getElementById('photoInput').click();
+    }
+}
+
+function stopCamera() {
+    if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+    }
+    const video = document.getElementById('cameraVideo');
+    if (video) {
+        video.srcObject = null;
+        video.classList.add('hidden');
+    }
+}
+
+function capturePhoto() {
+    playSound('success');
+    const video = document.getElementById('cameraVideo');
+    const canvas = document.createElement('canvas');
+    
+    const width = video.videoWidth || 640;
+    const height = video.videoHeight || 480;
+    
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    
+    ctx.drawImage(video, 0, 0, width, height);
+    
+    currentPhoto = canvas.toDataURL('image/jpeg', 0.8);
+    
+    const previewImg = document.getElementById('photoPreviewImg');
+    previewImg.src = currentPhoto;
+    
+    document.getElementById('photoPreviewContainer').classList.remove('hidden');
+    document.getElementById('btnCapturePhoto').classList.add('hidden');
+    document.getElementById('btnRetakePhoto').classList.remove('hidden');
+    
+    stopCamera();
+}
+
+function retakePhoto() {
+    playSound('click');
+    currentPhoto = null;
+    document.getElementById('photoPreviewContainer').classList.add('hidden');
+    startCamera();
+}
+
 function openCaptureForm() { 
     playSound('click'); 
     if (!localStorage.getItem('capy_cam_accepted')) {
@@ -1296,17 +1380,35 @@ function openCaptureForm() {
         document.getElementById('cameraWarningModal').style.display = 'flex';
     } else {
         document.getElementById('captureModal').classList.remove('hidden'); 
+        startCamera();
     }
 }
+
 function acceptCamera() {
     playSound('success'); localStorage.setItem('capy_cam_accepted', 'true');
     scheduleGameStateSync();
     document.getElementById('cameraWarningModal').classList.add('hidden'); document.getElementById('cameraWarningModal').style.display = 'none';
     document.getElementById('captureModal').classList.remove('hidden');
+    startCamera();
 }
+
 function cancelCamera() { playSound('click'); document.getElementById('cameraWarningModal').classList.add('hidden'); document.getElementById('cameraWarningModal').style.display = 'none'; }
 
-function closeCaptureForm() { playSound('click'); document.getElementById('captureModal').classList.add('hidden'); currentPhoto = null; document.getElementById('animalName').value = ''; document.getElementById('animalDescription').value = ''; document.querySelectorAll('.select-pill').forEach(p => p.classList.remove('active')); document.getElementById('imagePreview').innerHTML = `<i class="fas fa-camera text-4xl text-green-200"></i><span class="text-[10px] font-bold text-green-500 mt-2">Subir Foto</span>`; }
+function closeCaptureForm() { 
+    playSound('click'); 
+    stopCamera();
+    document.getElementById('captureModal').classList.add('hidden'); 
+    currentPhoto = null; 
+    document.getElementById('animalName').value = ''; 
+    document.getElementById('animalDescription').value = ''; 
+    document.querySelectorAll('.select-pill').forEach(p => p.classList.remove('active')); 
+    
+    // Reset camera UI
+    document.getElementById('photoPreviewContainer').classList.add('hidden');
+    document.getElementById('cameraVideo').classList.add('hidden');
+    document.getElementById('cameraPlaceholder').classList.remove('hidden');
+    document.getElementById('cameraControls').classList.add('hidden');
+}
 
 function selectOption(type, val, el) {
     playSound('click'); el.parentElement.querySelectorAll('.select-pill').forEach(p => p.classList.remove('active')); el.classList.add('active');
@@ -1316,16 +1418,31 @@ function selectOption(type, val, el) {
 function previewImage(input) {
     playSound('click');
     if (input.files && input.files[0]) {
+        stopCamera();
         const reader = new FileReader();
         reader.onload = (e) => {
             const img = new Image();
             img.onload = () => {
-                const canvas = document.createElement('canvas'); let w = img.width, h = img.height;
-                if (w > h) { if (w > 600) { h *= 600 / w; w = 600; } } else { if (h > 600) { w *= 600 / h; h = 600; } }
-                canvas.width = w; canvas.height = h; canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                currentPhoto = canvas.toDataURL('image/jpeg', 0.7); document.getElementById('imagePreview').innerHTML = `<img src="${currentPhoto}" class="w-full h-full object-cover">`;
-            }; img.src = e.target.result;
-        }; reader.readAsDataURL(input.files[0]);
+                const canvas = document.createElement('canvas');
+                let w = img.width, h = img.height;
+                if (w > h) { if (w > 600) { h *= 600 / w; w = 600; } } 
+                else { if (h > 600) { w *= 600 / h; h = 600; } }
+                canvas.width = w; canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                currentPhoto = canvas.toDataURL('image/jpeg', 0.8);
+                
+                document.getElementById('photoPreviewImg').src = currentPhoto;
+                document.getElementById('photoPreviewContainer').classList.remove('hidden');
+                document.getElementById('cameraPlaceholder').classList.add('hidden');
+                document.getElementById('cameraVideo').classList.add('hidden');
+                
+                document.getElementById('cameraControls').classList.remove('hidden');
+                document.getElementById('btnCapturePhoto').classList.add('hidden');
+                document.getElementById('btnRetakePhoto').classList.remove('hidden');
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
     }
 }
 
