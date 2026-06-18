@@ -1,8 +1,9 @@
-const CACHE_NAME = 'capivara-v7';
+const CACHE_NAME = 'capivara-v8';
 const ASSETS = [
   './',
   './index.html',
   './style.css',
+  './village_cloud.png',
   './app.js',
   './data.js',
   './manifest.json',

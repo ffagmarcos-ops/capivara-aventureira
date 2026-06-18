@@ -256,6 +256,30 @@
                 <!-- Imagem de Fundo (Vila sem prédios) -->
                 <img id="villageBg" src="capy_village_empty.png" class="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none select-none">
                 
+                <!-- Elementos Ambientais Animados (Nuvens, Água, Vento) -->
+                <div class="absolute inset-0 pointer-events-none z-10 overflow-hidden">
+                    <!-- Nuvens slow-motion -->
+                    <img src="village_cloud.png" class="village-cloud cloud-1">
+                    <img src="village_cloud.png" class="village-cloud cloud-2">
+                    <img src="village_cloud.png" class="village-cloud cloud-3">
+                    
+                    <!-- Névoa de água na base da cachoeira -->
+                    <div class="waterfall-mist mist-1"></div>
+                    <div class="waterfall-mist mist-2"></div>
+                    <div class="waterfall-mist mist-3"></div>
+                    
+                    <!-- Ondulações da correnteza do rio -->
+                    <div class="river-current current-1"></div>
+                    <div class="river-current current-2"></div>
+                    <div class="river-current current-3"></div>
+                    
+                    <!-- Folhas levadas pelo vento -->
+                    <span class="wind-leaf leaf-1">🍃</span>
+                    <span class="wind-leaf leaf-2">🍃</span>
+                    <span class="wind-leaf leaf-3">🍃</span>
+                    <span class="wind-leaf leaf-4">🍃</span>
+                </div>
+                
                 <!-- Camadas dos Prédios (Sobrepostos) -->
                 <div id="villageVisualLayers" class="absolute inset-0 pointer-events-none z-10">
                     <img id="visual-townHall" src="bld_townHall_lvl1.png" class="absolute pointer-events-auto transition-all hover:scale-105 duration-300 cursor-pointer origin-bottom select-none" style="left: 48%; top: 26%; width: 32%; transform: translate(-50%, -50%);" onclick="focusBuilding('townHall')">
