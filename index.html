@@ -447,6 +447,18 @@
                 <button onclick="document.getElementById('settingsModal').classList.add('hidden')" class="text-2xl text-gray-300">×</button>
             </div>
             <div class="space-y-3">
+                <!-- Modo de Áudio -->
+                <div class="p-4 bg-gray-50 rounded-2xl space-y-2 border border-gray-100/50">
+                    <span class="block font-bold text-xs text-green-900 uppercase tracking-wider">Modo de Áudio</span>
+                    <div class="flex bg-white p-1 rounded-xl border border-gray-100">
+                        <button id="soundModeBoth" onclick="setSoundMode('both')" class="flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all text-center">
+                            🎵 Música + Som
+                        </button>
+                        <button id="soundModeSound" onclick="setSoundMode('sound')" class="flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all text-center">
+                            🔊 Apenas Som
+                        </button>
+                    </div>
+                </div>
                 <button onclick="showPrivacy()" class="w-full text-left p-4 bg-gray-50 rounded-2xl flex items-center justify-between font-bold text-sm">
                     <span>Política de Privacidade</span>
                     <i class="fas fa-chevron-right text-xs opacity-30"></i>

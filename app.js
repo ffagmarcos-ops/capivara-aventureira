@@ -383,6 +383,12 @@ let currentAdAnimalId = null;
 let pendingAction = null;
 let audioCtx = null;
 let audioUnlocked = false;
+let soundMode = localStorage.getItem('capy_sound_mode') || 'both'; // 'both' ou 'sound'
+
+// Wardrobe procedural music sequencer variables
+let wardrobeMusicTimer = null;
+let wardrobeMusicStep = 0;
+let wardrobeMusicSynth = null; // Master GainNode
 
 const missionsPool = [
     { id: 'm1', l: 'Missão Diária', d: 'Faça 1 descoberta hoje', check: () => animals.some(a => a.timestamp === new Date().toLocaleDateString('pt-BR')), reward: 15 },
@@ -417,31 +423,280 @@ function unlockAudio() {
         if (vilaView && !vilaView.classList.contains('hidden')) {
             startVillageAmbient();
         }
+        
+        // Se o guarda-roupa estiver visível e a música ativada, toca a música
+        const closetModal = document.getElementById('closetModal');
+        if (closetModal && !closetModal.classList.contains('hidden')) {
+            startWardrobeMusic();
+        }
     } catch (e) {}
+}
+
+function setSoundMode(mode) {
+    playSound('click');
+    soundMode = mode;
+    localStorage.setItem('capy_sound_mode', mode);
+    updateSoundModeUI();
+    
+    if (mode === 'sound') {
+        stopWardrobeMusic();
+    } else {
+        const closetModal = document.getElementById('closetModal');
+        if (closetModal && !closetModal.classList.contains('hidden')) {
+            startWardrobeMusic();
+        }
+    }
+}
+
+function updateSoundModeUI() {
+    const btnBoth = document.getElementById('soundModeBoth');
+    const btnSound = document.getElementById('soundModeSound');
+    if (!btnBoth || !btnSound) return;
+    
+    if (soundMode === 'both') {
+        btnBoth.className = "flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all text-center bg-green-500 text-white shadow-sm";
+        btnSound.className = "flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all text-center bg-transparent text-gray-400 hover:text-gray-600";
+    } else {
+        btnBoth.className = "flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all text-center bg-transparent text-gray-400 hover:text-gray-600";
+        btnSound.className = "flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all text-center bg-green-500 text-white shadow-sm";
+    }
+}
+
+function startWardrobeMusic() {
+    try {
+        if (!audioUnlocked) return;
+        initAudio(); if (!audioCtx) return;
+        if (soundMode !== 'both') return;
+        if (wardrobeMusicTimer) return;
+        
+        wardrobeMusicStep = 0;
+        
+        // Notas baixas para cada acorde (C3, F3, G3, C3)
+        const bassNotes = [130.81, 174.61, 196.00, 130.81];
+        
+        // Acordes (Cmaj7, Fmaj7, G6, Cmaj7)
+        const chordTones = [
+            [261.63, 329.63, 392.00, 493.88], // C4, E4, G4, B4
+            [349.23, 440.00, 523.25, 659.25], // F4, A4, C5, E5
+            [392.00, 493.88, 587.33, 783.99], // G4, B4, D5, G5
+            [261.63, 329.63, 392.00, 493.88]  // C4, E4, G4, B4
+        ];
+        
+        // Escala pentatônica para melodia (C5, D5, E5, G5, A5, C6)
+        const melodyScale = [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50];
+        
+        const stepTime = 0.22; // ~136 BPM
+        let nextNoteTime = audioCtx.currentTime;
+        
+        const musicMasterGain = audioCtx.createGain();
+        musicMasterGain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        musicMasterGain.connect(audioCtx.destination);
+        wardrobeMusicSynth = musicMasterGain;
+        
+        function playNote(freq, type, duration, vol, delay = 0) {
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, now + delay);
+            
+            gainNode.gain.setValueAtTime(0, now + delay);
+            gainNode.gain.linearRampToValueAtTime(vol, now + delay + 0.02);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, now + delay + duration);
+            
+            osc.connect(gainNode);
+            gainNode.connect(musicMasterGain);
+            
+            osc.start(now + delay);
+            osc.stop(now + delay + duration);
+        }
+        
+        function tick() {
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            while (nextNoteTime < now + 0.1) {
+                const step = wardrobeMusicStep % 16;
+                const chordIdx = Math.floor((wardrobeMusicStep / 16) % 4);
+                
+                // 1. Baixo no step 0 de cada compasso (triangle quente)
+                if (step === 0) {
+                    playNote(bassNotes[chordIdx], 'triangle', 3.0, 0.28, nextNoteTime - now);
+                }
+                
+                // 2. Acorde arpejado fofo nos passos múltiplos de 4
+                if (step % 4 === 0) {
+                    const notes = chordTones[chordIdx];
+                    const note = notes[Math.floor(Math.random() * notes.length)];
+                    playNote(note, 'sine', 1.5, 0.18, nextNoteTime - now);
+                }
+                
+                // 3. Melodia lúdica aleatória nos passos ímpares
+                if (step % 2 !== 0 && Math.random() < 0.55) {
+                    const note = melodyScale[Math.floor(Math.random() * melodyScale.length)];
+                    playNote(note, 'sine', 0.45, 0.11, nextNoteTime - now);
+                    // Delay/Eco fofo
+                    playNote(note, 'sine', 0.35, 0.03, nextNoteTime - now + 0.22);
+                }
+                
+                wardrobeMusicStep++;
+                nextNoteTime += stepTime;
+            }
+        }
+        
+        wardrobeMusicTimer = setInterval(tick, 50);
+    } catch (e) {
+        console.error("Erro na música do guarda-roupa:", e);
+    }
+}
+
+function stopWardrobeMusic() {
+    if (wardrobeMusicTimer) {
+        clearInterval(wardrobeMusicTimer);
+        wardrobeMusicTimer = null;
+    }
+    if (wardrobeMusicSynth) {
+        try {
+            const now = audioCtx.currentTime;
+            wardrobeMusicSynth.gain.setValueAtTime(wardrobeMusicSynth.gain.value, now);
+            wardrobeMusicSynth.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+            setTimeout(() => {
+                try {
+                    wardrobeMusicSynth.disconnect();
+                } catch(e){}
+                wardrobeMusicSynth = null;
+            }, 600);
+        } catch(e) {
+            wardrobeMusicSynth = null;
+        }
+    }
 }
 
 function playSound(type) {
     try {
         if (!audioUnlocked) return;
         initAudio(); if (!audioCtx) return;
-        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-        osc.connect(gain); gain.connect(audioCtx.destination); const now = audioCtx.currentTime;
+        const now = audioCtx.currentTime;
+        
         if (type === 'click') {
-            osc.type = 'sine'; osc.frequency.setValueAtTime(400, now); osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
-            gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-            osc.start(now); osc.stop(now + 0.1);
+            // Clique bolha duplo ascendente
+            const osc1 = audioCtx.createOscillator();
+            const gain1 = audioCtx.createGain();
+            osc1.type = 'sine';
+            osc1.frequency.setValueAtTime(320, now);
+            osc1.frequency.exponentialRampToValueAtTime(640, now + 0.04);
+            gain1.gain.setValueAtTime(0.12, now);
+            gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+            osc1.connect(gain1);
+            gain1.connect(audioCtx.destination);
+            osc1.start(now);
+            osc1.stop(now + 0.05);
+            
+            const osc2 = audioCtx.createOscillator();
+            const gain2 = audioCtx.createGain();
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(420, now + 0.03);
+            osc2.frequency.exponentialRampToValueAtTime(840, now + 0.07);
+            gain2.gain.setValueAtTime(0.08, now + 0.03);
+            gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+            osc2.connect(gain2);
+            gain2.connect(audioCtx.destination);
+            osc2.start(now + 0.03);
+            osc2.stop(now + 0.08);
         } else if (type === 'coin') {
-            osc.type = 'sine'; osc.frequency.setValueAtTime(987.77, now); osc.frequency.setValueAtTime(1318.51, now + 0.08);
-            gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
-            osc.start(now); osc.stop(now + 0.35);
+            // Chime retrô fofo (E5 -> G5 -> C6 -> E6)
+            const notes = [659.25, 783.99, 1046.50, 1318.51];
+            notes.forEach((freq, idx) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                const playTime = now + (idx * 0.05);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, playTime);
+                gain.gain.setValueAtTime(0.09, playTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, playTime + 0.22);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(playTime);
+                osc.stop(playTime + 0.24);
+            });
         } else if (type === 'success') {
-            osc.type = 'triangle'; osc.frequency.setValueAtTime(523.25, now); osc.frequency.setValueAtTime(659.25, now + 0.08); osc.frequency.setValueAtTime(1046.50, now + 0.24);
-            gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
-            osc.start(now); osc.stop(now + 0.5);
+            // Harpa pentatônica rápida ascendente em dó maior
+            const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
+            notes.forEach((freq, idx) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                const playTime = now + (idx * 0.06);
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(freq, playTime);
+                gain.gain.setValueAtTime(0.12, playTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, playTime + 0.35);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(playTime);
+                osc.stop(playTime + 0.38);
+            });
         } else if (type === 'levelup') {
-            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(261.63, now); osc.frequency.linearRampToValueAtTime(1046.50, now + 0.6);
-            gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
-            osc.start(now); osc.stop(now + 0.6);
+            // Fanfarra festiva de acordes harmônicos e final agudo
+            const chords = [
+                [261.63, 329.63, 392.00], // C4 major
+                [349.23, 440.00, 523.25], // F4 major
+                [392.00, 493.88, 587.33]  // G4 major
+            ];
+            chords.forEach((chord, chordIdx) => {
+                const chordTime = now + (chordIdx * 0.15);
+                chord.forEach(freq => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, chordTime);
+                    gain.gain.setValueAtTime(0.08, chordTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, chordTime + 0.35);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(chordTime);
+                    osc.stop(chordTime + 0.38);
+                });
+            });
+            const finaleNotes = [523.25, 659.25, 783.99, 1046.50];
+            finaleNotes.forEach((freq, idx) => {
+                const noteTime = now + 0.45 + (idx * 0.05);
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, noteTime);
+                gain.gain.setValueAtTime(0.12, noteTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, noteTime + 0.45);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(noteTime);
+                osc.stop(noteTime + 0.48);
+            });
+        } else if (type === 'error') {
+            // "Boing" engraçado descendente detunado
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(220, now);
+            osc.frequency.linearRampToValueAtTime(100, now + 0.35);
+            
+            const lfo = audioCtx.createOscillator();
+            const lfoGain = audioCtx.createGain();
+            lfo.frequency.setValueAtTime(16, now);
+            lfoGain.gain.setValueAtTime(35, now);
+            lfo.connect(lfoGain);
+            lfoGain.connect(osc.frequency);
+            
+            gain.gain.setValueAtTime(0.14, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            lfo.start(now);
+            osc.start(now);
+            lfo.stop(now + 0.36);
+            osc.stop(now + 0.36);
         }
     } catch (e) {}
 }
@@ -518,7 +773,49 @@ const silhouetteBank = [
     { e: '🐛', n: 'Lagarta', o: ['Minhoca', 'Lagarta', 'Centopeia', 'Cobra'] },
     { e: '🦥', n: 'Bicho-preguiça', o: ['Sagui', 'Urso', 'Bicho-preguiça', 'Coala'] },
     { e: '🦨', n: 'Gambá', o: ['Gambá', 'Rato', 'Cachorro', 'Esquilo'] },
-    { e: '🦟', n: 'Mosquito', o: ['Mosca', 'Mosquito', 'Abelha', 'Libélula'] }
+    { e: '🦟', n: 'Mosquito', o: ['Mosca', 'Mosquito', 'Abelha', 'Libélula'] },
+    { e: '🦗', n: 'Grilo', o: ['Grilo', 'Gafanhoto', 'Barata', 'Formiga'] },
+    { e: '🦂', n: 'Escorpião', o: ['Escorpião', 'Aranha', 'Besouro', 'Caranguejo'] },
+    { e: '🦎', n: 'Lagartixa', o: ['Lagartixa', 'Cobra', 'Sapo', 'Jacaré'] },
+    { e: '🐕', n: 'Cachorro-do-mato', o: ['Cachorro-do-mato', 'Lobo-guará', 'Raposa', 'Gato'] },
+    { e: '🦡', n: 'Quati', o: ['Quati', 'Gambá', 'Bicho-preguiça', 'Mico'] },
+    { e: '🐆', n: 'Jaguatirica', o: ['Jaguatirica', 'Gato', 'Onça-pintada', 'Lobo-guará'] },
+    { e: '🦧', n: 'Mico', o: ['Mico', 'Sagui', 'Preguiça', 'Cachorro'] },
+    { e: '🦫', n: 'Tatu-bola', o: ['Tatu-bola', 'Tartaruga', 'Caracol', 'Ouriço'] },
+    { e: '🦤', n: 'Tucano', o: ['Tucano', 'Arara', 'Maritaca', 'Coruja'] },
+    { e: '🐦', n: 'Bem-te-vi', o: ['Bem-te-vi', 'Pardal', 'João-de-barro', 'Sabiá'] },
+    { e: '🐦', n: 'João-de-barro', o: ['João-de-barro', 'Bem-te-vi', 'Sabiá', 'Pombo'] },
+    { e: '🐦', n: 'Sabiá-laranjeira', o: ['Sabiá-laranjeira', 'João-de-barro', 'Bem-te-vi', 'Pardal'] },
+    { e: '🐦', n: 'Beija-flor', o: ['Beija-flor', 'Borboleta', 'Abelha', 'Pardal'] },
+    { e: '🐦', n: 'Quero-quero', o: ['Quero-quero', 'Gavião', 'Pombo', 'Bem-te-vi'] },
+    { e: '🐦', n: 'Pardal', o: ['Pardal', 'Pombo', 'Rolinha', 'Sabiá'] },
+    { e: '🐦', n: 'Rolinha', o: ['Rolinha', 'Pombo', 'Pardal', 'Sabiá'] },
+    { e: '🦜', n: 'Maritaca', o: ['Maritaca', 'Arara', 'Tucano', 'Coruja'] },
+    { e: '🦖', n: 'Teiú', o: ['Teiú', 'Lagartixa', 'Iguana', 'Jacaré'] },
+    { e: '🦎', n: 'Iguana', o: ['Iguana', 'Teiú', 'Lagartixa', 'Cobra'] },
+    { e: '🐍', n: 'Jiboia', o: ['Jiboia', 'Sucuri', 'Cascavel', 'Cobra-coral'] },
+    { e: '🐍', n: 'Sucuri', o: ['Sucuri', 'Jiboia', 'Cobra-coral', 'Jacaré'] },
+    { e: '🐍', n: 'Cascavel', o: ['Cascavel', 'Jararaca', 'Cobra', 'Lagartixa'] },
+    { e: '🐍', n: 'Jararaca', o: ['Jararaca', 'Cascavel', 'Cobra', 'Sucuri'] },
+    { e: '🐍', n: 'Cobra-coral', o: ['Cobra-coral', 'Cascavel', 'Jararaca', 'Jiboia'] },
+    { e: '🐢', n: 'Jabuti', o: ['Jabuti', 'Cágado', 'Tartaruga', 'Caracol'] },
+    { e: '🐢', n: 'Cágado', o: ['Cágado', 'Jabuti', 'Tartaruga', 'Jacaré'] },
+    { e: '🐸', n: 'Perereca', o: ['Perereca', 'Sapo', 'Rã', 'Lagartixa'] },
+    { e: '🐸', n: 'Rã', o: ['Rã', 'Sapo', 'Perereca', 'Peixe'] },
+    { e: '🕷️', n: 'Caranguejeira', o: ['Caranguejeira', 'Aranha', 'Escorpião', 'Caranguejo'] },
+    { e: '🕷️', n: 'Armadeira', o: ['Armadeira', 'Aranha', 'Caranguejeira', 'Escorpião'] },
+    { e: '🐜', n: 'Saúva', o: ['Saúva', 'Formiga', 'Cupim', 'Besouro'] },
+    { e: '🐜', n: 'Formiga-lava-pé', o: ['Formiga-lava-pé', 'Saúva', 'Formiga', 'Aranha'] },
+    { e: '🐝', n: 'Abelha-jataí', o: ['Abelha-jataí', 'Abelha', 'Vespa', 'Mosca'] },
+    { e: '🐝', n: 'Arapuá', o: ['Arapuá', 'Abelha', 'Mosca', 'Mosquito'] },
+    { e: '🐝', n: 'Mamangava', o: ['Mamangava', 'Abelha', 'Besouro', 'Borboleta'] },
+    { e: '🐝', n: 'Marimbondo', o: ['Marimbondo', 'Vespa', 'Abelha', 'Mosca'] },
+    { e: '🦗', n: 'Louva-a-deus', o: ['Louva-a-deus', 'Grilo', 'Bicho-pau', 'Barata'] },
+    { e: '🪵', n: 'Bicho-pau', o: ['Bicho-pau', 'Lagarta', 'Cobra', 'Minhoca'] },
+    { e: '🐛', n: 'Centopeia', o: ['Centopeia', 'Lagarta', 'Minhoca', 'Cobra'] },
+    { e: '🐛', n: 'Piolho-de-cobra', o: ['Piolho-de-cobra', 'Minhoca', 'Centopeia', 'Caracol'] },
+    { e: '🪳', n: 'Barata', o: ['Barata', 'Besouro', 'Formiga', 'Grilo'] },
+    { e: '🐜', n: 'Cupim', o: ['Cupim', 'Formiga', 'Abelha', 'Barata'] }
 ];
 let currentSilhouette = null;
 
@@ -630,8 +927,8 @@ function answerQuiz(selected, correct) {
     } else { playSound('click'); showToast("Tente novamente!", "❌"); event.target.closest('button').classList.add('border-red-400', 'bg-red-50'); }
 }
 
-function openCloset() { playSound('click'); document.getElementById('closetModal').classList.remove('hidden'); renderCloset(); }
-function closeCloset() { playSound('click'); document.getElementById('closetModal').classList.add('hidden'); }
+function openCloset() { playSound('click'); document.getElementById('closetModal').classList.remove('hidden'); renderCloset(); startWardrobeMusic(); }
+function closeCloset() { playSound('click'); document.getElementById('closetModal').classList.add('hidden'); stopWardrobeMusic(); }
 
 function renderCloset() {
     updateFullBodyVisuals();
@@ -1255,7 +1552,7 @@ window.onload = async () => {
     }, 2000);
     await hydrateRemoteState();
     checkTimeOfDay(); checkStreaks(); initVillageOfflineGains(); renderApp(); loadDailyQuiz();
-    loadSilhouetteGame(); loadEndlessQuiz();
+    loadSilhouetteGame(); loadEndlessQuiz(); updateSoundModeUI();
     if (!sessionStorage.getItem('safetySeen') && currentUser) { setTimeout(toggleSafetyGuide, 2500); sessionStorage.setItem('safetySeen', 'true'); }
 };
 
