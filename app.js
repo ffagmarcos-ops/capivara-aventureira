@@ -831,25 +831,30 @@ let villageNPCs = [];
 let npcIntervalId = null;
 
 const villagePaths = [
-    // Rota 1: Prefeitura ➔ Laboratório ➔ Docas
+    // Rota 1: Prefeitura ➔ Ponte ➔ Docas (Atravessa a ponte!)
     [
-        { x: 48, y: 32 },
-        { x: 58, y: 34 },
-        { x: 68, y: 40 },
-        { x: 74, y: 46 },
-        { x: 78, y: 55 }
+        { x: 48, y: 26 }, // Prefeitura
+        { x: 48, y: 44 }, // Desce na margem esquerda
+        { x: 58, y: 54 }, // Entrada esquerda da ponte
+        { x: 66, y: 52 }, // No meio da ponte
+        { x: 72, y: 50 }, // Entrada direita da ponte
+        { x: 78, y: 53 }  // Docas
     ],
-    // Rota 2: Horta ➔ Prefeitura
+    // Rota 2: Horta ➔ Ponte ➔ Prefeitura (Conecta Horta à ponte e depois sobe para Prefeitura)
     [
-        { x: 22, y: 50 },
-        { x: 34, y: 41 },
-        { x: 48, y: 32 }
+        { x: 22, y: 50 }, // Horta
+        { x: 38, y: 53 }, // Caminho inferior esquerdo
+        { x: 58, y: 54 }, // Entrada esquerda da ponte
+        { x: 48, y: 44 }, // Sobe na margem esquerda
+        { x: 48, y: 26 }  // Prefeitura
     ],
-    // Rota 3: Docas ➔ Torre de Vigia
+    // Rota 3: Docas ➔ Laboratório ➔ Torre (Fica inteiramente na margem direita, sem cruzar o rio)
     [
-        { x: 78, y: 55 },
-        { x: 81, y: 43 },
-        { x: 80, y: 28 }
+        { x: 78, y: 53 }, // Docas
+        { x: 74, y: 44 }, // Margem direita subindo
+        { x: 68, y: 36 }, // Laboratório
+        { x: 74, y: 30 }, // Subindo em direção à Torre
+        { x: 80, y: 25 }  // Torre
     ]
 ];
 
