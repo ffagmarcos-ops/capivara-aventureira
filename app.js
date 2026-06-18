@@ -4,40 +4,40 @@ const accessories = [
     { id: 'safari_helmet', label: 'Capacete Safári', emoji: '🪖', image: 'acc_safari_helmet.png', price: 50, slot: 'head' },
     { id: 'beanie', label: 'Gorro de Frio', emoji: '🧶', image: 'acc_beanie.png', price: 80, slot: 'head' },
     { id: 'crown', label: 'Coroa da Floresta', emoji: '👑', image: 'acc_crown.png', price: 500, slot: 'head' },
-    { id: 'flower', label: 'Flor Nativa', emoji: '🌺', price: 20, slot: 'head' },
-    { id: 'cap', label: 'Boné do Guarda', emoji: '🧢', price: 40, slot: 'head' },
-    { id: 'wizard', label: 'Chapéu Mágico', emoji: '🧙', price: 600, slot: 'head' },
-    { id: 'headphones', label: 'Fones de Ouvido', emoji: '🎧', price: 90, slot: 'head' },
+    { id: 'flower', label: 'Flor Nativa', emoji: '🌺', image: 'acc_flower.png', price: 20, slot: 'head' },
+    { id: 'cap', label: 'Boné do Guarda', emoji: '🧢', image: 'acc_cap.png', price: 40, slot: 'head' },
+    { id: 'wizard', label: 'Chapéu Mágico', emoji: '🧙', image: 'acc_wizard.png', price: 600, slot: 'head' },
+    { id: 'headphones', label: 'Fones de Ouvido', emoji: '🎧', image: 'acc_headphones.png', price: 90, slot: 'head' },
     
     { id: 'glasses', label: 'Óculos Cientista', emoji: '👓', image: 'acc_glasses.png', price: 30, slot: 'eyes' },
     { id: 'sunglasses', label: 'Óculos de Sol', emoji: '🕶️', image: 'acc_sunglasses.png', price: 45, slot: 'eyes' },
     { id: 'goggles', label: 'Óculos Mergulho', emoji: '🥽', image: 'acc_goggles.png', price: 100, slot: 'eyes' },
-    { id: 'monocle', label: 'Monóculo Clássico', emoji: '🧐', price: 150, slot: 'eyes' },
+    { id: 'monocle', label: 'Monóculo Clássico', emoji: '🧐', image: 'acc_monocle.png', price: 150, slot: 'eyes' },
     
     { id: 'magnifier', label: 'Lupa do Biólogo', emoji: '🔍', image: 'acc_magnifier.png', price: 45, slot: 'hand' },
     { id: 'compass', label: 'Bússola', emoji: '🧭', image: 'acc_compass.png', price: 75, slot: 'hand' },
     { id: 'flashlight', label: 'Lanterna', emoji: '🔦', image: 'acc_flashlight.png', price: 90, slot: 'hand' },
     { id: 'net', label: 'Rede de Insetos', emoji: '🕸️', image: 'acc_net.png', price: 135, slot: 'hand' },
-    { id: 'map', label: 'Mapa das Matas', emoji: '🗺️', price: 195, slot: 'hand' },
-    { id: 'microscope', label: 'Microscópio', emoji: '🔬', price: 230, slot: 'hand' },
+    { id: 'map', label: 'Mapa das Matas', emoji: '🗺️', image: 'acc_map.png', price: 195, slot: 'hand' },
+    { id: 'microscope', label: 'Microscópio', emoji: '🔬', image: 'acc_microscope.png', price: 230, slot: 'hand' },
     { id: 'notebook', label: 'Diário Científico', emoji: '📓', image: 'acc_notebook.png', price: 280, slot: 'hand' },
     { id: 'camera', label: 'Câmera Pro', emoji: '📷', image: 'acc_camera.png', price: 350, slot: 'hand' },
     { id: 'walkie_talkie', label: 'Rádio Amador', emoji: '📻', image: 'acc_walkie_talkie.png', price: 400, slot: 'hand' },
-    { id: 'potion', label: 'Poção de Cura', emoji: '🧪', price: 450, slot: 'hand' },
-    { id: 'sword', label: 'Espada de Graveto', emoji: '🗡️', price: 500, slot: 'hand' },
-    { id: 'guitar', label: 'Violão de Acampamento', emoji: '🎸', price: 600, slot: 'hand' },
+    { id: 'potion', label: 'Poção de Cura', emoji: '🧪', image: 'acc_potion.png', price: 450, slot: 'hand' },
+    { id: 'sword', label: 'Espada de Graveto', emoji: '🗡️', image: 'acc_sword.png', price: 500, slot: 'hand' },
+    { id: 'guitar', label: 'Violão de Acampamento', emoji: '🎸', image: 'acc_guitar.png', price: 600, slot: 'hand' },
     
     { id: 'backpack', label: 'Mochila de Campo', emoji: '🎒', image: 'acc_backpack.png', price: 60, slot: 'body' },
     { id: 'vest', label: 'Colete de Guarda', emoji: '🦺', image: 'acc_vest.png', price: 110, slot: 'body' },
     { id: 'lab_coat', label: 'Jaleco de Ciência', emoji: '🥼', image: 'acc_lab_coat.png', price: 250, slot: 'body' },
-    { id: 'tie', label: 'Gravata Borboleta', emoji: '🎀', price: 150, slot: 'body' },
-    { id: 'scarf', label: 'Cachecol de Lã', emoji: '🧣', price: 120, slot: 'body' },
+    { id: 'tie', label: 'Gravata Borboleta', emoji: '🎀', image: 'acc_tie.png', price: 150, slot: 'body' },
+    { id: 'scarf', label: 'Cachecol de Lã', emoji: '🧣', image: 'acc_scarf.png', price: 120, slot: 'body' },
     
-    { id: 'boots', label: 'Botas de Trilha', emoji: '🥾', price: 160, slot: 'feet' },
-    { id: 'rain_boots', label: 'Galochas', emoji: '👢', price: 200, slot: 'feet' },
-    { id: 'sneakers', label: 'Tênis Rápido', emoji: '👟', price: 220, slot: 'feet' },
-    { id: 'socks', label: 'Meias Quentinhas', emoji: '🧦', price: 100, slot: 'feet' },
-    { id: 'skates', label: 'Patins de Asfalto', emoji: '🛼', price: 300, slot: 'feet' }
+    { id: 'boots', label: 'Botas de Trilha', emoji: '🥾', image: 'acc_boots.png', price: 160, slot: 'feet' },
+    { id: 'rain_boots', label: 'Galochas', emoji: '👢', image: 'acc_rain_boots.png', price: 200, slot: 'feet' },
+    { id: 'sneakers', label: 'Tênis Rápido', emoji: '👟', image: 'acc_sneakers.png', price: 220, slot: 'feet' },
+    { id: 'socks', label: 'Meias Quentinhas', emoji: '🧦', image: 'acc_socks.png', price: 100, slot: 'feet' },
+    { id: 'skates', label: 'Patins de Asfalto', emoji: '🛼', image: 'acc_skates.png', price: 300, slot: 'feet' }
 ];
 
 const quizBank = [
@@ -606,20 +606,16 @@ function updateFullBodyVisuals() {
     ['head', 'eyes', 'body', 'hand', 'feet'].forEach(slot => {
         const item = accessories.find(a => a.id === equippedAccessories[slot]);
         if (slot === 'feet') {
-            const footL = document.querySelector('#closetSlotFeet .foot-l');
-            const footR = document.querySelector('#closetSlotFeet .foot-r');
-            if (footL && footR) {
+            const slotEl = document.getElementById('closetSlotFeet');
+            if (slotEl) {
                 if (item) {
                     if (item.image) {
-                        footL.innerHTML = `<img src="${item.image}" class="w-10 h-10 object-contain select-none pointer-events-none">`;
-                        footR.innerHTML = `<img src="${item.image}" class="w-10 h-10 object-contain select-none pointer-events-none">`;
+                        slotEl.innerHTML = `<img src="${item.image}" class="acc-img acc-${item.id} w-full h-full object-contain select-none pointer-events-none">`;
                     } else {
-                        footL.innerText = item.emoji;
-                        footR.innerText = item.emoji;
+                        slotEl.innerHTML = `<span class="foot-l">${item.emoji}</span><span class="foot-r">${item.emoji}</span>`;
                     }
                 } else {
-                    footL.innerText = '';
-                    footR.innerText = '';
+                    slotEl.innerHTML = `<span class="foot-l"></span><span class="foot-r"></span>`;
                 }
             }
         } else {
@@ -627,7 +623,7 @@ function updateFullBodyVisuals() {
             if (layer) {
                 if (item) {
                     if (item.image) {
-                        layer.innerHTML = `<img src="${item.image}" class="w-full h-full object-contain select-none pointer-events-none">`;
+                        layer.innerHTML = `<img src="${item.image}" class="acc-img acc-${item.id} w-full h-full object-contain select-none pointer-events-none">`;
                     } else {
                         layer.innerText = item.emoji;
                     }

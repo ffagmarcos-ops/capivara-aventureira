@@ -391,3 +391,65 @@ body.night-mode .bg-blue-50, body.night-mode .bg-amber-50, body.night-mode .bg-p
     90% { opacity: 0.75; }
     100% { transform: translate(220px, 480px) rotate(480deg) scale(0.6); opacity: 0; }
 }
+
+/* ==========================================================================
+   SISTEMA DE ALINHAMENTO E ESCALA DOS ACESSÓRIOS DO MASCOTE
+   ========================================================================== */
+
+/* Regras gerais para as imagens dos slots */
+.capy-slot img.acc-img {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* 1. Ajustes para o Slot de Cabeça (slot-head) */
+.slot-head img.acc-explorer_hat { transform: translate(0, -3px) scale(1.1); }
+.slot-head img.acc-safari_helmet { transform: translate(0, -5px) scale(1.05); }
+.slot-head img.acc-beanie { transform: translate(-2px, 2px) scale(1.0); }
+.slot-head img.acc-crown { transform: translate(0, -8px) scale(0.95); }
+.slot-head img.acc-flower { transform: translate(18px, 12px) scale(0.7) rotate(12deg); }
+.slot-head img.acc-cap { transform: translate(-3px, 2px) scale(1.05); }
+.slot-head img.acc-wizard { transform: translate(-2px, -24px) scale(1.25) rotate(4deg); }
+.slot-head img.acc-headphones { transform: translate(-1px, 6px) scale(1.08); }
+
+/* 2. Ajustes para o Slot de Olhos (slot-eyes) */
+.slot-eyes img.acc-glasses { transform: translate(0, 0) scale(1.0); }
+.slot-eyes img.acc-sunglasses { transform: translate(0, 2px) scale(1.0); }
+.slot-eyes img.acc-goggles { transform: translate(0, 1px) scale(1.05); }
+.slot-eyes img.acc-monocle { transform: translate(14px, -3px) scale(0.7); }
+
+/* 3. Ajustes para o Slot de Corpo (slot-body) */
+.slot-body img.acc-backpack { transform: translate(22px, -5px) scale(1.05); }
+.slot-body img.acc-vest { transform: translate(0, 5px) scale(1.05); }
+.slot-body img.acc-lab_coat { transform: translate(-2px, 8px) scale(1.1); }
+.slot-body img.acc-tie { transform: translate(-38px, -5px) scale(0.48); }
+.slot-body img.acc-scarf { transform: translate(-12px, -12px) scale(0.95); }
+
+/* 4. Ajustes para o Slot de Mão (slot-hand) */
+.slot-hand img.acc-magnifier { transform: translate(0, 0) scale(1.0); }
+.slot-hand img.acc-compass { transform: translate(-5px, 5px) scale(0.9); }
+.slot-hand img.acc-flashlight { transform: translate(-2px, -2px) scale(1.0); }
+.slot-hand img.acc-net { transform: translate(-15px, -15px) scale(1.1) rotate(-10deg); }
+.slot-hand img.acc-map { transform: translate(5px, 5px) scale(0.95) rotate(-5deg); }
+.slot-hand img.acc-microscope { transform: translate(0, 10px) scale(0.9); }
+.slot-hand img.acc-notebook { transform: translate(2px, 2px) scale(1.0); }
+.slot-hand img.acc-camera { transform: translate(0, 0) scale(1.0); }
+.slot-hand img.acc-walkie_talkie { transform: translate(0, 2px) scale(0.95); }
+.slot-hand img.acc-potion { transform: translate(2px, 8px) scale(0.95); }
+.slot-hand img.acc-sword { transform: translate(-10px, -22px) scale(1.2) rotate(-15deg); }
+.slot-hand img.acc-guitar { transform: translate(15px, -5px) scale(1.25) rotate(-20deg); }
+
+/* 5. Ajustes para o Slot de Pés (slot-feet) como Imagem Única */
+.slot-feet img.acc-img {
+    position: absolute;
+    width: 130px;
+    height: 90px;
+    left: 50%;
+    top: 50%;
+    z-index: 10;
+}
+.slot-feet img.acc-boots { transform: translate(-50%, -35%) scale(1.05); }
+.slot-feet img.acc-rain_boots { transform: translate(-50%, -40%) scale(1.0); }
+.slot-feet img.acc-sneakers { transform: translate(-50%, -32%) scale(1.02); }
+.slot-feet img.acc-socks { transform: translate(-50%, -38%) scale(0.95); }
+.slot-feet img.acc-skates { transform: translate(-50%, -30%) scale(1.08); }
+
