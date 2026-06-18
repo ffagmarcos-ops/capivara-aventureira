@@ -49,6 +49,24 @@ const quizBank = [
 ];
 
 const API_BASE = '/api';
+
+// Debug / Testing helpers via URL query parameters
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.has('clear')) {
+    localStorage.clear();
+    window.location.href = window.location.pathname;
+} else if (urlParams.has('test')) {
+    localStorage.setItem('capy_seeds', '10000');
+    localStorage.setItem('capy_user', JSON.stringify({
+        id: 'local_test_' + Date.now(),
+        name: 'Teste',
+        avatar: '🦫',
+        email: 'test@capivara.aporttec.com',
+        isLocal: true
+    }));
+    window.location.href = window.location.pathname;
+}
+
 let authToken = localStorage.getItem('capy_token') || '';
 let apiOnline = false;
 
