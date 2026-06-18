@@ -253,6 +253,14 @@ async function authenticateExplorer(name, avatar, isGoogle) {
             isGoogle: Boolean(isGoogle)
         };
         localStorage.setItem('capy_user', JSON.stringify(currentUser));
+        
+        // Grant 10,000 seeds for test users
+        const lowerName = name.toLowerCase();
+        if (lowerName === 'teste' || lowerName === 'test' || lowerName === 'tesrez') {
+            seedCoins = Math.max(seedCoins, 10000);
+            localStorage.setItem('capy_seeds', seedCoins);
+        }
+        
         await hydrateRemoteState();
     } catch (apiError) {
         console.warn('API indisponível, iniciando em modo local offline:', apiError.message);
@@ -267,6 +275,14 @@ async function authenticateExplorer(name, avatar, isGoogle) {
             isLocal: true
         };
         localStorage.setItem('capy_user', JSON.stringify(currentUser));
+        
+        // Grant 10,000 seeds for test users in offline mode
+        const lowerName = name.toLowerCase();
+        if (lowerName === 'teste' || lowerName === 'test' || lowerName === 'tesrez') {
+            seedCoins = Math.max(seedCoins, 10000);
+            localStorage.setItem('capy_seeds', seedCoins);
+        }
+        
         showToast("Modo Offline Ativado! 📶❌", "⚠️");
     }
 }
@@ -326,6 +342,15 @@ async function loginWithGoogle() {
 let animals = JSON.parse(localStorage.getItem('capy_vPlay')) || [];
 let guardianXP = parseInt(localStorage.getItem('capy_xpPlay')) || 0;
 let seedCoins = parseInt(localStorage.getItem('capy_seeds')) || 0;
+if (currentUser) {
+    const lowerName = currentUser.name.toLowerCase();
+    if (lowerName === 'teste' || lowerName === 'test' || lowerName === 'tesrez') {
+        if (seedCoins < 10000) {
+            seedCoins = 10000;
+            localStorage.setItem('capy_seeds', seedCoins);
+        }
+    }
+}
 let ownedAccessories = JSON.parse(localStorage.getItem('capy_owned_acc')) || [];
 let equippedAccessories = JSON.parse(localStorage.getItem('capy_equipped_slots')) || { head: null, eyes: null, body: null, hand: null, feet: null };
 let currentStreak = parseInt(localStorage.getItem('capy_streak')) || 0;
