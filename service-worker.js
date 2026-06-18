@@ -1,9 +1,15 @@
-const CACHE_NAME = 'capivara-v9';
+const CACHE_NAME = 'capivara-v10';
 const ASSETS = [
   './',
   './index.html',
   './style.css',
   './village_cloud.png',
+  './capy_npc_green_front.png',
+  './capy_npc_green_back.png',
+  './capy_npc_blue_front.png',
+  './capy_npc_blue_back.png',
+  './capy_npc_red_front.png',
+  './capy_npc_red_back.png',
   './app.js',
   './data.js',
   './manifest.json',

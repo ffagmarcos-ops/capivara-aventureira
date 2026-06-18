@@ -824,6 +824,187 @@ function claimVillageSeeds() {
     }
 }
 
+// ==========================================================================
+// SISTEMA DE NPCs DE CAPIVARAS PASSEADORAS (NATIVE NPCs)
+// ==========================================================================
+let villageNPCs = [];
+let npcIntervalId = null;
+
+const villagePaths = [
+    // Rota 1: Prefeitura ➔ Laboratório ➔ Docas
+    [
+        { x: 48, y: 32 },
+        { x: 58, y: 34 },
+        { x: 68, y: 40 },
+        { x: 74, y: 46 },
+        { x: 78, y: 55 }
+    ],
+    // Rota 2: Horta ➔ Prefeitura
+    [
+        { x: 22, y: 50 },
+        { x: 34, y: 41 },
+        { x: 48, y: 32 }
+    ],
+    // Rota 3: Docas ➔ Torre de Vigia
+    [
+        { x: 78, y: 55 },
+        { x: 81, y: 43 },
+        { x: 80, y: 28 }
+    ]
+];
+
+const npcConfigs = [
+    { name: 'Capy Exploradora', color: 'green', role: 'Exploradora', speed: 0.8 },
+    { name: 'Capy Pescadora', color: 'blue', role: 'Pescadora', speed: 0.6 },
+    { name: 'Capy Jardineira', color: 'red', role: 'Jardineira', speed: 0.9 }
+];
+
+function tickNPCs() {
+    villageNPCs.forEach(npc => {
+        if (npc.state === 'resting' || npc.state === 'working') {
+            npc.stateTimer -= 150;
+            if (npc.stateTimer <= 0) {
+                const currentEndpoint = { x: npc.x, y: npc.y };
+                const availablePaths = [];
+                
+                villagePaths.forEach((path, pIdx) => {
+                    const startNode = path[0];
+                    const endNode = path[path.length - 1];
+                    
+                    const distToStart = Math.sqrt((startNode.x - currentEndpoint.x)**2 + (startNode.y - currentEndpoint.y)**2);
+                    const distToEnd = Math.sqrt((endNode.x - currentEndpoint.x)**2 + (endNode.y - currentEndpoint.y)**2);
+                    
+                    if (distToStart < 2) {
+                        availablePaths.push({ pathIndex: pIdx, nodeIndex: 1, direction: 1 });
+                    }
+                    if (distToEnd < 2) {
+                        availablePaths.push({ pathIndex: pIdx, nodeIndex: path.length - 2, direction: -1 });
+                    }
+                });
+                
+                if (availablePaths.length > 0) {
+                    const nextPath = availablePaths[Math.floor(Math.random() * availablePaths.length)];
+                    npc.pathIndex = nextPath.pathIndex;
+                    npc.nodeIndex = nextPath.nodeIndex;
+                    npc.direction = nextPath.direction;
+                } else {
+                    npc.direction *= -1;
+                    npc.nodeIndex = (npc.direction === 1) ? 1 : villagePaths[npc.pathIndex].length - 2;
+                }
+                
+                npc.state = 'walking';
+                npc.el.className = 'village-npc npc-walk-anim';
+            }
+            return;
+        }
+        
+        // Estado caminhando
+        const path = villagePaths[npc.pathIndex];
+        const target = path[npc.nodeIndex];
+        
+        const dx = target.x - npc.x;
+        const dy = target.y - npc.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        
+        if (dist <= npc.speed) {
+            // Chegou ao nó
+            npc.x = target.x;
+            npc.y = target.y;
+            npc.nodeIndex += npc.direction;
+            
+            // Verifica se chegou ao fim da rota
+            if (npc.nodeIndex < 0 || npc.nodeIndex >= path.length) {
+                npc.state = Math.random() > 0.4 ? 'resting' : 'working';
+                npc.stateTimer = Math.floor(Math.random() * 4000) + 3000; // 3-7 segundos de descanso/trabalho
+                npc.el.className = `village-npc ${npc.state === 'resting' ? 'npc-idle-anim' : 'npc-work-anim'}`;
+            }
+        } else {
+            // Move
+            npc.x += (dx / dist) * npc.speed;
+            npc.y += (dy / dist) * npc.speed;
+            
+            npc.el.style.left = npc.x + '%';
+            npc.el.style.top = npc.y + '%';
+            npc.el.style.zIndex = Math.round(npc.y * 10);
+            
+            // Atualiza imagem do sprite conforme direção do movimento
+            const spriteContainer = npc.el.querySelector('.npc-sprite-container');
+            const spriteImg = npc.el.querySelector('.npc-sprite');
+            
+            if (dy > 0.05) {
+                spriteImg.src = `capy_npc_${npc.color}_front.png`;
+            } else if (dy < -0.05) {
+                spriteImg.src = `capy_npc_${npc.color}_back.png`;
+            }
+            
+            if (dx < 0) {
+                spriteContainer.style.transform = 'scaleX(-1)';
+            } else if (dx > 0) {
+                spriteContainer.style.transform = 'scaleX(1)';
+            }
+        }
+    });
+}
+
+function startVillageNPCs() {
+    if (npcIntervalId) return;
+    
+    const container = document.getElementById('villageNPCsContainer');
+    if (!container) return;
+    
+    if (villageNPCs.length === 0) {
+        container.innerHTML = '';
+        npcConfigs.forEach((cfg, idx) => {
+            const pathIdx = idx % villagePaths.length;
+            const startNode = villagePaths[pathIdx][0];
+            
+            const npcEl = document.createElement('div');
+            npcEl.className = 'village-npc npc-walk-anim';
+            npcEl.style.left = startNode.x + '%';
+            npcEl.style.top = startNode.y + '%';
+            npcEl.style.zIndex = Math.round(startNode.y * 10);
+            
+            npcEl.innerHTML = `
+                <div class="npc-nametag">${cfg.name} (${cfg.role})</div>
+                <div class="npc-sprite-container" style="transition: transform 0.2s;">
+                    <img src="capy_npc_${cfg.color}_front.png" class="npc-sprite">
+                </div>
+            `;
+            
+            container.appendChild(npcEl);
+            
+            villageNPCs.push({
+                name: cfg.name,
+                color: cfg.color,
+                role: cfg.role,
+                speed: cfg.speed,
+                x: startNode.x,
+                y: startNode.y,
+                pathIndex: pathIdx,
+                nodeIndex: 1,
+                direction: 1,
+                state: 'walking',
+                stateTimer: 0,
+                el: npcEl
+            });
+        });
+    } else {
+        container.innerHTML = '';
+        villageNPCs.forEach(npc => {
+            container.appendChild(npc.el);
+        });
+    }
+    
+    npcIntervalId = setInterval(tickNPCs, 150);
+}
+
+function stopVillageNPCs() {
+    if (npcIntervalId) {
+        clearInterval(npcIntervalId);
+        npcIntervalId = null;
+    }
+}
+
 function focusBuilding(key) {
     const cardEl = document.getElementById(`card-${key}`);
     if (cardEl) {
@@ -1075,8 +1256,10 @@ function showView(view) {
     
     if (view === 'vila') {
         startVillageAmbient();
+        startVillageNPCs();
     } else {
         stopVillageAmbient();
+        stopVillageNPCs();
     }
 }
 
