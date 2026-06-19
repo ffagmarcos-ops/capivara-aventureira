@@ -1843,6 +1843,9 @@ function renderVillage() {
             if (b.underConstruction) {
                 imgSrc = 'bld_scaffolding.png';
             } else {
+                // Como Horta, Docas, Lab e Torre não têm artes próprias do Lvl 4 ao 10,
+                // limitamos seus sprites ao Lvl 3 (fallback automático para Lvl >= 3).
+                // A prefeitura (townHall) possui artes específicas do Lvl 1 ao 10.
                 let maxSpriteLvl = (key === 'townHall') ? 10 : 3;
                 let spriteLvl = Math.min(maxSpriteLvl, b.level);
                 if (spriteLvl === 0) {
