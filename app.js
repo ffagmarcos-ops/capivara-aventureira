@@ -1650,14 +1650,39 @@ const villagePaths = [
         { x: 68, y: 36 }, // Laboratório
         { x: 74, y: 30 }, // Subindo em direção à Torre
         { x: 80, y: 25 }  // Torre
+    ],
+    // Rota 4: Ponte (Aventureira se movimenta apenas na ponte e arredores)
+    [
+        { x: 53, y: 55 }, // Margem esquerda da ponte
+        { x: 58, y: 54 }, // Entrada esquerda da ponte
+        { x: 66, y: 52 }, // No meio da ponte
+        { x: 72, y: 50 }, // Entrada direita da ponte
+        { x: 77, y: 49 }  // Margem direita da ponte
     ]
 ];
 
 const npcConfigs = [
     { name: 'Capy Exploradora', color: 'green', role: 'Exploradora', speed: 0.8 },
     { name: 'Capy Pescadora', color: 'blue', role: 'Pescadora', speed: 0.6 },
-    { name: 'Capy Jardineira', color: 'red', role: 'Jardineira', speed: 0.9 }
+    { name: 'Capy Jardineira', color: 'red', role: 'Jardineira', speed: 0.9 },
+    { name: 'Capy Aventureira', color: 'adventurer', role: 'Aventureira', speed: 0.7 }
 ];
+
+function animateAdventurerSprite(npc) {
+    npc.frameIndex = ((npc.frameIndex || 0) + 1) % 8;
+    let row = 0; // default: idle (row 0)
+    if (npc.state === 'walking') {
+        row = 1; // walk (row 1)
+    } else if (npc.state === 'working') {
+        row = 3; // attack/work (row 3)
+    } else if (npc.state === 'resting') {
+        row = 0; // idle/rest (row 0)
+    }
+    const spriteDiv = npc.el.querySelector('.adventurer-npc-sprite');
+    if (spriteDiv) {
+        spriteDiv.style.backgroundPosition = `-${npc.frameIndex * 33}px -${row * 38}px`;
+    }
+}
 
 function tickNPCs() {
     villageNPCs.forEach(npc => {
@@ -1668,6 +1693,10 @@ function tickNPCs() {
                 const availablePaths = [];
                 
                 villagePaths.forEach((path, pIdx) => {
+                    // Filtrar Rota 4 (index 3) apenas para a Aventureira, e outras rotas apenas para NPCs normais
+                    if (npc.color === 'adventurer' && pIdx !== 3) return;
+                    if (npc.color !== 'adventurer' && pIdx === 3) return;
+
                     const startNode = path[0];
                     const endNode = path[path.length - 1];
                     
@@ -1693,7 +1722,14 @@ function tickNPCs() {
                 }
                 
                 npc.state = 'walking';
-                npc.el.className = 'village-npc npc-walk-anim';
+                if (npc.color === 'adventurer') {
+                    npc.el.className = 'village-npc npc-adventurer';
+                } else {
+                    npc.el.className = 'village-npc npc-walk-anim';
+                }
+            }
+            if (npc.color === 'adventurer') {
+                animateAdventurerSprite(npc);
             }
             return;
         }
@@ -1716,7 +1752,11 @@ function tickNPCs() {
             if (npc.nodeIndex < 0 || npc.nodeIndex >= path.length) {
                 npc.state = Math.random() > 0.4 ? 'resting' : 'working';
                 npc.stateTimer = Math.floor(Math.random() * 4000) + 3000; // 3-7 segundos de descanso/trabalho
-                npc.el.className = `village-npc ${npc.state === 'resting' ? 'npc-idle-anim' : 'npc-work-anim'}`;
+                if (npc.color === 'adventurer') {
+                    npc.el.className = 'village-npc npc-adventurer';
+                } else {
+                    npc.el.className = `village-npc ${npc.state === 'resting' ? 'npc-idle-anim' : 'npc-work-anim'}`;
+                }
             }
         } else {
             // Move
@@ -1729,12 +1769,14 @@ function tickNPCs() {
             
             // Atualiza imagem do sprite conforme direção do movimento
             const spriteContainer = npc.el.querySelector('.npc-sprite-container');
-            const spriteImg = npc.el.querySelector('.npc-sprite');
             
-            if (dy > 0.05) {
-                spriteImg.src = `capy_npc_${npc.color}_front.png`;
-            } else if (dy < -0.05) {
-                spriteImg.src = `capy_npc_${npc.color}_back.png`;
+            if (npc.color !== 'adventurer') {
+                const spriteImg = npc.el.querySelector('.npc-sprite');
+                if (dy > 0.05) {
+                    spriteImg.src = `capy_npc_${npc.color}_front.png`;
+                } else if (dy < -0.05) {
+                    spriteImg.src = `capy_npc_${npc.color}_back.png`;
+                }
             }
             
             if (dx < 0) {
@@ -1742,6 +1784,10 @@ function tickNPCs() {
             } else if (dx > 0) {
                 spriteContainer.style.transform = 'scaleX(1)';
             }
+        }
+
+        if (npc.color === 'adventurer') {
+            animateAdventurerSprite(npc);
         }
     });
 }
@@ -1759,17 +1805,30 @@ function startVillageNPCs() {
             const startNode = villagePaths[pathIdx][0];
             
             const npcEl = document.createElement('div');
-            npcEl.className = 'village-npc npc-walk-anim';
+            if (cfg.color === 'adventurer') {
+                npcEl.className = 'village-npc npc-adventurer';
+            } else {
+                npcEl.className = 'village-npc npc-walk-anim';
+            }
             npcEl.style.left = startNode.x + '%';
             npcEl.style.top = startNode.y + '%';
             npcEl.style.zIndex = Math.round(startNode.y * 10);
             
-            npcEl.innerHTML = `
-                <div class="npc-nametag">${cfg.name} (${cfg.role})</div>
-                <div class="npc-sprite-container" style="transition: transform 0.2s;">
-                    <img src="capy_npc_${cfg.color}_front.png" class="npc-sprite">
-                </div>
-            `;
+            if (cfg.color === 'adventurer') {
+                npcEl.innerHTML = `
+                    <div class="npc-nametag">${cfg.name} (${cfg.role})</div>
+                    <div class="npc-sprite-container" style="transition: transform 0.2s;">
+                        <div class="npc-sprite adventurer-npc-sprite" style="background-position: 0px 0px;"></div>
+                    </div>
+                `;
+            } else {
+                npcEl.innerHTML = `
+                    <div class="npc-nametag">${cfg.name} (${cfg.role})</div>
+                    <div class="npc-sprite-container" style="transition: transform 0.2s;">
+                        <img src="capy_npc_${cfg.color}_front.png" class="npc-sprite">
+                    </div>
+                `;
+            }
             
             container.appendChild(npcEl);
             
@@ -1785,6 +1844,7 @@ function startVillageNPCs() {
                 direction: 1,
                 state: 'walking',
                 stateTimer: 0,
+                frameIndex: 0,
                 el: npcEl
             });
         });

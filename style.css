@@ -572,6 +572,21 @@ body.night-mode .bg-blue-50, body.night-mode .bg-amber-50, body.night-mode .bg-p
     object-fit: contain;
 }
 
+/* Custom spritesheet styled element for Capy Aventureira */
+.adventurer-npc-sprite {
+    width: 33px;
+    height: 38px;
+    background-image: url('capybara_adventurer/atlas.webp');
+    background-repeat: no-repeat;
+    background-size: 264px 228px; /* 8 columns * 33px = 264px, 6 rows * 38px = 228px */
+    display: inline-block;
+}
+
+.village-npc.npc-adventurer {
+    width: 33px !important;
+    height: 38px !important;
+}
+
 /* Tag de nome flutuante ao pairar o mouse */
 .npc-nametag {
     position: absolute;
