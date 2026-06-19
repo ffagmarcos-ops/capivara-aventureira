@@ -2193,6 +2193,12 @@ function showView(view) {
         }
     }
     
+    if (view === 'lab') {
+        startComboRotation();
+    } else {
+        stopComboRotation();
+    }
+    
     const closetModal = document.getElementById('closetModal');
     const closetOpen = closetModal && !closetModal.classList.contains('hidden');
     if (!closetOpen) {
@@ -2775,6 +2781,191 @@ function updateBadges() {
         { n: 'Guarda-Roupa Cheio', desc: 'Adquiriu todos os itens!', i: '🛍️', u: pAcc >= aAcc, p: `${Math.min(pAcc, aAcc)}/${aAcc}` }
     ];
     document.getElementById('badgesGrid').innerHTML = b.map(x => `<div class="bg-white p-4 rounded-[2.5rem] border-2 transition-all duration-300 ${x.u ? 'border-amber-400 bg-amber-50/30 shadow-md' : 'border-gray-100 opacity-60'} flex flex-col items-center gap-1 text-center"><div class="text-4xl filter ${x.u ? '' : 'grayscale'} mb-1">${x.i}</div><p class="text-[10px] font-black uppercase text-green-950">${x.n}</p><p class="text-[8px] text-gray-400 font-bold leading-tight">${x.desc}</p><div class="mt-2 text-[8px] font-black px-2 py-0.5 rounded-full ${x.u ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-gray-500'}">${x.u ? 'CONQUISTADO! 🎉' : x.p}</div></div>`).join('');
+}
+
+// ==========================================================================
+// PROVADOR DE COMBINAÇÕES CIENTÍFICAS ROTATIVAS (LAB)
+// ==========================================================================
+
+const scientificSlots = {
+    head: [
+        null,
+        { id: 'safari_helmet', image: 'acc_safari_helmet.png', label: 'Capacete Safári' },
+        { id: 'explorer_hat', image: 'acc_explorer_hat.png', label: 'Chapéu de Trilha' },
+        { id: 'beanie', image: 'acc_beanie.png', label: 'Gorro de Frio' }
+    ],
+    eyes: [
+        null,
+        { id: 'glasses', image: 'acc_glasses.png', label: 'Óculos Cientista' },
+        { id: 'goggles', image: 'acc_goggles.png', label: 'Óculos Mergulho' },
+        { id: 'monocle', image: 'acc_monocle.png', label: 'Monóculo Clássico' }
+    ],
+    body: [
+        null,
+        { id: 'lab_coat', image: 'acc_lab_coat.png', label: 'Jaleco de Ciência' },
+        { id: 'backpack', image: 'acc_backpack.png', label: 'Mochila de Campo' },
+        { id: 'vest', image: 'acc_vest.png', label: 'Colete de Guarda' }
+    ],
+    hand: [
+        null,
+        { id: 'magnifier', image: 'acc_magnifier.png', label: 'Lupa do Biólogo' },
+        { id: 'compass', image: 'acc_compass.png', label: 'Bússola' },
+        { id: 'flashlight', image: 'acc_flashlight.png', label: 'Lanterna' },
+        { id: 'net', image: 'acc_net.png', label: 'Rede de Insetos' },
+        { id: 'map', image: 'acc_map.png', label: 'Mapa das Matas' },
+        { id: 'microscope', image: 'acc_microscope.png', label: 'Microscópio' },
+        { id: 'notebook', image: 'acc_notebook.png', label: 'Diário Científico' },
+        { id: 'camera', image: 'acc_camera.png', label: 'Câmera Pro' },
+        { id: 'walkie_talkie', image: 'acc_walkie_talkie.png', label: 'Rádio Amador' },
+        { id: 'potion', image: 'acc_potion.png', label: 'Poção de Cura' }
+    ],
+    feet: [
+        null,
+        { id: 'boots', image: 'acc_boots.png', label: 'Botas de Trilha' },
+        { id: 'rain_boots', image: 'acc_rain_boots.png', label: 'Galochas' },
+        { id: 'sneakers', image: 'acc_sneakers.png', label: 'Tênis Rápido' },
+        { id: 'socks', image: 'acc_socks.png', label: 'Meias Quentinhas' }
+    ]
+};
+
+let currentComboIndices = { head: 0, eyes: 0, body: 0, hand: 0, feet: 0 };
+let comboRotationInterval = null;
+let comboRotationPlaying = true;
+
+function calculateComboNumber() {
+    let index = currentComboIndices.feet;
+    index = index * scientificSlots.body.length + currentComboIndices.body;
+    index = index * scientificSlots.head.length + currentComboIndices.head;
+    index = index * scientificSlots.eyes.length + currentComboIndices.eyes;
+    index = index * scientificSlots.hand.length + currentComboIndices.hand;
+    return index + 1;
+}
+
+function startComboRotation() {
+    if (comboRotationInterval) clearInterval(comboRotationInterval);
+    updateScientificComboDOM();
+    if (comboRotationPlaying) {
+        comboRotationInterval = setInterval(rotateScientificAvatar, 2000);
+    }
+}
+
+function stopComboRotation() {
+    if (comboRotationInterval) {
+        clearInterval(comboRotationInterval);
+        comboRotationInterval = null;
+    }
+}
+
+function togglePlayPauseCombo() {
+    playSound('click');
+    comboRotationPlaying = !comboRotationPlaying;
+    const btn = document.getElementById('btnPlayPauseCombo');
+    if (!btn) return;
+    
+    if (comboRotationPlaying) {
+        btn.innerHTML = `<i class="fas fa-pause"></i> Pausar`;
+        btn.classList.add('bg-green-700', 'hover:bg-green-800');
+        btn.classList.remove('bg-amber-600', 'hover:bg-amber-700');
+        startComboRotation();
+    } else {
+        btn.innerHTML = `<i class="fas fa-play"></i> Iniciar`;
+        btn.classList.remove('bg-green-700', 'hover:bg-green-800');
+        btn.classList.add('bg-amber-600', 'hover:bg-amber-700');
+        stopComboRotation();
+    }
+}
+
+function nextComboManual() {
+    playSound('click');
+    rotateScientificAvatar();
+}
+
+function rotateScientificAvatar() {
+    currentComboIndices.hand = (currentComboIndices.hand + 1) % scientificSlots.hand.length;
+    if (currentComboIndices.hand === 0) {
+        currentComboIndices.eyes = (currentComboIndices.eyes + 1) % scientificSlots.eyes.length;
+        if (currentComboIndices.eyes === 0) {
+            currentComboIndices.head = (currentComboIndices.head + 1) % scientificSlots.head.length;
+            if (currentComboIndices.head === 0) {
+                currentComboIndices.body = (currentComboIndices.body + 1) % scientificSlots.body.length;
+                if (currentComboIndices.body === 0) {
+                    currentComboIndices.feet = (currentComboIndices.feet + 1) % scientificSlots.feet.length;
+                }
+            }
+        }
+    }
+    updateScientificComboDOM();
+}
+
+function updateScientificComboDOM() {
+    const baseMascotImg = document.getElementById('labMascotBase');
+    if (!baseMascotImg) return;
+    
+    const equipped = {
+        head: scientificSlots.head[currentComboIndices.head],
+        eyes: scientificSlots.eyes[currentComboIndices.eyes],
+        body: scientificSlots.body[currentComboIndices.body],
+        hand: scientificSlots.hand[currentComboIndices.hand],
+        feet: scientificSlots.feet[currentComboIndices.feet]
+    };
+    
+    let activeSetImage = null;
+    if (equipped.eyes && equipped.eyes.id === 'glasses' && equipped.body && equipped.body.id === 'lab_coat') {
+        activeSetImage = 'capy_set_scientist.png';
+    } else if (equipped.head && equipped.head.id === 'explorer_hat' && equipped.body && equipped.body.id === 'backpack') {
+        activeSetImage = 'capy_set_explorer.png';
+    }
+    
+    if (activeSetImage) {
+        baseMascotImg.src = activeSetImage;
+    } else if (equipped.body) {
+        baseMascotImg.src = 'capybara_mascot_clean.png';
+    } else {
+        baseMascotImg.src = 'capybara_mascot.png';
+    }
+    
+    const activeSetItems = activeSetImage ? (activeSetImage === 'capy_set_scientist.png' ? 
+        ['safari_helmet', 'glasses', 'lab_coat', 'microscope', 'sneakers'] : 
+        ['explorer_hat', 'sunglasses', 'backpack', 'compass', 'boots']) : [];
+        
+    ['head', 'eyes', 'body', 'hand', 'feet'].forEach(slot => {
+        const layer = slot === 'feet' ? document.getElementById('labSlotFeet') : document.getElementById('labSlot' + slot.charAt(0).toUpperCase() + slot.slice(1));
+        if (!layer) return;
+        
+        const item = equipped[slot];
+        const isDrawnInSet = item && activeSetItems.includes(item.id);
+        
+        if (item && !isDrawnInSet) {
+            layer.innerHTML = `<img src="${item.image}" class="acc-img acc-${item.id} w-full h-full object-contain select-none pointer-events-none transition-all duration-300">`;
+        } else {
+            if (slot === 'feet') {
+                layer.innerHTML = `<span class="foot-l"></span><span class="foot-r"></span>`;
+            } else {
+                layer.innerHTML = '';
+            }
+        }
+    });
+    
+    const equippedLabels = [];
+    ['head', 'eyes', 'body', 'hand', 'feet'].forEach(slot => {
+        if (equipped[slot]) equippedLabels.push(equipped[slot].label);
+    });
+    
+    const textEl = document.getElementById('labComboEquippedText');
+    if (textEl) {
+        if (equippedLabels.length === 0) {
+            textEl.innerHTML = `Nenhum equipamento equipado. (Capivara Cientista ao natural! 🦦🌿)`;
+        } else {
+            textEl.innerHTML = `Equipado: <span class="text-green-800">${equippedLabels.join(' + ')}</span>`;
+        }
+    }
+    
+    const counterEl = document.getElementById('comboCounter');
+    if (counterEl) {
+        const comboNum = calculateComboNumber();
+        const totalCombos = scientificSlots.head.length * scientificSlots.eyes.length * scientificSlots.body.length * scientificSlots.hand.length * scientificSlots.feet.length;
+        counterEl.innerText = `Combo: ${comboNum}/${totalCombos}`;
+    }
 }
 
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(e => {}));
