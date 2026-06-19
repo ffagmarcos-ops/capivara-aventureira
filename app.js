@@ -1246,28 +1246,158 @@ function initVillageOfflineGains() {
     }
 }
 
+const constructionPhrases = {
+    townHall: [
+        "Capivaras organizando a papelada da prefeitura...",
+        "Capivaras debatendo as leis ecológicas da vila...",
+        "Varrendo a recepção para receber visitantes...",
+        "Polindo o crachá do Prefeito Capivara...",
+        "Capivaras organizando uma festa com bolo de sementes..."
+    ],
+    farm: [
+        "Capivaras adubando a terra com folhas secas...",
+        "Plantando capim de alta qualidade...",
+        "Capivaras regando as mudas com muito carinho...",
+        "Espantando formiguinhas curiosas das folhas...",
+        "Capivaras medindo a altura do capim com régua..."
+    ],
+    docks: [
+        "Capivaras amarrando cordas nos píeres de madeira...",
+        "Polindo os barquinhos ecológicos...",
+        "Debatendo se a ponte aguenta duas capivaras gordinhas...",
+        "Capivaras testando a qualidade das redes de pesca...",
+        "Pausa para um cochilo à beira do lago..."
+    ],
+    lab: [
+        "Capivaras limpando as lentes do microscópio...",
+        "Ajustando misturas de poções coloridas e brilhantes...",
+        "Capivaras batendo martelo nas bancadas de ciência...",
+        "Analisando amostras de sementes mágicas...",
+        "Capivaras debatendo a fórmula do capim super nutritivo..."
+    ],
+    tower: [
+        "Capivaras parafusando a luneta na torre...",
+        "Limpando a lente principal contra poeira...",
+        "Ajustando o suporte de observação de estrelas...",
+        "Pintando a torre com tinta ecológica impermeável...",
+        "Capivaras procurando constelações em forma de capivara..."
+    ]
+};
+
+function getRandomConstructionPhrase(key) {
+    const list = constructionPhrases[key] || [
+        "Capivaras trabalhando duro na obra...",
+        "Pausa coletiva para banho de rio...",
+        "Carregando tijolos de barro na cabeça...",
+        "Ajustando vigas de madeira ecológica..."
+    ];
+    return list[Math.floor(Math.random() * list.length)];
+}
+
 function getBuildingUpgradeCost(key) {
     const b = villageState.buildings[key];
     return Math.floor(b.cost * Math.pow(b.costMultiplier, b.level));
 }
 
+function getAccelerationCost(b) {
+    if (!b || !b.underConstruction) return 0;
+    const remainingMs = b.constructionEnd - Date.now();
+    if (remainingMs <= 0) return 0;
+    const remainingMinutes = Math.ceil(remainingMs / 60000);
+    // 2 sementes por minuto restante, mínimo de 5 sementes
+    return Math.max(5, remainingMinutes * 2);
+}
+
 function upgradeBuilding(key) {
     const b = villageState.buildings[key];
+    if (b.underConstruction) return;
+    
     const cost = getBuildingUpgradeCost(key);
     if (seedCoins >= cost) {
-        playSound('levelup');
+        playSound('click');
         seedCoins -= cost;
-        b.level += 1;
+        localStorage.setItem('capy_seeds', seedCoins);
+        
+        // Inicia construção
+        b.underConstruction = true;
+        b.constructionStart = Date.now();
+        
+        // Tempo aumenta a cada nível: 30 minutos em 30 minutos (30 * nível_alvo)
+        const targetLevel = b.level + 1;
+        const durationMs = targetLevel * 30 * 60 * 1000;
+        
+        b.constructionEnd = b.constructionStart + durationMs;
+        b.currentPhrase = getRandomConstructionPhrase(key);
+        b.lastPhraseChange = Date.now();
+        
         villageState.lastClaimTime = Date.now();
         villageState.unclaimedSeeds = unclaimedSeedsAccumulated;
-        localStorage.setItem('capy_seeds', seedCoins);
         localStorage.setItem('capy_village_state', JSON.stringify(villageState));
-        showToast(`${b.name} evoluído para Lvl ${b.level}! 🛠️`, "🎉");
+        
+        showToast(`Obra iniciada no(a) ${b.name}! 🏗️`, "🎉");
         renderApp();
     } else {
         playSound('error');
         showToast("Sementes insuficientes!", "⚠️");
     }
+}
+
+function accelerateConstruction(key) {
+    const b = villageState.buildings[key];
+    if (!b || !b.underConstruction) return;
+    
+    const cost = getAccelerationCost(b);
+    if (seedCoins >= cost) {
+        playSound('levelup');
+        seedCoins -= cost;
+        b.underConstruction = false;
+        b.level += 1;
+        b.constructionStart = null;
+        b.constructionEnd = null;
+        
+        localStorage.setItem('capy_seeds', seedCoins);
+        villageState.lastClaimTime = Date.now();
+        villageState.unclaimedSeeds = unclaimedSeedsAccumulated;
+        localStorage.setItem('capy_village_state', JSON.stringify(villageState));
+        
+        showToast(`Construção acelerada! ${b.name} evoluído para Lvl ${b.level}! 🚀`, "🎉");
+        renderApp();
+    } else {
+        playSound('error');
+        showToast("Sementes insuficientes para acelerar!", "⚠️");
+    }
+}
+
+function updateConstructionDOM(key) {
+    const b = villageState.buildings[key];
+    const progressBar = document.getElementById(`progress-bar-${key}`);
+    const timeLabel = document.getElementById(`construction-time-${key}`);
+    const phraseLabel = document.getElementById(`construction-phrase-${key}`);
+    const accelCostLabel = document.getElementById(`accel-cost-${key}`);
+    
+    if (!b || !b.underConstruction) return;
+    
+    const now = Date.now();
+    const totalDuration = b.constructionEnd - b.constructionStart;
+    const elapsed = now - b.constructionStart;
+    const progressPercent = Math.min(100, (elapsed / totalDuration) * 100);
+    
+    const remainingMs = Math.max(0, b.constructionEnd - now);
+    const secs = Math.floor((remainingMs / 1000) % 60);
+    const mins = Math.floor((remainingMs / 60000) % 60);
+    const hrs = Math.floor(remainingMs / 3600000);
+    
+    let timeStr = "";
+    if (hrs > 0) {
+        timeStr = `${hrs}h ${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`;
+    } else {
+        timeStr = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    
+    if (progressBar) progressBar.style.width = `${progressPercent}%`;
+    if (timeLabel) timeLabel.innerText = timeStr;
+    if (phraseLabel) phraseLabel.innerText = b.currentPhrase || "Construindo...";
+    if (accelCostLabel) accelCostLabel.innerText = getAccelerationCost(b);
 }
 
 function claimVillageSeeds() {
@@ -1505,18 +1635,16 @@ function renderVillage() {
         const b = villageState.buildings[key];
         const visualEl = document.getElementById(`visual-${key}`);
         if (visualEl) {
-            let spriteLvl = b.level;
-            if (key === 'townHall') {
-                spriteLvl = Math.min(3, b.level);
-            } else {
-                spriteLvl = Math.min(2, b.level);
-            }
-            
             let imgSrc = '';
-            if (spriteLvl === 0) {
+            if (b.underConstruction) {
                 imgSrc = 'bld_scaffolding.png';
             } else {
-                imgSrc = `bld_${key}_lvl${spriteLvl}.png`;
+                let spriteLvl = Math.min(3, b.level);
+                if (spriteLvl === 0) {
+                    imgSrc = 'bld_scaffolding.png';
+                } else {
+                    imgSrc = `bld_${key}_lvl${spriteLvl}.png`;
+                }
             }
             visualEl.src = imgSrc;
         }
@@ -1532,6 +1660,43 @@ function renderVillage() {
         else if (key === 'docks') emoji = '🎣';
         else if (key === 'lab') emoji = '🔬';
         else if (key === 'tower') emoji = '🔭';
+        
+        // Se estiver em construção, renderiza card especial de progresso
+        if (b.underConstruction) {
+            const accelCost = getAccelerationCost(b);
+            const canAffordAccel = seedCoins >= accelCost;
+            const accelBtnClass = canAffordAccel 
+                ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-md cursor-pointer' 
+                : 'bg-gray-100 text-gray-400 cursor-not-allowed';
+                
+            return `
+                <div id="card-${key}" class="building-card bg-purple-50/50 p-5 rounded-[2rem] shadow-sm border border-purple-100/50 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all hover:shadow-md animate-fadeIn">
+                    <div class="flex-grow flex flex-col gap-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
+                                🏗️
+                            </div>
+                            <div>
+                                <p class="brand-font text-purple-900 text-xs leading-none">${b.name}</p>
+                                <span class="text-[8px] text-purple-600 font-bold uppercase">Em Obra para Lvl ${b.level + 1}</span>
+                            </div>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between items-center text-[8px] font-black text-purple-800">
+                                <span id="construction-phrase-${key}" class="italic truncate max-w-[200px]">${b.currentPhrase || "Capivaras trabalhando..."}</span>
+                                <span id="construction-time-${key}" class="font-mono bg-purple-100 px-1 rounded">--:--</span>
+                            </div>
+                            <div class="w-full bg-purple-100 h-2 rounded-full overflow-hidden border border-purple-200">
+                                <div id="progress-bar-${key}" class="bg-purple-500 h-full transition-all duration-1000" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="accelerateConstruction('${key}')" class="px-3 py-2 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all btn-bounce ${accelBtnClass} flex items-center gap-1 self-end md:self-center">
+                        🚀 Acelerar: <span id="accel-cost-${key}">${accelCost}</span> <img src="seed_coin.png" class="w-3.5 h-3.5 object-contain inline-block -mt-0.5 ml-0.5">
+                    </button>
+                </div>
+            `;
+        }
         
         let bonusText = '';
         if (key === 'townHall') {
@@ -1605,6 +1770,38 @@ setInterval(() => {
                 collectBtn.disabled = Math.floor(unclaimedSeedsAccumulated) <= 0;
             }
         }
+    }
+    
+    // Verifica status de construção para cada prédio
+    let needsRender = false;
+    const now = Date.now();
+    for (let key in villageState.buildings) {
+        const b = villageState.buildings[key];
+        if (b.underConstruction) {
+            if (now >= b.constructionEnd) {
+                b.underConstruction = false;
+                b.level += 1;
+                b.constructionStart = null;
+                b.constructionEnd = null;
+                playSound('levelup');
+                showToast(`Construção concluída: ${b.name} evoluído para Lvl ${b.level}! 🛠️`, "🎉");
+                needsRender = true;
+            } else {
+                // Rotaciona frase a cada 12 segundos
+                if (!b.lastPhraseChange || now - b.lastPhraseChange > 12000) {
+                    b.currentPhrase = getRandomConstructionPhrase(key);
+                    b.lastPhraseChange = now;
+                }
+                updateConstructionDOM(key);
+            }
+        }
+    }
+    
+    if (needsRender) {
+        villageState.lastClaimTime = now;
+        villageState.unclaimedSeeds = unclaimedSeedsAccumulated;
+        localStorage.setItem('capy_village_state', JSON.stringify(villageState));
+        renderApp();
     }
 }, 1000);
 
