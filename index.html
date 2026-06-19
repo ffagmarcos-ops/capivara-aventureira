@@ -255,7 +255,7 @@
         <!-- ECO-VILA DAS CAPIVARAS -->
         <section id="vilaView" class="hidden space-y-6 pb-10">
             <!-- Mapa Visual Interativo da Vila -->
-            <div class="relative w-full aspect-[9/16] max-h-[500px] rounded-[3rem] overflow-hidden border-4 border-amber-950/20 shadow-xl bg-[#2e5c1e] flex flex-col justify-between p-6">
+            <div id="villageMapContainer" class="relative w-full aspect-[9/16] max-h-[500px] rounded-[3rem] overflow-hidden border-4 border-amber-950/20 shadow-xl bg-[#2e5c1e] flex flex-col justify-between p-6">
                 <!-- Imagem de Fundo (Vila sem prédios) -->
                 <img id="villageBg" src="capy_village_empty.png" class="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none select-none">
                 
@@ -284,6 +284,27 @@
                     <span class="wind-leaf leaf-2">🍃</span>
                     <span class="wind-leaf leaf-3">🍃</span>
                     <span class="wind-leaf leaf-4">🍃</span>
+
+                    <!-- Borboletas coloridas flutuando -->
+                    <span class="village-butterfly bf-1">🦋</span>
+                    <span class="village-butterfly bf-2">🦋</span>
+                    <span class="village-butterfly bf-3">🦋</span>
+                    
+                    <!-- Peixes saltitantes no rio -->
+                    <span class="jumping-fish fish-1">🐟</span>
+                    <span class="jumping-fish fish-2">🐟</span>
+                    
+                    <!-- Vaga-lumes brilhantes na mata -->
+                    <div class="village-firefly ffy-1"></div>
+                    <div class="village-firefly ffy-2"></div>
+                    <div class="village-firefly ffy-3"></div>
+                    <div class="village-firefly ffy-4"></div>
+                    
+                    <!-- Fumaça das chaminés -->
+                    <span class="chimney-smoke smoke-th1">💨</span>
+                    <span class="chimney-smoke smoke-th2">💨</span>
+                    <span class="chimney-smoke smoke-dk1">💨</span>
+                    <span class="chimney-smoke smoke-dk2">💨</span>
                 </div>
                 
                 <!-- Camadas dos Prédios (Sobrepostos) -->
@@ -305,9 +326,14 @@
                 <!-- Info overlays no topo do mapa -->
                 <div class="relative z-20 flex justify-between items-center pointer-events-none w-full">
                     <span class="bg-amber-500/95 text-amber-950 font-black px-3 py-1 rounded-full text-[10px] tracking-wider uppercase border border-amber-300 shadow pointer-events-auto">Vila das Capivaras</span>
-                    <button onclick="toggleVillageAmbient()" id="btnAmbientSound" class="w-8 h-8 rounded-full bg-white/90 hover:bg-white text-green-800 border border-green-200 shadow flex items-center justify-center transition-all pointer-events-auto" title="Som Ambiente">
-                        <i class="fas fa-volume-mute text-xs"></i>
-                    </button>
+                    <div class="flex items-center gap-2 pointer-events-auto">
+                        <button onclick="toggleFullscreenMap()" id="btnFullscreenMap" class="w-8 h-8 rounded-full bg-white/90 hover:bg-white text-green-800 border border-green-200 shadow flex items-center justify-center transition-all" title="Tela Cheia">
+                            <i class="fas fa-expand text-xs"></i>
+                        </button>
+                        <button onclick="toggleVillageAmbient()" id="btnAmbientSound" class="w-8 h-8 rounded-full bg-white/90 hover:bg-white text-green-800 border border-green-200 shadow flex items-center justify-center transition-all" title="Som Ambiente">
+                            <i class="fas fa-volume-mute text-xs"></i>
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="relative z-20 bg-gradient-to-t from-black/80 to-transparent p-4 -mx-6 -mb-6 pointer-events-none rounded-b-[2.5rem]">

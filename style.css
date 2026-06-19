@@ -392,6 +392,92 @@ body.night-mode .bg-blue-50, body.night-mode .bg-amber-50, body.night-mode .bg-p
     100% { transform: translate(220px, 480px) rotate(480deg) scale(0.6); opacity: 0; }
 }
 
+/* 5. Borboletas flutuantes (perto da horta/flores) */
+.village-butterfly {
+    position: absolute;
+    font-size: 11px;
+    pointer-events: none;
+    z-index: 10;
+    opacity: 0.85;
+    animation: butterflyFlutter 6s infinite ease-in-out;
+}
+.bf-1 { left: 22%; top: 46%; animation-delay: 0s; }
+.bf-2 { left: 16%; top: 52%; animation-delay: 1.5s; animation-duration: 7s; }
+.bf-3 { left: 28%; top: 50%; animation-delay: 3s; animation-duration: 5s; }
+
+@keyframes butterflyFlutter {
+    0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+    25% { transform: translate(12px, -15px) scale(0.9) rotate(20deg); }
+    50% { transform: translate(6px, -28px) scale(1.1) rotate(-15deg); }
+    75% { transform: translate(-8px, -12px) scale(0.85) rotate(10deg); }
+}
+
+/* 6. Peixes pulando no rio (perto das docas) */
+.jumping-fish {
+    position: absolute;
+    font-size: 12px;
+    pointer-events: none;
+    z-index: 9;
+    opacity: 0;
+    animation: fishJump 8s infinite ease-in-out;
+}
+.fish-1 { left: 74%; top: 62%; animation-delay: 0s; }
+.fish-2 { left: 64%; top: 72%; animation-delay: 3.5s; animation-duration: 9s; }
+
+@keyframes fishJump {
+    0%, 90%, 100% { transform: translate(0, 0) scale(0) rotate(-45deg); opacity: 0; }
+    92% { transform: translate(-8px, -16px) scale(1) rotate(-20deg); opacity: 1; }
+    94% { transform: translate(-16px, -22px) scale(1) rotate(10deg); opacity: 1; }
+    96% { transform: translate(-24px, -10px) scale(0.8) rotate(45deg); opacity: 0.8; }
+    98%, 100% { transform: translate(-30px, 0) scale(0) rotate(90deg); opacity: 0; }
+}
+
+/* 7. Vaga-lumes brilhando (perto do Lab/mata) */
+.village-firefly {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #fef08a;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #facc15, 0 0 16px #fbbf24;
+    pointer-events: none;
+    z-index: 10;
+    opacity: 0;
+    animation: fireflyFloat 5s infinite ease-in-out;
+}
+.ffy-1 { left: 66%; top: 32%; animation-delay: 0s; }
+.ffy-2 { left: 72%; top: 28%; animation-delay: 1.2s; }
+.ffy-3 { left: 12%; top: 40%; animation-delay: 2.5s; }
+.ffy-4 { left: 88%; top: 22%; animation-delay: 3.7s; }
+
+@keyframes fireflyFloat {
+    0%, 100% { transform: translate(0, 0); opacity: 0; }
+    30% { opacity: 0.9; }
+    70% { opacity: 0.8; transform: translate(12px, -20px); }
+    90% { opacity: 0; }
+}
+
+/* 8. Fumaça subindo das chaminés (Prefeitura e Docas) */
+.chimney-smoke {
+    position: absolute;
+    font-size: 8px;
+    color: rgba(240, 240, 240, 0.6);
+    pointer-events: none;
+    z-index: 11;
+    opacity: 0;
+    animation: smokeRise 4s infinite ease-out;
+}
+.smoke-th1 { left: 47.5%; top: 15%; animation-delay: 0s; }
+.smoke-th2 { left: 47.5%; top: 15%; animation-delay: 2s; }
+.smoke-dk1 { left: 75.5%; top: 42%; animation-delay: 0.5s; }
+.smoke-dk2 { left: 75.5%; top: 42%; animation-delay: 2.5s; }
+
+@keyframes smokeRise {
+    0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
+    15% { opacity: 0.5; }
+    100% { transform: translate(-15px, -35px) scale(2.2); opacity: 0; filter: blur(1px); }
+}
+
 /* ==========================================================================
    SISTEMA DE ALINHAMENTO E ESCALA DOS ACESSÓRIOS DO MASCOTE
    ========================================================================== */
@@ -546,5 +632,39 @@ body.night-mode .bg-blue-50, body.night-mode .bg-amber-50, body.night-mode .bg-p
     50% { transform: translateY(0) scaleY(0.94); }
     100% { transform: translateY(0) scaleY(1); }
 }
+
+/* Fullscreen mode for the Village Map Container */
+#villageMapContainer.map-fullscreen {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: min(100vw, 56.25vh) !important; /* Preserves 9:16 aspect ratio */
+    height: min(177.78vw, 100vh) !important;
+    max-height: 100vh !important;
+    max-width: 100vw !important;
+    aspect-ratio: 9/16 !important;
+    z-index: 9999 !important;
+    border-radius: 0 !important;
+    border: none !important;
+    margin: 0 !important;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.85) !important;
+}
+
+/* Blurred dark backdrop for the fullscreen map */
+#villageMapContainer.map-fullscreen::before {
+    content: "";
+    position: fixed;
+    top: -100vh;
+    left: -100vw;
+    width: 300vw;
+    height: 300vh;
+    background: rgba(13, 26, 9, 0.85);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    z-index: -1;
+    pointer-events: none;
+}
+
 
 

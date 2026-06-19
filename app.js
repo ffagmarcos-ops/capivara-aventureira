@@ -1843,10 +1843,15 @@ function renderVillage() {
             if (b.underConstruction) {
                 imgSrc = 'bld_scaffolding.png';
             } else {
-                // Como Horta, Docas, Lab e Torre não têm artes próprias do Lvl 4 ao 10,
-                // limitamos seus sprites ao Lvl 3 (fallback automático para Lvl >= 3).
-                // A prefeitura (townHall) possui artes específicas do Lvl 1 ao 10.
-                let maxSpriteLvl = (key === 'townHall') ? 10 : 3;
+                // Dicionário com o nível máximo de arte disponível para cada prédio
+                const maxAvailableLvl = {
+                    townHall: 10,
+                    farm: 10,
+                    docks: 10,
+                    lab: 6,
+                    tower: 3
+                };
+                let maxSpriteLvl = maxAvailableLvl[key] || 3;
                 let spriteLvl = Math.min(maxSpriteLvl, b.level);
                 if (spriteLvl === 0) {
                     imgSrc = 'bld_scaffolding.png';
@@ -2135,6 +2140,39 @@ function updateAmbientSoundButton() {
     }
 }
 
+function toggleFullscreenMap() {
+    playSound('click');
+    const container = document.getElementById('villageMapContainer');
+    const btn = document.getElementById('btnFullscreenMap');
+    if (!container || !btn) return;
+    
+    const isFullscreen = container.classList.toggle('map-fullscreen');
+    
+    if (isFullscreen) {
+        btn.innerHTML = `<i class="fas fa-compress text-xs text-green-600 animate-pulse"></i>`;
+        btn.classList.add('bg-green-50', 'border-green-300');
+        btn.classList.remove('bg-white/90', 'border-green-200');
+        
+        window.addEventListener('keydown', handleMapFullscreenEscape);
+        showToast("Modo Tela Cheia ativado! Pressione ESC para sair.", "🖥️");
+    } else {
+        btn.innerHTML = `<i class="fas fa-expand text-xs"></i>`;
+        btn.classList.remove('bg-green-50', 'border-green-300');
+        btn.classList.add('bg-white/90', 'border-green-200');
+        
+        window.removeEventListener('keydown', handleMapFullscreenEscape);
+    }
+}
+
+function handleMapFullscreenEscape(e) {
+    if (e.key === 'Escape') {
+        const container = document.getElementById('villageMapContainer');
+        if (container && container.classList.contains('map-fullscreen')) {
+            toggleFullscreenMap();
+        }
+    }
+}
+
 function showView(view) {
     playSound('click');
     document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
@@ -2149,6 +2187,10 @@ function showView(view) {
     } else {
         stopVillageAmbient();
         stopVillageNPCs();
+        const container = document.getElementById('villageMapContainer');
+        if (container && container.classList.contains('map-fullscreen')) {
+            toggleFullscreenMap();
+        }
     }
     
     const closetModal = document.getElementById('closetModal');
