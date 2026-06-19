@@ -1509,6 +1509,11 @@ function getAccelerationCost(b) {
 
 function upgradeBuilding(key) {
     const b = villageState.buildings[key];
+    if (b.level >= 10) {
+        playSound('error');
+        showToast("Esta construção já atingiu o nível máximo (10)!", "⚠️");
+        return;
+    }
     if (b.underConstruction) return;
     
     const cost = getBuildingUpgradeCost(key);
@@ -1838,7 +1843,8 @@ function renderVillage() {
             if (b.underConstruction) {
                 imgSrc = 'bld_scaffolding.png';
             } else {
-                let spriteLvl = Math.min(3, b.level);
+                let maxSpriteLvl = (key === 'townHall') ? 10 : 3;
+                let spriteLvl = Math.min(maxSpriteLvl, b.level);
                 if (spriteLvl === 0) {
                     imgSrc = 'bld_scaffolding.png';
                 } else {
@@ -1910,24 +1916,44 @@ function renderVillage() {
             bonusText = `Chance Raros: +${b.level * 5}%`;
         }
         
+        const isMaxLevel = b.level >= 10;
+        
         let nextBonusText = '';
         const nextLvl = b.level + 1;
-        if (key === 'townHall') {
-            nextBonusText = `Lvl ${nextLvl}: +${nextLvl * 5}%`;
-        } else if (key === 'farm') {
-            nextBonusText = `Lvl ${nextLvl}: +${nextLvl * 1} sementes/h`;
-        } else if (key === 'docks') {
-            nextBonusText = `Lvl ${nextLvl}: +${nextLvl * 3} sementes/h`;
-        } else if (key === 'lab') {
-            nextBonusText = `Lvl ${nextLvl}: +${nextLvl * 10}%`;
-        } else if (key === 'tower') {
-            nextBonusText = `Lvl ${nextLvl}: +${nextLvl * 5}%`;
+        if (isMaxLevel) {
+            nextBonusText = 'Nível Máximo';
+        } else {
+            if (key === 'townHall') {
+                nextBonusText = `Lvl ${nextLvl}: +${nextLvl * 5}%`;
+            } else if (key === 'farm') {
+                nextBonusText = `Lvl ${nextLvl}: +${nextLvl * 1} sementes/h`;
+            } else if (key === 'docks') {
+                nextBonusText = `Lvl ${nextLvl}: +${nextLvl * 3} sementes/h`;
+            } else if (key === 'lab') {
+                nextBonusText = `Lvl ${nextLvl}: +${nextLvl * 10}%`;
+            } else if (key === 'tower') {
+                nextBonusText = `Lvl ${nextLvl}: +${nextLvl * 5}%`;
+            }
         }
         
-        const btnClass = canAfford 
-            ? 'bg-green-600 hover:bg-green-700 text-white shadow-md cursor-pointer' 
-            : 'bg-gray-100 text-gray-400 cursor-not-allowed';
-            
+        let btnHtml = '';
+        if (isMaxLevel) {
+            btnHtml = `
+                <button disabled class="px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider bg-gray-100 text-gray-400 cursor-not-allowed flex items-center gap-1">
+                    MÁXIMO (10)
+                </button>
+            `;
+        } else {
+            const btnClass = canAfford 
+                ? 'bg-green-600 hover:bg-green-700 text-white shadow-md cursor-pointer' 
+                : 'bg-gray-100 text-gray-400 cursor-not-allowed';
+            btnHtml = `
+                <button onclick="upgradeBuilding('${key}')" class="px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all btn-bounce ${btnClass} flex items-center gap-1">
+                    Melhorar: ${cost} <img src="seed_coin.png" class="w-3.5 h-3.5 object-contain inline-block -mt-0.5 ml-0.5">
+                </button>
+            `;
+        }
+        
         return `
             <div id="card-${key}" class="building-card bg-white p-5 rounded-[2rem] shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all hover:shadow-md animate-fadeIn">
                 <div class="flex items-start gap-4">
@@ -1947,9 +1973,7 @@ function renderVillage() {
                         </div>
                     </div>
                 </div>
-                <button onclick="upgradeBuilding('${key}')" class="px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all btn-bounce ${btnClass} flex items-center gap-1">
-                    Melhorar: ${cost} <img src="seed_coin.png" class="w-3.5 h-3.5 object-contain inline-block -mt-0.5 ml-0.5">
-                </button>
+                ${btnHtml}
             </div>
         `;
     }).join('');
