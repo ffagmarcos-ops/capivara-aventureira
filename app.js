@@ -385,10 +385,11 @@ let audioCtx = null;
 let audioUnlocked = false;
 let soundMode = localStorage.getItem('capy_sound_mode') || 'both'; // 'both' ou 'sound'
 
-// Wardrobe procedural music sequencer variables
-let wardrobeMusicTimer = null;
-let wardrobeMusicStep = 0;
-let wardrobeMusicSynth = null; // Master GainNode
+// Procedural music sequencer variables (BGM)
+let bgmTimer = null;
+let bgmStep = 0;
+let bgmMasterGain = null;
+let currentTrackName = null;
 
 const missionsPool = [
     { id: 'm1', l: 'Missão Diária', d: 'Faça 1 descoberta hoje', check: () => animals.some(a => a.timestamp === new Date().toLocaleDateString('pt-BR')), reward: 15 },
@@ -427,7 +428,18 @@ function unlockAudio() {
         // Se o guarda-roupa estiver visível e a música ativada, toca a música
         const closetModal = document.getElementById('closetModal');
         if (closetModal && !closetModal.classList.contains('hidden')) {
-            startWardrobeMusic();
+            changeBgm('wardrobe');
+        } else {
+            let activeView = 'vila';
+            const views = ['home', 'lab', 'vila', 'games', 'album', 'badges'];
+            for (const v of views) {
+                const el = document.getElementById(v + 'View');
+                if (el && !el.classList.contains('hidden')) {
+                    activeView = v;
+                    break;
+                }
+            }
+            changeBgm(activeView);
         }
     } catch (e) {}
 }
@@ -439,11 +451,22 @@ function setSoundMode(mode) {
     updateSoundModeUI();
     
     if (mode === 'sound') {
-        stopWardrobeMusic();
+        stopBgm();
     } else {
         const closetModal = document.getElementById('closetModal');
         if (closetModal && !closetModal.classList.contains('hidden')) {
-            startWardrobeMusic();
+            changeBgm('wardrobe');
+        } else {
+            let activeView = 'vila';
+            const views = ['home', 'lab', 'vila', 'games', 'album', 'badges'];
+            for (const v of views) {
+                const el = document.getElementById(v + 'View');
+                if (el && !el.classList.contains('hidden')) {
+                    activeView = v;
+                    break;
+                }
+            }
+            changeBgm(activeView);
         }
     }
 }
@@ -462,39 +485,194 @@ function updateSoundModeUI() {
     }
 }
 
-function startWardrobeMusic() {
+const bgmTracksSpec = {
+    home: {
+        stepTime: 0.333, // 90 BPM (8th notes: 60 / 180)
+        bassNotes: [130.81, 164.81, 174.61, 196.00], // C3, E3, F3, G3
+        chordTones: [
+            [261.63, 329.63, 392.00, 493.88], // Cmaj7 (C4, E4, G4, B4)
+            [329.63, 392.00, 493.88, 587.33], // Em7 (E4, G4, B4, D5)
+            [349.23, 440.00, 523.25, 659.25], // Fmaj7 (F4, A4, C5, E5)
+            [392.00, 493.88, 587.33, 698.46]  // G7 (G4, B4, D5, F5)
+        ],
+        melodyScale: [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50], // C major pentatonic
+        bassOsc: 'triangle',
+        chordOsc: 'sine',
+        melodyOsc: 'sine',
+        masterVol: 0.15,
+        bassVol: 0.22,
+        chordVol: 0.15,
+        melodyVol: 0.08,
+        melodyChance: 0.45,
+        hasDelay: true
+    },
+    album: {
+        stepTime: 0.333,
+        bassNotes: [130.81, 164.81, 174.61, 196.00],
+        chordTones: [
+            [261.63, 329.63, 392.00, 493.88],
+            [329.63, 392.00, 493.88, 587.33],
+            [349.23, 440.00, 523.25, 659.25],
+            [392.00, 493.88, 587.33, 698.46]
+        ],
+        melodyScale: [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50],
+        bassOsc: 'triangle',
+        chordOsc: 'sine',
+        melodyOsc: 'sine',
+        masterVol: 0.15,
+        bassVol: 0.22,
+        chordVol: 0.15,
+        melodyVol: 0.08,
+        melodyChance: 0.45,
+        hasDelay: true
+    },
+    games: {
+        stepTime: 0.24, // 125 BPM (8th notes: 60 / 250)
+        bassNotes: [130.81, 110.00, 146.83, 98.00], // C3, A2, D3, G2
+        chordTones: [
+            [261.63, 329.63, 392.00, 523.25], // C major
+            [220.00, 261.63, 329.63, 440.00], // A minor
+            [146.83, 174.61, 220.00, 293.66], // D minor
+            [196.00, 246.94, 293.66, 392.00]  // G major
+        ],
+        melodyScale: [523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77, 1046.50], // C major scale
+        bassOsc: 'triangle',
+        chordOsc: 'triangle',
+        melodyOsc: 'square',
+        masterVol: 0.08,
+        bassVol: 0.18,
+        chordVol: 0.08,
+        melodyVol: 0.04,
+        melodyChance: 0.6,
+        hasDelay: false
+    },
+    lab: {
+        stepTime: 0.353, // 85 BPM (8th notes: 60 / 170)
+        bassNotes: [110.00, 146.83, 87.31, 82.41], // A2, D3, F2, E2
+        chordTones: [
+            [220.00, 261.63, 329.63, 493.88], // Am9
+            [293.66, 369.99, 440.00, 523.25, 659.25], // D9
+            [174.61, 220.00, 261.63, 329.63], // Fmaj7
+            [164.81, 220.00, 246.94, 293.66]  // E7sus4
+        ],
+        melodyScale: [440.00, 493.88, 523.25, 587.33, 659.25, 739.99, 783.99, 880.00], // A Dorian/Minor scale
+        bassOsc: 'sine',
+        chordOsc: 'sine',
+        melodyOsc: 'sine',
+        masterVol: 0.18,
+        bassVol: 0.24,
+        chordVol: 0.14,
+        melodyVol: 0.08,
+        melodyChance: 0.4,
+        hasDelay: true
+    },
+    badges: {
+        stepTime: 0.3, // 100 BPM (8th notes: 60 / 200)
+        bassNotes: [174.61, 196.00, 164.81, 220.00], // F3, G3, E3, A3
+        chordTones: [
+            [349.23, 440.00, 523.25, 659.25], // Fmaj7
+            [392.00, 493.88, 587.33, 659.25], // G6
+            [329.63, 392.00, 493.88, 587.33], // Em7
+            [220.00, 261.63, 329.63, 392.00]  // Am7
+        ],
+        melodyScale: [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50], // C major pentatonic
+        bassOsc: 'triangle',
+        chordOsc: 'sine',
+        melodyOsc: 'triangle',
+        masterVol: 0.16,
+        bassVol: 0.25,
+        chordVol: 0.16,
+        melodyVol: 0.09,
+        melodyChance: 0.5,
+        hasDelay: true
+    },
+    vila: {
+        stepTime: 0.272, // 110 BPM (8th notes: 60 / 220)
+        bassNotes: [98.00, 130.81, 110.00, 146.83], // G2, C3, A2, D3
+        chordTones: [
+            [196.00, 246.94, 293.66, 369.99], // Gmaj7
+            [261.63, 329.63, 392.00, 493.88], // Cmaj7
+            [220.00, 261.63, 329.63, 392.00], // Am7
+            [293.66, 369.99, 440.00, 523.25]  // D7
+        ],
+        melodyScale: [392.00, 440.00, 493.88, 587.33, 659.25, 783.99], // G major pentatonic
+        bassOsc: 'triangle',
+        chordOsc: 'sine',
+        melodyOsc: 'sine',
+        masterVol: 0.16,
+        bassVol: 0.24,
+        chordVol: 0.16,
+        melodyVol: 0.09,
+        melodyChance: 0.5,
+        hasDelay: true
+    },
+    wardrobe: {
+        stepTime: 0.22, // ~136 BPM
+        bassNotes: [130.81, 174.61, 196.00, 130.81],
+        chordTones: [
+            [261.63, 329.63, 392.00, 493.88], // Cmaj7
+            [349.23, 440.00, 523.25, 659.25], // Fmaj7
+            [392.00, 493.88, 587.33, 783.99], // G6/G5
+            [261.63, 329.63, 392.00, 493.88]  // Cmaj7
+        ],
+        melodyScale: [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50],
+        bassOsc: 'triangle',
+        chordOsc: 'sine',
+        melodyOsc: 'sine',
+        masterVol: 0.2,
+        bassVol: 0.28,
+        chordVol: 0.18,
+        melodyVol: 0.11,
+        melodyChance: 0.55,
+        hasDelay: true
+    }
+};
+
+function changeBgm(trackName) {
     try {
         if (!audioUnlocked) return;
         initAudio(); if (!audioCtx) return;
         if (soundMode !== 'both') return;
-        if (wardrobeMusicTimer) return;
+        if (currentTrackName === trackName && bgmTimer) return;
         
-        wardrobeMusicStep = 0;
+        // Se houver música tocando, fazer fade-out suave antes de remover
+        if (bgmMasterGain) {
+            const oldGain = bgmMasterGain;
+            try {
+                const now = audioCtx.currentTime;
+                oldGain.gain.setValueAtTime(oldGain.gain.value, now);
+                oldGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                setTimeout(() => {
+                    try { oldGain.disconnect(); } catch (e) {}
+                }, 500);
+            } catch (e) {}
+        }
         
-        // Notas baixas para cada acorde (C3, F3, G3, C3)
-        const bassNotes = [130.81, 174.61, 196.00, 130.81];
+        if (bgmTimer) {
+            clearInterval(bgmTimer);
+            bgmTimer = null;
+        }
         
-        // Acordes (Cmaj7, Fmaj7, G6, Cmaj7)
-        const chordTones = [
-            [261.63, 329.63, 392.00, 493.88], // C4, E4, G4, B4
-            [349.23, 440.00, 523.25, 659.25], // F4, A4, C5, E5
-            [392.00, 493.88, 587.33, 783.99], // G4, B4, D5, G5
-            [261.63, 329.63, 392.00, 493.88]  // C4, E4, G4, B4
-        ];
+        if (!trackName) {
+            currentTrackName = null;
+            bgmMasterGain = null;
+            return;
+        }
         
-        // Escala pentatônica para melodia (C5, D5, E5, G5, A5, C6)
-        const melodyScale = [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50];
+        currentTrackName = trackName;
+        const spec = bgmTracksSpec[trackName];
+        if (!spec) return;
         
-        const stepTime = 0.22; // ~136 BPM
+        bgmStep = 0;
         let nextNoteTime = audioCtx.currentTime;
         
-        const musicMasterGain = audioCtx.createGain();
-        musicMasterGain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-        musicMasterGain.connect(audioCtx.destination);
-        wardrobeMusicSynth = musicMasterGain;
+        bgmMasterGain = audioCtx.createGain();
+        bgmMasterGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+        bgmMasterGain.gain.linearRampToValueAtTime(spec.masterVol || 0.2, audioCtx.currentTime + 0.2);
+        bgmMasterGain.connect(audioCtx.destination);
         
         function playNote(freq, type, duration, vol, delay = 0) {
-            if (!audioCtx) return;
+            if (!audioCtx || !bgmMasterGain) return;
             const now = audioCtx.currentTime;
             
             const osc = audioCtx.createOscillator();
@@ -508,69 +686,71 @@ function startWardrobeMusic() {
             gainNode.gain.exponentialRampToValueAtTime(0.001, now + delay + duration);
             
             osc.connect(gainNode);
-            gainNode.connect(musicMasterGain);
+            gainNode.connect(bgmMasterGain);
             
             osc.start(now + delay);
             osc.stop(now + delay + duration);
         }
         
         function tick() {
-            if (!audioCtx) return;
+            if (!audioCtx || !bgmMasterGain) return;
             const now = audioCtx.currentTime;
             while (nextNoteTime < now + 0.1) {
-                const step = wardrobeMusicStep % 16;
-                const chordIdx = Math.floor((wardrobeMusicStep / 16) % 4);
+                const step = bgmStep % 16;
+                const chordIdx = Math.floor((bgmStep / 16) % 4);
                 
-                // 1. Baixo no step 0 de cada compasso (triangle quente)
+                // 1. Baixo
                 if (step === 0) {
-                    playNote(bassNotes[chordIdx], 'triangle', 3.0, 0.28, nextNoteTime - now);
+                    playNote(spec.bassNotes[chordIdx], spec.bassOsc, 3.0, spec.bassVol, nextNoteTime - now);
                 }
                 
-                // 2. Acorde arpejado fofo nos passos múltiplos de 4
+                // 2. Acorde arpejado
                 if (step % 4 === 0) {
-                    const notes = chordTones[chordIdx];
+                    const notes = spec.chordTones[chordIdx];
                     const note = notes[Math.floor(Math.random() * notes.length)];
-                    playNote(note, 'sine', 1.5, 0.18, nextNoteTime - now);
+                    playNote(note, spec.chordOsc, 1.5, spec.chordVol, nextNoteTime - now);
                 }
                 
-                // 3. Melodia lúdica aleatória nos passos ímpares
-                if (step % 2 !== 0 && Math.random() < 0.55) {
-                    const note = melodyScale[Math.floor(Math.random() * melodyScale.length)];
-                    playNote(note, 'sine', 0.45, 0.11, nextNoteTime - now);
-                    // Delay/Eco fofo
-                    playNote(note, 'sine', 0.35, 0.03, nextNoteTime - now + 0.22);
+                // 3. Melodia aleatória nos passos ímpares
+                if (step % 2 !== 0 && Math.random() < spec.melodyChance) {
+                    const note = spec.melodyScale[Math.floor(Math.random() * spec.melodyScale.length)];
+                    playNote(note, spec.melodyOsc, 0.45, spec.melodyVol, nextNoteTime - now);
+                    
+                    if (spec.hasDelay) {
+                        playNote(note, spec.melodyOsc, 0.35, spec.melodyVol * 0.3, nextNoteTime - now + spec.stepTime);
+                    }
                 }
                 
-                wardrobeMusicStep++;
-                nextNoteTime += stepTime;
+                bgmStep++;
+                nextNoteTime += spec.stepTime;
             }
         }
         
-        wardrobeMusicTimer = setInterval(tick, 50);
+        bgmTimer = setInterval(tick, 50);
     } catch (e) {
-        console.error("Erro na música do guarda-roupa:", e);
+        console.error("Erro na música procedural:", e);
     }
 }
 
-function stopWardrobeMusic() {
-    if (wardrobeMusicTimer) {
-        clearInterval(wardrobeMusicTimer);
-        wardrobeMusicTimer = null;
+function stopBgm() {
+    if (bgmTimer) {
+        clearInterval(bgmTimer);
+        bgmTimer = null;
     }
-    if (wardrobeMusicSynth) {
+    currentTrackName = null;
+    if (bgmMasterGain) {
         try {
             const now = audioCtx.currentTime;
-            wardrobeMusicSynth.gain.setValueAtTime(wardrobeMusicSynth.gain.value, now);
-            wardrobeMusicSynth.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+            bgmMasterGain.gain.setValueAtTime(bgmMasterGain.gain.value, now);
+            bgmMasterGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+            const oldGain = bgmMasterGain;
             setTimeout(() => {
                 try {
-                    wardrobeMusicSynth.disconnect();
+                    oldGain.disconnect();
                 } catch(e){}
-                wardrobeMusicSynth = null;
-            }, 600);
-        } catch(e) {
-            wardrobeMusicSynth = null;
-        }
+            }, 500);
+        } catch(e) {}
+        bgmMasterGain = null;
     }
 }
 
@@ -1005,8 +1185,27 @@ function answerQuiz(selected, correct) {
     } else { playSound('click'); showToast("Tente novamente!", "❌"); event.target.closest('button').classList.add('border-red-400', 'bg-red-50'); }
 }
 
-function openCloset() { playSound('click'); document.getElementById('closetModal').classList.remove('hidden'); renderCloset(); startWardrobeMusic(); }
-function closeCloset() { playSound('click'); document.getElementById('closetModal').classList.add('hidden'); stopWardrobeMusic(); }
+function openCloset() {
+    playSound('click');
+    document.getElementById('closetModal').classList.remove('hidden');
+    renderCloset();
+    changeBgm('wardrobe');
+}
+
+function closeCloset() {
+    playSound('click');
+    document.getElementById('closetModal').classList.add('hidden');
+    let activeView = 'vila';
+    const views = ['home', 'lab', 'vila', 'games', 'album', 'badges'];
+    for (const v of views) {
+        const el = document.getElementById(v + 'View');
+        if (el && !el.classList.contains('hidden')) {
+            activeView = v;
+            break;
+        }
+    }
+    changeBgm(activeView);
+}
 
 function renderCloset() {
     updateFullBodyVisuals();
@@ -1923,6 +2122,12 @@ function showView(view) {
     } else {
         stopVillageAmbient();
         stopVillageNPCs();
+    }
+    
+    const closetModal = document.getElementById('closetModal');
+    const closetOpen = closetModal && !closetModal.classList.contains('hidden');
+    if (!closetOpen) {
+        changeBgm(view);
     }
 }
 
