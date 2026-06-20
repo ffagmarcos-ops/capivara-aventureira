@@ -1888,6 +1888,7 @@ function startVillageNPCs() {
             } else {
                 npcEl.innerHTML = `
                     <div class="npc-nametag">${cfg.name} (${cfg.role})</div>
+                    <div class="npc-bubble"></div>
                     <div class="npc-sprite-container" style="transition: transform 0.2s;">
                         <img src="capy_npc_${cfg.color}_front.png" class="npc-sprite">
                     </div>
@@ -2041,8 +2042,8 @@ function startNPCBubbles() {
     stopNPCBubbles();
     // Primeiro balão após 5 segundos para testar fácil
     npcBubbleTimeoutId = setTimeout(triggerRandomNPCBubble, 5000);
-    // Intervalo de 2 minutos (120000ms)
-    npcBubbleIntervalId = setInterval(triggerRandomNPCBubble, 120000);
+    // Intervalo de 1 minuto (60000ms)
+    npcBubbleIntervalId = setInterval(triggerRandomNPCBubble, 60000);
 }
 
 function stopNPCBubbles() {
