@@ -12,6 +12,7 @@ const authRoutes = require('./routes/auth');
 const meRoutes = require('./routes/me');
 const animalsRoutes = require('./routes/animals');
 const accessoriesRoutes = require('./routes/accessories');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 
@@ -41,7 +42,7 @@ app.use(
     crossOriginResourcePolicy: false
   })
 );
-app.use(express.json({ limit: '2mb' }));
+app.use(express.json({ limit: '50mb' }));
 app.use(morgan('combined'));
 
 const apiLimiter = rateLimit({
@@ -69,6 +70,7 @@ app.use('/api', authRoutes);
 app.use('/api', meRoutes);
 app.use('/api', animalsRoutes);
 app.use('/api', accessoriesRoutes);
+app.use('/api', adminRoutes);
 
 const rootDir = path.resolve(process.cwd());
 app.use(express.static(rootDir));

@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - Capivara Aventureira</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Outfit & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #022c22 0%, #064e3b 50%, #0f172a 100%);
+        }
+        h1, h2, h3, .font-outfit {
+            font-family: 'Outfit', sans-serif;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(52, 211, 153, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -10px rgba(4, 120, 87, 0.5);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(52, 211, 153, 0.3);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(52, 211, 153, 0.5);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-100 antialiased p-4 sm:p-8">
+
+    <div class="max-w-7xl mx-auto space-y-8">
+        
+        <!-- Header -->
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6 glass-panel rounded-3xl shadow-2xl">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 bg-gradient-to-br from-emerald-400 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-950/50">
+                    <i class="fa-solid fa-user-gear text-2xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white">PAINEL ADMINISTRATIVO</h1>
+                    <p class="text-xs sm:text-sm text-emerald-400/80 font-medium">Substituição de assets visuais e configurações do jogo em tempo real</p>
+                </div>
+            </div>
+            
+            <a href="/" class="px-5 py-2.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-emerald-500/30 text-slate-300 hover:text-white flex items-center gap-2 transition-all text-sm font-semibold">
+                <i class="fa-solid fa-arrow-left"></i> Voltar ao Jogo
+            </a>
+        </header>
+
+        <!-- Stats overview -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
+                <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Total de Assets</span>
+                <span id="stat-total" class="text-3xl font-black text-white mt-2">-</span>
+            </div>
+            <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
+                <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Prédios</span>
+                <span id="stat-buildings" class="text-3xl font-black text-emerald-400 mt-2">-</span>
+            </div>
+            <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
+                <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Equipamentos</span>
+                <span id="stat-accessories" class="text-3xl font-black text-teal-400 mt-2">-</span>
+            </div>
+            <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
+                <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Personagens / NPCs</span>
+                <span id="stat-characters" class="text-3xl font-black text-amber-400 mt-2">-</span>
+            </div>
+        </div>
+
+        <!-- Main Workspace -->
+        <div class="glass-panel rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+            
+            <!-- Filters and search -->
+            <div class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+                <!-- Search -->
+                <div class="relative flex-1">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="search-input" placeholder="Pesquisar por nome ou caminho do asset..." 
+                           class="w-full bg-slate-950/60 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all">
+                </div>
+                
+                <!-- Category Tabs -->
+                <div class="flex overflow-x-auto gap-1.5 p-1 bg-slate-950/50 rounded-2xl border border-white/5 self-start md:self-auto shrink-0">
+                    <button onclick="switchTab('all')" id="tab-all" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all bg-emerald-600 text-white shadow-sm">Todos</button>
+                    <button onclick="switchTab('buildings')" id="tab-buildings" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white">Prédios</button>
+                    <button onclick="switchTab('accessories')" id="tab-accessories" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white">Equipamentos</button>
+                    <button onclick="switchTab('characters')" id="tab-characters" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white">Personagens</button>
+                    <button onclick="switchTab('ui')" id="tab-ui" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white">Gerais / UI</button>
+                </div>
+            </div>
+
+            <!-- Loader -->
+            <div id="loader" class="flex flex-col items-center justify-center py-20 space-y-4">
+                <i class="fa-solid fa-spinner-third animate-spin text-4xl text-emerald-400"></i>
+                <p class="text-sm text-slate-400">Buscando assets no servidor...</p>
+            </div>
+
+            <!-- Assets Grid -->
+            <div id="assets-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 hidden">
+                <!-- Cards will be dynamically inserted here -->
+            </div>
+            
+            <!-- Empty state -->
+            <div id="empty-state" class="hidden text-center py-20 space-y-4">
+                <i class="fa-solid fa-folder-open text-5xl text-slate-600"></i>
+                <h3 class="text-lg font-bold text-slate-400">Nenhum asset encontrado</h3>
+                <p class="text-xs text-slate-500 max-w-md mx-auto">Não encontramos arquivos com o filtro pesquisado. Tente buscar por outros termos.</p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Upload Overlay Modal -->
+    <div id="upload-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+        <div class="w-full max-w-lg glass-panel rounded-3xl p-6 sm:p-8 shadow-2xl relative space-y-6 transform scale-95 transition-transform duration-300">
+            <!-- Close -->
+            <button onclick="closeModal()" class="absolute right-6 top-6 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-all">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div>
+                <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Substituir Asset</span>
+                <h2 id="modal-title" class="text-2xl font-black text-white mt-1">Carregar Nova Imagem</h2>
+                <p id="modal-filepath" class="text-xs text-slate-400 font-mono mt-1 break-all bg-slate-950/40 p-2 rounded-lg border border-white/5"></p>
+            </div>
+
+            <!-- Preview panel comparison -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="p-3 bg-slate-950/40 rounded-2xl border border-white/5 flex flex-col items-center justify-center">
+                    <span class="text-[9px] text-slate-500 font-bold uppercase mb-2">Atual</span>
+                    <div class="w-24 h-24 flex items-center justify-center bg-slate-950/20 rounded-xl overflow-hidden border border-white/5 p-2">
+                        <img id="modal-img-current" class="max-w-full max-h-full object-contain" src="">
+                    </div>
+                </div>
+                <div class="p-3 bg-slate-950/40 rounded-2xl border border-white/5 flex flex-col items-center justify-center">
+                    <span class="text-[9px] text-emerald-400 font-bold uppercase mb-2">Novo</span>
+                    <div class="w-24 h-24 flex items-center justify-center bg-slate-950/20 rounded-xl overflow-hidden border border-emerald-500/10 border-dashed p-2">
+                        <img id="modal-img-new" class="max-w-full max-h-full object-contain hidden" src="">
+                        <i id="modal-img-placeholder" class="fa-solid fa-image text-3xl text-slate-700"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload Forms -->
+            <div class="space-y-4">
+                <!-- Image Input -->
+                <div class="space-y-2">
+                    <label class="block text-xs text-slate-400 font-bold uppercase">Arquivo de Imagem (PNG/WebP)</label>
+                    <div class="relative">
+                        <input type="file" id="image-file-input" accept="image/*" onchange="previewNewImage(this)"
+                               class="hidden">
+                        <button onclick="document.getElementById('image-file-input').click()" 
+                                class="w-full py-3 px-4 bg-slate-900 border border-white/10 hover:border-emerald-500/30 rounded-2xl text-slate-300 hover:text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all">
+                            <i class="fa-solid fa-cloud-arrow-up text-emerald-400"></i> Escolher Imagem
+                        </button>
+                        <p id="image-filename" class="text-[10px] text-slate-400 mt-1.5 text-center font-medium"></p>
+                    </div>
+                </div>
+
+                <!-- Companion JSON Input (spritesheet animations) -->
+                <div id="json-upload-section" class="space-y-2 hidden border-t border-white/5 pt-4">
+                    <div class="flex items-center justify-between">
+                        <label class="block text-xs text-slate-400 font-bold uppercase">Animação JSON Associada (Opcional)</label>
+                        <span class="bg-amber-500/20 text-amber-300 text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider">Spritesheet</span>
+                    </div>
+                    <p class="text-[10px] text-slate-500">Se este spritesheet requer um arquivo de coordenadas `.json` atualizado, faça o upload dele aqui.</p>
+                    <div class="relative">
+                        <input type="file" id="json-file-input" accept=".json" onchange="previewNewJson(this)"
+                               class="hidden">
+                        <button onclick="document.getElementById('json-file-input').click()" 
+                                class="w-full py-3 px-4 bg-slate-900 border border-white/10 hover:border-amber-500/30 rounded-2xl text-slate-300 hover:text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all">
+                            <i class="fa-solid fa-file-code text-amber-400"></i> Escolher JSON (.json)
+                        </button>
+                        <p id="json-filename" class="text-[10px] text-slate-400 mt-1.5 text-center font-medium"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="flex gap-4 pt-2">
+                <button onclick="closeModal()" 
+                        class="flex-1 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white rounded-2xl font-bold transition-all text-sm">
+                    Cancelar
+                </button>
+                <button onclick="submitUpload()" id="btn-save-upload" disabled
+                        class="flex-1 py-3 bg-emerald-600 disabled:bg-slate-800 hover:bg-emerald-500 disabled:text-slate-500 text-white rounded-2xl font-bold transition-all text-sm shadow-lg shadow-emerald-950/20 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-check"></i> Salvar e Atualizar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3"></div>
+
+    <script>
+        let allFiles = [];
+        let filteredFiles = [];
+        let currentTab = 'all';
+        let selectedFile = null;
+        let selectedImageBase64 = null;
+        let selectedJsonBase64 = null;
+        let selectedJsonText = null;
+
+        // Fetch files on load
+        window.addEventListener('DOMContentLoaded', fetchFiles);
+
+        async function fetchFiles() {
+            showLoader(true);
+            try {
+                const response = await fetch('/api/admin/files');
+                const data = await response.json();
+                if (data.files) {
+                    allFiles = data.files;
+                    updateStats();
+                    applyFilterAndSearch();
+                }
+            } catch (err) {
+                showToast('Erro ao buscar arquivos no servidor', 'error');
+                console.error(err);
+            } finally {
+                showLoader(false);
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('stat-total').innerText = allFiles.length;
+            
+            const buildingsCount = allFiles.filter(f => f.path.includes('bld_')).length;
+            document.getElementById('stat-buildings').innerText = buildingsCount;
+            
+            const accCount = allFiles.filter(f => f.path.includes('acc_')).length;
+            document.getElementById('stat-accessories').innerText = accCount;
+            
+            const charactersCount = allFiles.filter(f => 
+                f.path.includes('capy_npc_') || 
+                f.path.includes('capybara_adventurer') || 
+                f.path.includes('avatar') || 
+                f.path.includes('mascot')
+            ).length;
+            document.getElementById('stat-characters').innerText = charactersCount;
+        }
+
+        // Handle tabs
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // Update active state in UI
+            const tabs = ['all', 'buildings', 'accessories', 'characters', 'ui'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === tab) {
+                    btn.className = "px-4 py-2 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all bg-emerald-600 text-white shadow-sm";
+                } else {
+                    btn.className = "px-4 py-2 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white";
+                }
+            });
+
+            applyFilterAndSearch();
+        }
+
+        // Apply filter + search
+        const searchInput = document.getElementById('search-input');
+        searchInput.addEventListener('input', applyFilterAndSearch);
+
+        function applyFilterAndSearch() {
+            const query = searchInput.value.toLowerCase().trim();
+            
+            filteredFiles = allFiles.filter(file => {
+                // Ignore raw json files in listing unless they are companion scripts, or let's show them?
+                // It is better to filter out JSON files from cards directly, since they will be uploaded alongside their images!
+                // This keeps the panel clean and focused on images.
+                if (file.path.endsWith('.json')) return false;
+
+                // Tab filter
+                if (currentTab === 'buildings' && !file.path.includes('bld_')) return false;
+                if (currentTab === 'accessories' && !file.path.includes('acc_')) return false;
+                if (currentTab === 'characters' && !(
+                    file.path.includes('capy_npc_') || 
+                    file.path.includes('capybara_adventurer') || 
+                    file.path.includes('avatar') || 
+                    file.path.includes('mascot')
+                )) return false;
+                if (currentTab === 'ui' && (
+                    file.path.includes('bld_') || 
+                    file.path.includes('acc_') || 
+                    file.path.includes('capy_npc_') || 
+                    file.path.includes('capybara_adventurer')
+                )) return false;
+
+                // Search query filter
+                if (query) {
+                    return file.path.toLowerCase().includes(query) || file.name.toLowerCase().includes(query);
+                }
+
+                return true;
+            });
+
+            renderGrid();
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('assets-grid');
+            const emptyState = document.getElementById('empty-state');
+            
+            grid.innerHTML = '';
+            
+            if (filteredFiles.length === 0) {
+                grid.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            grid.classList.remove('hidden');
+
+            filteredFiles.forEach(file => {
+                const card = document.createElement('div');
+                card.className = "glass-card rounded-2xl p-4 flex flex-col justify-between space-y-4";
+                
+                // Format size
+                const sizeKb = (file.sizeBytes / 1024).toFixed(1);
+                
+                // Categorize tag
+                let tagText = "Geral";
+                let tagClass = "bg-slate-500/20 text-slate-400";
+                if (file.path.includes('bld_')) {
+                    tagText = "Prédio";
+                    tagClass = "bg-emerald-500/20 text-emerald-400";
+                } else if (file.path.includes('acc_')) {
+                    tagText = "Equipamento";
+                    tagClass = "bg-teal-500/20 text-teal-400";
+                } else if (file.path.includes('capy_npc_') || file.path.includes('capybara_adventurer')) {
+                    tagText = "NPC";
+                    tagClass = "bg-amber-500/20 text-amber-400";
+                }
+
+                card.innerHTML = `
+                    <div class="space-y-3">
+                        <!-- Image Preview Box -->
+                        <div class="aspect-square w-full bg-slate-950/60 rounded-xl overflow-hidden flex items-center justify-center p-3 border border-white/5 relative group">
+                            <img class="max-w-full max-h-full object-contain drop-shadow-[0_4px_6px_rgba(0,0,0,0.5)] transition-transform duration-300 group-hover:scale-110" 
+                                 src="${file.path}?t=${new Date(file.mtime).getTime()}" alt="${file.name}">
+                            <span class="absolute top-2 left-2 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${tagClass}">
+                                ${tagText}
+                            </span>
+                        </div>
+                        
+                        <!-- File Details -->
+                        <div class="space-y-1">
+                            <h3 class="text-xs font-bold font-mono text-slate-300 truncate" title="${file.path}">${file.path}</h3>
+                            <div class="flex justify-between items-center text-[10px] text-slate-500 font-semibold">
+                                <span>Tamanho: ${sizeKb} KB</span>
+                                <span>Tipo: ${file.path.split('.').pop().toUpperCase()}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action -->
+                    <button onclick="openUploadModal('${file.path}')" 
+                            class="w-full py-2 bg-emerald-600/10 hover:bg-emerald-600 border border-emerald-500/20 hover:border-emerald-500 text-emerald-400 hover:text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-pen-to-square"></i> Substituir
+                    </button>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        // Open Upload Modal
+        function openUploadModal(filePath) {
+            selectedFile = allFiles.find(f => f.path === filePath);
+            if (!selectedFile) return;
+
+            selectedImageBase64 = null;
+            selectedJsonBase64 = null;
+            selectedJsonText = null;
+
+            document.getElementById('image-file-input').value = '';
+            document.getElementById('json-file-input').value = '';
+            document.getElementById('image-filename').innerText = '';
+            document.getElementById('json-filename').innerText = '';
+            
+            document.getElementById('modal-img-new').classList.add('hidden');
+            document.getElementById('modal-img-placeholder').classList.remove('hidden');
+            document.getElementById('btn-save-upload').disabled = true;
+
+            // Setup current image preview
+            const currentImg = document.getElementById('modal-img-current');
+            currentImg.src = `${selectedFile.path}?t=${new Date().getTime()}`;
+            
+            document.getElementById('modal-filepath').innerText = selectedFile.path;
+
+            // Setup spritesheet companion json section
+            const jsonSection = document.getElementById('json-upload-section');
+            if (filePath.includes('capybara_adventurer') || filePath.includes('atlas.webp')) {
+                jsonSection.classList.remove('hidden');
+            } else {
+                jsonSection.classList.add('hidden');
+            }
+
+            const modal = document.getElementById('upload-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.querySelector('div').classList.remove('scale-95');
+            }, 50);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('upload-modal');
+            modal.classList.add('opacity-0');
+            modal.querySelector('div').classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // Preview local uploaded image
+        function previewNewImage(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            document.getElementById('image-filename').innerText = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Content = e.target.result;
+                selectedImageBase64 = base64Content.split(',')[1]; // Strip prefix data:*/*;base64,
+
+                const previewImg = document.getElementById('modal-img-new');
+                previewImg.src = base64Content;
+                previewImg.classList.remove('hidden');
+                document.getElementById('modal-img-placeholder').classList.add('hidden');
+                
+                checkReadyToSave();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Preview local uploaded JSON
+        function previewNewJson(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            document.getElementById('json-filename').innerText = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Content = e.target.result;
+                selectedJsonBase64 = base64Content.split(',')[1];
+                
+                try {
+                    // Try parsing as raw text to check validation
+                    const text = atob(selectedJsonBase64);
+                    JSON.parse(text); // Check valid JSON syntax
+                    selectedJsonText = text;
+                } catch (e) {
+                    showToast('Arquivo JSON inválido!', 'error');
+                    input.value = '';
+                    document.getElementById('json-filename').innerText = '';
+                    selectedJsonBase64 = null;
+                    selectedJsonText = null;
+                }
+                
+                checkReadyToSave();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function checkReadyToSave() {
+            const btn = document.getElementById('btn-save-upload');
+            if (selectedImageBase64) {
+                btn.disabled = false;
+            } else {
+                btn.disabled = true;
+            }
+        }
+
+        // Submit the replacement to backend API
+        async function submitUpload() {
+            if (!selectedFile || !selectedImageBase64) return;
+            
+            const btn = document.getElementById('btn-save-upload');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Enviando...`;
+
+            // Prepare payload
+            const payload = {
+                filePath: selectedFile.path,
+                fileData: selectedImageBase64
+            };
+
+            // Include companion JSON if uploader has it
+            if (selectedFile.path.includes('capybara_adventurer') || selectedFile.path.includes('atlas.webp')) {
+                if (selectedJsonBase64) {
+                    // Assume atlas.json in the same folder
+                    const parts = selectedFile.path.split('/');
+                    parts.pop(); // Remove atlas.webp
+                    payload.jsonPath = [...parts, 'atlas.json'].join('/');
+                    payload.jsonData = selectedJsonBase64;
+                }
+            }
+
+            try {
+                const response = await fetch('/api/admin/upload', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    showToast('Asset atualizado com sucesso! O cache do PWA foi invalidado.', 'success');
+                    closeModal();
+                    
+                    // Reload file list from server to show updated modification dates/sizes
+                    fetchFiles();
+                } else {
+                    showToast('Erro ao salvar asset: ' + data.error, 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-solid fa-check"></i> Salvar e Atualizar`;
+                }
+            } catch (err) {
+                showToast('Erro de conexão com o servidor', 'error');
+                console.error(err);
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-check"></i> Salvar e Atualizar`;
+            }
+        }
+
+        // UI Load helpers
+        function showLoader(show) {
+            const loader = document.getElementById('loader');
+            const grid = document.getElementById('assets-grid');
+            if (show) {
+                loader.classList.remove('hidden');
+                grid.classList.add('hidden');
+            } else {
+                loader.classList.add('hidden');
+                grid.classList.remove('hidden');
+            }
+        }
+
+        // Toast notifications system
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const colorClass = type === 'success' ? 'bg-emerald-600 border-emerald-500 shadow-emerald-950/20' : 'bg-red-600 border-red-500 shadow-red-950/20';
+            const icon = type === 'success' ? 'fa-circle-check' : 'fa-triangle-exclamation';
+            
+            toast.className = `${colorClass} border px-4 py-3 rounded-2xl text-white text-xs sm:text-sm font-semibold flex items-center gap-3 shadow-xl transform translate-y-2 opacity-0 transition-all duration-300`;
+            toast.innerHTML = `
+                <i class="fa-solid ${icon} text-lg"></i>
+                <span>${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 50);
+
+            // Dismiss
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 4000);
+        }
+    </script>
+</body>
+</html>
