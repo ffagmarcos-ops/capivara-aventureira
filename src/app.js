@@ -55,7 +55,13 @@ const apiLimiter = rateLimit({
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || env.corsOrigins.includes('*') || env.corsOrigins.includes(origin)) {
+      if (
+        !origin || 
+        env.corsOrigins.includes('*') || 
+        env.corsOrigins.includes(origin) || 
+        origin.includes('localhost') || 
+        origin.includes('127.0.0.1')
+      ) {
         return callback(null, true);
       }
       return callback(new Error('CORS not allowed'));

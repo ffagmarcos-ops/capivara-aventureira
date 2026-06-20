@@ -232,13 +232,24 @@
         let selectedJsonBase64 = null;
         let selectedJsonText = null;
 
+        function getApiBase() {
+            if (window.location.protocol === 'file:') {
+                return 'http://127.0.0.1:3000';
+            }
+            const currentPort = window.location.port;
+            if (currentPort && currentPort !== '3000' && currentPort !== '8080') {
+                return 'http://127.0.0.1:3000';
+            }
+            return '';
+        }
+
         // Fetch files on load
         window.addEventListener('DOMContentLoaded', fetchFiles);
 
         async function fetchFiles() {
             showLoader(true);
             try {
-                const response = await fetch('/api/admin/files');
+                const response = await fetch(`${getApiBase()}/api/admin/files`);
                 const data = await response.json();
                 if (data.files) {
                     allFiles = data.files;
@@ -370,7 +381,7 @@
                         <!-- Image Preview Box -->
                         <div class="aspect-square w-full bg-slate-950/60 rounded-xl overflow-hidden flex items-center justify-center p-3 border border-white/5 relative group">
                             <img class="max-w-full max-h-full object-contain drop-shadow-[0_4px_6px_rgba(0,0,0,0.5)] transition-transform duration-300 group-hover:scale-110" 
-                                 src="${file.path}?t=${new Date(file.mtime).getTime()}" alt="${file.name}">
+                                 src="${getApiBase()}/${file.path}?t=${new Date(file.mtime).getTime()}" alt="${file.name}">
                             <span class="absolute top-2 left-2 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${tagClass}">
                                 ${tagText}
                             </span>
@@ -417,7 +428,7 @@
 
             // Setup current image preview
             const currentImg = document.getElementById('modal-img-current');
-            currentImg.src = `${selectedFile.path}?t=${new Date().getTime()}`;
+            currentImg.src = `${getApiBase()}/${selectedFile.path}?t=${new Date().getTime()}`;
             
             document.getElementById('modal-filepath').innerText = selectedFile.path;
 
@@ -533,7 +544,7 @@
             }
 
             try {
-                const response = await fetch('/api/admin/upload', {
+                const response = await fetch(`${getApiBase()}/api/admin/upload`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
