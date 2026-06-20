@@ -67,7 +67,7 @@
                 </div>
                 <div>
                     <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white">PAINEL ADMINISTRATIVO</h1>
-                    <p class="text-xs sm:text-sm text-emerald-400/80 font-medium">Substituição de assets visuais e configurações do jogo em tempo real</p>
+                    <p class="text-xs sm:text-sm text-emerald-400/80 font-medium">Controle total de usuários, música procedural, NPCs e assets do jogo</p>
                 </div>
             </div>
             
@@ -76,85 +76,337 @@
             </a>
         </header>
 
-        <!-- Stats overview -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
-                <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Total de Assets</span>
-                <span id="stat-total" class="text-3xl font-black text-white mt-2">-</span>
-            </div>
-            <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
-                <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Prédios</span>
-                <span id="stat-buildings" class="text-3xl font-black text-emerald-400 mt-2">-</span>
-            </div>
-            <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
-                <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Equipamentos</span>
-                <span id="stat-accessories" class="text-3xl font-black text-teal-400 mt-2">-</span>
-            </div>
-            <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
-                <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Personagens / NPCs</span>
-                <span id="stat-characters" class="text-3xl font-black text-amber-400 mt-2">-</span>
-            </div>
+        <!-- Main Navigation Tabs -->
+        <div class="flex flex-wrap gap-2 p-1.5 bg-slate-950/60 border border-white/5 rounded-3xl self-start">
+            <button onclick="switchMainTab('assets')" id="main-tab-assets" class="px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all bg-emerald-600 text-white shadow-lg shadow-emerald-950/20">
+                <i class="fa-solid fa-folder-open mr-2"></i> Assets Visuais
+            </button>
+            <button onclick="switchMainTab('users')" id="main-tab-users" class="px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white hover:bg-white/5">
+                <i class="fa-solid fa-users mr-2"></i> Estatísticas & Usuários
+            </button>
+            <button onclick="switchMainTab('bgm')" id="main-tab-bgm" class="px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white hover:bg-white/5">
+                <i class="fa-solid fa-music mr-2"></i> Música & Sons (BGM)
+            </button>
+            <button onclick="switchMainTab('npcs')" id="main-tab-npcs" class="px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white hover:bg-white/5">
+                <i class="fa-solid fa-person-walking mr-2"></i> Personagens (NPCs)
+            </button>
         </div>
 
-        <!-- Main Workspace -->
-        <div class="glass-panel rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
-            
-            <!-- Filters and search -->
+        <!-- Stats overview -->
+        <div id="stats-panel" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <!-- Dynamic stats card will be populated here -->
+        </div>
+
+        <!-- Section 1: Assets Workspace -->
+        <div id="section-assets" class="main-section glass-panel rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
             <div class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
-                <!-- Search -->
                 <div class="relative flex-1">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
                     <input type="text" id="search-input" placeholder="Pesquisar por nome ou caminho do asset..." 
                            class="w-full bg-slate-950/60 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all">
                 </div>
                 
-                <!-- Category Tabs -->
                 <div class="flex overflow-x-auto gap-1.5 p-1 bg-slate-950/50 rounded-2xl border border-white/5 self-start md:self-auto shrink-0">
-                    <button onclick="switchTab('all')" id="tab-all" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all bg-emerald-600 text-white shadow-sm">Todos</button>
-                    <button onclick="switchTab('buildings')" id="tab-buildings" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white">Prédios</button>
-                    <button onclick="switchTab('accessories')" id="tab-accessories" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white">Equipamentos</button>
-                    <button onclick="switchTab('characters')" id="tab-characters" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white">Personagens</button>
-                    <button onclick="switchTab('ui')" id="tab-ui" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white">Gerais / UI</button>
+                    <button onclick="switchAssetTab('all')" id="tab-all" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all bg-emerald-600 text-white shadow-sm">Todos</button>
+                    <button onclick="switchAssetTab('buildings')" id="tab-buildings" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white">Prédios</button>
+                    <button onclick="switchAssetTab('accessories')" id="tab-accessories" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white">Equipamentos</button>
+                    <button onclick="switchAssetTab('characters')" id="tab-characters" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white">Personagens</button>
+                    <button onclick="switchAssetTab('ui')" id="tab-ui" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white">Gerais / UI</button>
                 </div>
             </div>
 
             <!-- Loader -->
-            <div id="loader" class="flex flex-col items-center justify-center py-20 space-y-4">
-                <i class="fa-solid fa-spinner-third animate-spin text-4xl text-emerald-400"></i>
+            <div id="loader-assets" class="flex flex-col items-center justify-center py-20 space-y-4">
+                <i class="fa-solid fa-spinner animate-spin text-4xl text-emerald-400"></i>
                 <p class="text-sm text-slate-400">Buscando assets no servidor...</p>
             </div>
 
             <!-- Assets Grid -->
-            <div id="assets-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 hidden">
-                <!-- Cards will be dynamically inserted here -->
-            </div>
+            <div id="assets-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 hidden"></div>
             
-            <!-- Empty state -->
-            <div id="empty-state" class="hidden text-center py-20 space-y-4">
+            <div id="empty-state-assets" class="hidden text-center py-20 space-y-4">
                 <i class="fa-solid fa-folder-open text-5xl text-slate-600"></i>
                 <h3 class="text-lg font-bold text-slate-400">Nenhum asset encontrado</h3>
-                <p class="text-xs text-slate-500 max-w-md mx-auto">Não encontramos arquivos com o filtro pesquisado. Tente buscar por outros termos.</p>
+            </div>
+        </div>
+
+        <!-- Section 2: Users Workspace -->
+        <div id="section-users" class="main-section glass-panel rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 hidden">
+            <div class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+                <div class="relative flex-1">
+                    <i class="fa-solid fa-user-astronaut absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="user-search-input" oninput="applyUserFilter()" placeholder="Pesquisar usuários por nome ou email..." 
+                           class="w-full bg-slate-950/60 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all">
+                </div>
             </div>
 
+            <!-- Table -->
+            <div class="overflow-x-auto rounded-2xl border border-white/10 bg-slate-950/20">
+                <table class="w-full border-collapse text-left text-sm text-slate-300">
+                    <thead class="bg-slate-950/60 text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-white/10">
+                        <tr>
+                            <th class="px-6 py-4">Usuário</th>
+                            <th class="px-6 py-4">Email</th>
+                            <th class="px-6 py-4">Cargo</th>
+                            <th class="px-6 py-4">Capins (Moedas)</th>
+                            <th class="px-6 py-4">XP Guardião</th>
+                            <th class="px-6 py-4">Streak (Dias)</th>
+                            <th class="px-6 py-4">Animais Salvos</th>
+                            <th class="px-6 py-4">Criado em</th>
+                            <th class="px-6 py-4 text-right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-tbody" class="divide-y divide-white/5">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="empty-state-users" class="hidden text-center py-20 space-y-4">
+                <i class="fa-solid fa-users-slash text-5xl text-slate-600"></i>
+                <h3 class="text-lg font-bold text-slate-400">Nenhum usuário correspondente</h3>
+            </div>
+        </div>
+
+        <!-- Section 3: BGM Soundtrack Synthesizer config -->
+        <div id="section-bgm" class="main-section glass-panel rounded-3xl p-6 sm:p-8 shadow-2xl hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                <!-- Sidebar Tracks -->
+                <div class="lg:col-span-1 space-y-2 border-r border-white/5 pr-4">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Escolha a Tela/Trilha</h3>
+                    <div id="bgm-track-list" class="space-y-1.5">
+                        <!-- Hydrated JS -->
+                    </div>
+                </div>
+
+                <!-- Parameters Editor -->
+                <div class="lg:col-span-3 space-y-6">
+                    <div class="flex justify-between items-center border-b border-white/5 pb-4">
+                        <div>
+                            <h2 id="bgm-editor-title" class="text-2xl font-black text-white capitalize">-</h2>
+                            <p class="text-xs text-emerald-400">Edite as frequências do sintetizador e a pulsação da batida em tempo real</p>
+                        </div>
+                        <button onclick="saveBgmConfig()" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg transition-all">
+                            <i class="fa-solid fa-floppy-disk"></i> Salvar Trilha BGM
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Oscillators select -->
+                        <div class="p-5 bg-slate-950/40 rounded-2xl border border-white/5 space-y-4">
+                            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-white/5 pb-2">Tipo de Osciladores</h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Oscilador Baixo</label>
+                                    <select id="bgm-bass-osc" class="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500/50">
+                                        <option value="sine">Sine (Senoide)</option>
+                                        <option value="triangle">Triangle (Triangular)</option>
+                                        <option value="sawtooth">Sawtooth (Dente de serra)</option>
+                                        <option value="square">Square (Quadrada)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Oscilador Acordes</label>
+                                    <select id="bgm-chord-osc" class="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500/50">
+                                        <option value="sine">Sine (Senoide)</option>
+                                        <option value="triangle">Triangle (Triangular)</option>
+                                        <option value="sawtooth">Sawtooth (Dente de serra)</option>
+                                        <option value="square">Square (Quadrada)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Oscilador Melodia</label>
+                                    <select id="bgm-melody-osc" class="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500/50">
+                                        <option value="sine">Sine (Senoide)</option>
+                                        <option value="triangle">Triangle (Triangular)</option>
+                                        <option value="sawtooth">Sawtooth (Dente de serra)</option>
+                                        <option value="square">Square (Quadrada)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Volumes & Balance sliders -->
+                        <div class="p-5 bg-slate-950/40 rounded-2xl border border-white/5 space-y-4">
+                            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-white/5 pb-2">Volumes & Mixagem</h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase mb-1">
+                                        <span>Geral (Master)</span>
+                                        <span id="val-master-vol" class="text-emerald-400">0.15</span>
+                                    </div>
+                                    <input type="range" id="bgm-master-vol" min="0" max="0.5" step="0.01" oninput="updateBgmRangeVal('master-vol')" class="w-full accent-emerald-500">
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase mb-1">
+                                        <span>Volume Baixo</span>
+                                        <span id="val-bass-vol" class="text-emerald-400">0.22</span>
+                                    </div>
+                                    <input type="range" id="bgm-bass-vol" min="0" max="0.5" step="0.01" oninput="updateBgmRangeVal('bass-vol')" class="w-full accent-emerald-500">
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase mb-1">
+                                        <span>Volume Acordes</span>
+                                        <span id="val-chord-vol" class="text-emerald-400">0.15</span>
+                                    </div>
+                                    <input type="range" id="bgm-chord-vol" min="0" max="0.5" step="0.01" oninput="updateBgmRangeVal('chord-vol')" class="w-full accent-emerald-500">
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase mb-1">
+                                        <span>Volume Melodia</span>
+                                        <span id="val-melody-vol" class="text-emerald-400">0.08</span>
+                                    </div>
+                                    <input type="range" id="bgm-melody-vol" min="0" max="0.5" step="0.01" oninput="updateBgmRangeVal('melody-vol')" class="w-full accent-emerald-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pulse and Tempo -->
+                        <div class="p-5 bg-slate-950/40 rounded-2xl border border-white/5 space-y-4">
+                            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-white/5 pb-2">Ritmo & Efeitos</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase mb-1">
+                                        <span>Tempo do Passo</span>
+                                        <span id="val-step-time" class="text-emerald-400">0.33s</span>
+                                    </div>
+                                    <input type="range" id="bgm-step-time" min="0.1" max="0.8" step="0.01" oninput="updateBgmRangeVal('step-time')" class="w-full accent-emerald-500">
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase mb-1">
+                                        <span>Chance de Melodia</span>
+                                        <span id="val-melody-chance" class="text-emerald-400">45%</span>
+                                    </div>
+                                    <input type="range" id="bgm-melody-chance" min="0" max="1" step="0.05" oninput="updateBgmRangeVal('melody-chance')" class="w-full accent-emerald-500">
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-slate-950/60 rounded-xl border border-white/5">
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase cursor-pointer" for="bgm-has-delay">Efeito Echo / Delay</label>
+                                    <input type="checkbox" id="bgm-has-delay" class="w-4 h-4 accent-emerald-500 cursor-pointer">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Frequencies Section -->
+                    <div class="p-5 bg-slate-950/40 rounded-2xl border border-white/5 space-y-4">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-white/5 pb-2">Configuração de Frequências (Física do Áudio - Hz)</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Bass Notes & Melody scale -->
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Frequências do Baixo (4 notas separadas por espaço ou vírgula)</label>
+                                    <input type="text" id="bgm-bass-notes" class="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2 text-xs font-mono text-emerald-400 focus:outline-none focus:border-emerald-500/50">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Escala Melódica (Hz, separadas por vírgulas)</label>
+                                    <input type="text" id="bgm-melody-scale" class="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2 text-xs font-mono text-emerald-400 focus:outline-none focus:border-emerald-500/50">
+                                </div>
+                            </div>
+
+                            <!-- Chord tones -->
+                            <div class="space-y-2">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase">Grupos de Acordes (Cada acorde com 4 frequências de notas)</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="text" id="bgm-chord-0" placeholder="Acorde 1" class="bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-emerald-400 focus:outline-none focus:border-emerald-500/50">
+                                    <input type="text" id="bgm-chord-1" placeholder="Acorde 2" class="bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-emerald-400 focus:outline-none focus:border-emerald-500/50">
+                                    <input type="text" id="bgm-chord-2" placeholder="Acorde 3" class="bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-emerald-400 focus:outline-none focus:border-emerald-500/50">
+                                    <input type="text" id="bgm-chord-3" placeholder="Acorde 4" class="bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-emerald-400 focus:outline-none focus:border-emerald-500/50">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Walking NPCs Manager -->
+        <div id="section-npcs" class="main-section glass-panel rounded-3xl p-6 sm:p-8 shadow-2xl hidden space-y-8">
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                <!-- Walkers List -->
+                <div class="xl:col-span-2 space-y-4">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Capivaras Passeando Atualmente</h3>
+                    <div id="npc-walkers-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+
+                <!-- Add New NPC Form -->
+                <div class="xl:col-span-1 p-6 bg-slate-950/40 border border-white/5 rounded-3xl space-y-6">
+                    <div>
+                        <h3 class="text-lg font-black text-white">Criar Novo Personagem</h3>
+                        <p class="text-xs text-amber-400">Insira um novo personagem animado no mapa 3D da Eco-Vila</p>
+                    </div>
+
+                    <form id="new-npc-form" onsubmit="createNewNPC(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nome do Personagem</label>
+                            <input type="text" id="new-npc-name" required placeholder="Ex: Capy Esportista"
+                                   class="w-full bg-slate-950 border border-white/10 rounded-xl py-2 px-3 text-xs focus:outline-none focus:border-amber-500/50 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Função / Profissão</label>
+                            <input type="text" id="new-npc-role" required placeholder="Ex: Maratonista"
+                                   class="w-full bg-slate-950 border border-white/10 rounded-xl py-2 px-3 text-xs focus:outline-none focus:border-amber-500/50 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Identificador / Cor (Sem espaços, único)</label>
+                            <input type="text" id="new-npc-color" required placeholder="Ex: runner"
+                                   class="w-full bg-slate-950 border border-white/10 rounded-xl py-2 px-3 text-xs focus:outline-none focus:border-amber-500/50 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Velocidade de Caminhada</label>
+                            <div class="flex items-center gap-3">
+                                <input type="range" id="new-npc-speed" min="0.4" max="1.5" step="0.05" value="0.7" oninput="document.getElementById('val-new-npc-speed').innerText = this.value" class="flex-1 accent-amber-500">
+                                <span id="val-new-npc-speed" class="text-xs font-bold text-amber-400 w-8 text-right">0.7</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Largura do Frame (px)</label>
+                                <input type="number" id="new-npc-width" required value="32"
+                                       class="w-full bg-slate-950 border border-white/10 rounded-xl py-2 px-3 text-xs focus:outline-none focus:border-amber-500/50 text-white">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Altura do Frame (px)</label>
+                                <input type="number" id="new-npc-height" required value="32"
+                                       class="w-full bg-slate-950 border border-white/10 rounded-xl py-2 px-3 text-xs focus:outline-none focus:border-amber-500/50 text-white">
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 pt-2 border-t border-white/5">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase">Imagem Spritesheet (PNG/WebP)</label>
+                            <p class="text-[9px] text-slate-500">A spritesheet deve conter 8 colunas e 6 linhas no formato padrão de caminhada.</p>
+                            <input type="file" id="new-npc-image" accept="image/*" required class="hidden" onchange="previewNpcSpritesheet(this)">
+                            <button type="button" onclick="document.getElementById('new-npc-image').click()"
+                                    class="w-full py-2.5 px-4 bg-slate-900 border border-white/10 hover:border-amber-500/30 rounded-xl text-slate-300 hover:text-white font-semibold text-xs flex items-center justify-center gap-2 transition-all">
+                                <i class="fa-solid fa-image text-amber-400"></i> Carregar Spritesheet
+                            </button>
+                            <p id="new-npc-filename" class="text-[9px] text-slate-400 text-center font-medium"></p>
+                        </div>
+
+                        <button type="submit" id="btn-create-npc" class="w-full py-3 bg-amber-600 hover:bg-amber-500 text-white rounded-xl font-bold transition-all text-xs uppercase tracking-wider flex items-center justify-center gap-2 mt-4 shadow-lg shadow-amber-950/20">
+                            <i class="fa-solid fa-circle-plus"></i> Injetar NPC na Vila
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
 
     </div>
 
-    <!-- Upload Overlay Modal -->
+    <!-- Modals -->
+    <!-- Modal 1: Asset Upload (Original) -->
     <div id="upload-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
         <div class="w-full max-w-lg glass-panel rounded-3xl p-6 sm:p-8 shadow-2xl relative space-y-6 transform scale-95 transition-transform duration-300">
-            <!-- Close -->
             <button onclick="closeModal()" class="absolute right-6 top-6 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-all">
                 <i class="fa-solid fa-xmark"></i>
             </button>
-
             <div>
                 <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Substituir Asset</span>
                 <h2 id="modal-title" class="text-2xl font-black text-white mt-1">Carregar Nova Imagem</h2>
                 <p id="modal-filepath" class="text-xs text-slate-400 font-mono mt-1 break-all bg-slate-950/40 p-2 rounded-lg border border-white/5"></p>
             </div>
-
-            <!-- Preview panel comparison -->
             <div class="grid grid-cols-2 gap-4">
                 <div class="p-3 bg-slate-950/40 rounded-2xl border border-white/5 flex flex-col items-center justify-center">
                     <span class="text-[9px] text-slate-500 font-bold uppercase mb-2">Atual</span>
@@ -170,52 +422,70 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Upload Forms -->
             <div class="space-y-4">
-                <!-- Image Input -->
                 <div class="space-y-2">
                     <label class="block text-xs text-slate-400 font-bold uppercase">Arquivo de Imagem (PNG/WebP)</label>
-                    <div class="relative">
-                        <input type="file" id="image-file-input" accept="image/*" onchange="previewNewImage(this)"
-                               class="hidden">
-                        <button onclick="document.getElementById('image-file-input').click()" 
-                                class="w-full py-3 px-4 bg-slate-900 border border-white/10 hover:border-emerald-500/30 rounded-2xl text-slate-300 hover:text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all">
-                            <i class="fa-solid fa-cloud-arrow-up text-emerald-400"></i> Escolher Imagem
-                        </button>
-                        <p id="image-filename" class="text-[10px] text-slate-400 mt-1.5 text-center font-medium"></p>
-                    </div>
+                    <input type="file" id="image-file-input" accept="image/*" onchange="previewNewImage(this)" class="hidden">
+                    <button onclick="document.getElementById('image-file-input').click()" 
+                            class="w-full py-3 px-4 bg-slate-900 border border-white/10 hover:border-emerald-500/30 rounded-2xl text-slate-300 hover:text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all">
+                        <i class="fa-solid fa-cloud-arrow-up text-emerald-400"></i> Escolher Imagem
+                    </button>
+                    <p id="image-filename" class="text-[10px] text-slate-400 mt-1.5 text-center font-medium"></p>
                 </div>
-
-                <!-- Companion JSON Input (spritesheet animations) -->
                 <div id="json-upload-section" class="space-y-2 hidden border-t border-white/5 pt-4">
                     <div class="flex items-center justify-between">
                         <label class="block text-xs text-slate-400 font-bold uppercase">Animação JSON Associada (Opcional)</label>
-                        <span class="bg-amber-500/20 text-amber-300 text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider">Spritesheet</span>
                     </div>
-                    <p class="text-[10px] text-slate-500">Se este spritesheet requer um arquivo de coordenadas `.json` atualizado, faça o upload dele aqui.</p>
-                    <div class="relative">
-                        <input type="file" id="json-file-input" accept=".json" onchange="previewNewJson(this)"
-                               class="hidden">
-                        <button onclick="document.getElementById('json-file-input').click()" 
-                                class="w-full py-3 px-4 bg-slate-900 border border-white/10 hover:border-amber-500/30 rounded-2xl text-slate-300 hover:text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all">
-                            <i class="fa-solid fa-file-code text-amber-400"></i> Escolher JSON (.json)
-                        </button>
-                        <p id="json-filename" class="text-[10px] text-slate-400 mt-1.5 text-center font-medium"></p>
-                    </div>
+                    <input type="file" id="json-file-input" accept=".json" onchange="previewNewJson(this)" class="hidden">
+                    <button onclick="document.getElementById('json-file-input').click()" 
+                            class="w-full py-3 px-4 bg-slate-900 border border-white/10 hover:border-amber-500/30 rounded-2xl text-slate-300 hover:text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all">
+                        <i class="fa-solid fa-file-code text-amber-400"></i> Escolher JSON (.json)
+                    </button>
+                    <p id="json-filename" class="text-[10px] text-slate-400 mt-1.5 text-center font-medium"></p>
                 </div>
             </div>
-
-            <!-- Action buttons -->
             <div class="flex gap-4 pt-2">
-                <button onclick="closeModal()" 
-                        class="flex-1 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white rounded-2xl font-bold transition-all text-sm">
-                    Cancelar
-                </button>
-                <button onclick="submitUpload()" id="btn-save-upload" disabled
-                        class="flex-1 py-3 bg-emerald-600 disabled:bg-slate-800 hover:bg-emerald-500 disabled:text-slate-500 text-white rounded-2xl font-bold transition-all text-sm shadow-lg shadow-emerald-950/20 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-check"></i> Salvar e Atualizar
-                </button>
+                <button onclick="closeModal()" class="flex-1 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white rounded-2xl font-bold transition-all text-sm">Cancelar</button>
+                <button onclick="submitUpload()" id="btn-save-upload" disabled class="flex-1 py-3 bg-emerald-600 disabled:bg-slate-800 hover:bg-emerald-500 disabled:text-slate-500 text-white rounded-2xl font-bold transition-all text-sm shadow-lg flex items-center justify-center gap-2">Salvar e Atualizar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Edit User Modal -->
+    <div id="user-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+        <div class="w-full max-w-md glass-panel rounded-3xl p-6 sm:p-8 shadow-2xl relative space-y-6 transform scale-95 transition-transform duration-300">
+            <button onclick="closeUserModal()" class="absolute right-6 top-6 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-all">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div>
+                <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Painel do Usuário</span>
+                <h2 id="user-modal-title" class="text-2xl font-black text-white mt-1">Editar Usuário</h2>
+                <p id="user-modal-email" class="text-xs text-slate-400 font-mono mt-1 break-all bg-slate-950/40 p-2 rounded-lg border border-white/5"></p>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs text-slate-400 font-bold uppercase mb-1">Cargo (Papel)</label>
+                    <select id="edit-user-role" class="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500/50">
+                        <option value="user">User (Jogador)</option>
+                        <option value="admin">Admin (Administrador)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 font-bold uppercase mb-1">Capins (Moedas)</label>
+                    <input type="number" id="edit-user-coins" class="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500/50">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 font-bold uppercase mb-1">XP do Guardião</label>
+                    <input type="number" id="edit-user-xp" class="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500/50">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 font-bold uppercase mb-1">Streak Atual (Dias de Acesso)</label>
+                    <input type="number" id="edit-user-streak" class="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500/50">
+                </div>
+            </div>
+            <div class="flex gap-4 pt-2">
+                <button onclick="closeUserModal()" class="flex-1 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white rounded-2xl font-bold transition-all text-sm">Cancelar</button>
+                <button onclick="submitUserEdit()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-bold transition-all text-sm shadow-lg flex items-center justify-center gap-2">Salvar</button>
             </div>
         </div>
     </div>
@@ -227,10 +497,24 @@
         let allFiles = [];
         let filteredFiles = [];
         let currentTab = 'all';
+        let activeMainTab = 'assets';
         let selectedFile = null;
         let selectedImageBase64 = null;
         let selectedJsonBase64 = null;
         let selectedJsonText = null;
+
+        // BGM State
+        let bgmConfig = {};
+        let activeBgmTrack = 'vila';
+
+        // NPC State
+        let npcConfigs = [];
+        let selectedNpcImageBase64 = null;
+
+        // Users State
+        let usersData = [];
+        let filteredUsers = [];
+        let selectedUser = null;
 
         function getApiBase() {
             if (window.location.protocol === 'file:') {
@@ -243,50 +527,214 @@
             return '';
         }
 
-        // Fetch files on load
-        window.addEventListener('DOMContentLoaded', fetchFiles);
+        function getAuthHeaders() {
+            const token = localStorage.getItem('capy_token');
+            return {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            };
+        }
 
+        // On Load checks
+        window.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('capy_token');
+            if (!token) {
+                showToast('Token inválido ou não autenticado. Redirecionando para login...', 'error');
+                setTimeout(() => window.location.href = '/', 1500);
+                return;
+            }
+            
+            // Prime dashboard load
+            await fetchFiles();
+            await fetchUsers();
+            await fetchBgmConfig();
+            await fetchNpcConfig();
+            
+            switchMainTab('assets');
+        });
+
+        // Fetching APIs
         async function fetchFiles() {
-            showLoader(true);
             try {
-                const response = await fetch(`${getApiBase()}/api/admin/files`);
+                const response = await fetch(`${getApiBase()}/api/admin/files`, { headers: getAuthHeaders() });
+                if (response.status === 401 || response.status === 403) {
+                    window.location.href = '/';
+                    return;
+                }
                 const data = await response.json();
                 if (data.files) {
                     allFiles = data.files;
-                    updateStats();
+                    updateDashboardStats();
                     applyFilterAndSearch();
                 }
             } catch (err) {
                 showToast('Erro ao buscar arquivos no servidor', 'error');
                 console.error(err);
             } finally {
-                showLoader(false);
+                document.getElementById('loader-assets').classList.add('hidden');
             }
         }
 
-        function updateStats() {
-            document.getElementById('stat-total').innerText = allFiles.length;
-            
-            const buildingsCount = allFiles.filter(f => f.path.includes('bld_')).length;
-            document.getElementById('stat-buildings').innerText = buildingsCount;
-            
-            const accCount = allFiles.filter(f => f.path.includes('acc_')).length;
-            document.getElementById('stat-accessories').innerText = accCount;
-            
-            const charactersCount = allFiles.filter(f => 
-                f.path.includes('capy_npc_') || 
-                f.path.includes('capybara_adventurer') || 
-                f.path.includes('avatar') || 
-                f.path.includes('mascot')
-            ).length;
-            document.getElementById('stat-characters').innerText = charactersCount;
+        async function fetchUsers() {
+            try {
+                const response = await fetch(`${getApiBase()}/api/admin/users`, { headers: getAuthHeaders() });
+                const data = await response.json();
+                if (data.users) {
+                    usersData = data.users;
+                    usersStats = data.stats;
+                    applyUserFilter();
+                }
+            } catch (err) {
+                console.error('Erro ao buscar usuários:', err);
+                showToast('Erro ao carregar banco de usuários', 'error');
+            }
         }
 
-        // Handle tabs
-        function switchTab(tab) {
+        async function fetchBgmConfig() {
+            try {
+                const response = await fetch(`${getApiBase()}/api/bgm/config`);
+                const data = await response.json();
+                bgmConfig = data;
+                renderBgmTrackList();
+                loadBgmTrackEditor();
+            } catch (err) {
+                console.error('Erro ao buscar BGM config:', err);
+            }
+        }
+
+        async function fetchNpcConfig() {
+            try {
+                const response = await fetch(`${getApiBase()}/api/npc/config`);
+                const data = await response.json();
+                npcConfigs = data;
+                renderNpcGrid();
+            } catch (err) {
+                console.error('Erro ao carregar NPCs:', err);
+            }
+        }
+
+        // Stats Render
+        function updateDashboardStats() {
+            const panel = document.getElementById('stats-panel');
+            panel.innerHTML = '';
+
+            if (activeMainTab === 'assets') {
+                const buildingsCount = allFiles.filter(f => f.path.includes('bld_')).length;
+                const accCount = allFiles.filter(f => f.path.includes('acc_')).length;
+                const charactersCount = allFiles.filter(f => 
+                    f.path.includes('capy_npc_') || 
+                    f.path.includes('capybara_adventurer') || 
+                    f.path.includes('avatar') || 
+                    f.path.includes('mascot')
+                ).length;
+                
+                panel.innerHTML = `
+                    <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Total de Assets</span>
+                        <span class="text-3xl font-black text-white mt-2">${allFiles.length}</span>
+                    </div>
+                    <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Prédios</span>
+                        <span class="text-3xl font-black text-emerald-400 mt-2">${buildingsCount}</span>
+                    </div>
+                    <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Equipamentos</span>
+                        <span class="text-3xl font-black text-teal-400 mt-2">${accCount}</span>
+                    </div>
+                    <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Spritesheets</span>
+                        <span class="text-3xl font-black text-amber-400 mt-2">${charactersCount}</span>
+                    </div>
+                `;
+            } else if (activeMainTab === 'users') {
+                const totalU = usersData.length;
+                const totalCapins = usersData.reduce((s, u) => s + (u.gameState ? u.gameState.seedCoins : 0), 0);
+                const totalXP = usersData.reduce((s, u) => s + (u.gameState ? u.gameState.guardianXP : 0), 0);
+                const totalAn = usersData.reduce((s, u) => s + (u.animalsCount || 0), 0);
+
+                panel.innerHTML = `
+                    <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Total de Usuários</span>
+                        <span class="text-3xl font-black text-white mt-2">${totalU}</span>
+                    </div>
+                    <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Capins Distribuídos</span>
+                        <span class="text-3xl font-black text-emerald-400 mt-2">${totalCapins} 🌾</span>
+                    </div>
+                    <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">XP Consolidado</span>
+                        <span class="text-3xl font-black text-teal-400 mt-2">${totalXP}</span>
+                    </div>
+                    <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Animais Avistados</span>
+                        <span class="text-3xl font-black text-amber-400 mt-2">${totalAn} 🐾</span>
+                    </div>
+                `;
+            } else if (activeMainTab === 'bgm') {
+                panel.innerHTML = `
+                    <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Trilhas de BGM</span>
+                        <span class="text-3xl font-black text-white mt-2">${Object.keys(bgmConfig).length}</span>
+                    </div>
+                    <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Sintetizadores Pro</span>
+                        <span class="text-3xl font-black text-emerald-400 mt-2">Ativos</span>
+                    </div>
+                    <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Afinamento</span>
+                        <span class="text-3xl font-black text-teal-400 mt-2">Pentatônica</span>
+                    </div>
+                    <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Latência Sequência</span>
+                        <span class="text-3xl font-black text-amber-400 mt-2">Sub 50ms</span>
+                    </div>
+                `;
+            } else if (activeMainTab === 'npcs') {
+                const totalSpeed = npcConfigs.reduce((s, n) => s + n.speed, 0);
+                const avgSpeed = npcConfigs.length ? (totalSpeed / npcConfigs.length).toFixed(2) : 0;
+                panel.innerHTML = `
+                    <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">NPCs Ativos</span>
+                        <span class="text-3xl font-black text-white mt-2">${npcConfigs.length}</span>
+                    </div>
+                    <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Velocidade Média</span>
+                        <span class="text-3xl font-black text-emerald-400 mt-2">${avgSpeed} %/tick</span>
+                    </div>
+                    <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Caminhos Disponíveis</span>
+                        <span class="text-3xl font-black text-teal-400 mt-2">8 rotas</span>
+                    </div>
+                    <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Tipo Animação</span>
+                        <span class="text-3xl font-black text-amber-400 mt-2">Diagonal Atl.</span>
+                    </div>
+                `;
+            }
+        }
+
+        // Switch main sections
+        function switchMainTab(sectionId) {
+            activeMainTab = sectionId;
+            document.querySelectorAll('.main-section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`section-${sectionId}`).classList.remove('hidden');
+
+            const tabs = ['assets', 'users', 'bgm', 'npcs'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`main-tab-${t}`);
+                if (t === sectionId) {
+                    btn.className = "px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all bg-emerald-600 text-white shadow-lg shadow-emerald-950/20";
+                } else {
+                    btn.className = "px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white hover:bg-white/5";
+                }
+            });
+
+            updateDashboardStats();
+        }
+
+        // SECTION 1: ASSETS SCRIPTS
+        function switchAssetTab(tab) {
             currentTab = tab;
-            
-            // Update active state in UI
             const tabs = ['all', 'buildings', 'accessories', 'characters', 'ui'];
             tabs.forEach(t => {
                 const btn = document.getElementById(`tab-${t}`);
@@ -296,24 +744,14 @@
                     btn.className = "px-4 py-2 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white";
                 }
             });
-
             applyFilterAndSearch();
         }
 
-        // Apply filter + search
-        const searchInput = document.getElementById('search-input');
-        searchInput.addEventListener('input', applyFilterAndSearch);
-
         function applyFilterAndSearch() {
-            const query = searchInput.value.toLowerCase().trim();
-            
+            const query = document.getElementById('search-input').value.toLowerCase().trim();
             filteredFiles = allFiles.filter(file => {
-                // Ignore raw json files in listing unless they are companion scripts, or let's show them?
-                // It is better to filter out JSON files from cards directly, since they will be uploaded alongside their images!
-                // This keeps the panel clean and focused on images.
                 if (file.path.endsWith('.json')) return false;
 
-                // Tab filter
                 if (currentTab === 'buildings' && !file.path.includes('bld_')) return false;
                 if (currentTab === 'accessories' && !file.path.includes('acc_')) return false;
                 if (currentTab === 'characters' && !(
@@ -329,11 +767,9 @@
                     file.path.includes('capybara_adventurer')
                 )) return false;
 
-                // Search query filter
                 if (query) {
                     return file.path.toLowerCase().includes(query) || file.name.toLowerCase().includes(query);
                 }
-
                 return true;
             });
 
@@ -342,8 +778,7 @@
 
         function renderGrid() {
             const grid = document.getElementById('assets-grid');
-            const emptyState = document.getElementById('empty-state');
-            
+            const emptyState = document.getElementById('empty-state-assets');
             grid.innerHTML = '';
             
             if (filteredFiles.length === 0) {
@@ -358,11 +793,8 @@
             filteredFiles.forEach(file => {
                 const card = document.createElement('div');
                 card.className = "glass-card rounded-2xl p-4 flex flex-col justify-between space-y-4";
-                
-                // Format size
                 const sizeKb = (file.sizeBytes / 1024).toFixed(1);
                 
-                // Categorize tag
                 let tagText = "Geral";
                 let tagClass = "bg-slate-500/20 text-slate-400";
                 if (file.path.includes('bld_')) {
@@ -378,7 +810,6 @@
 
                 card.innerHTML = `
                     <div class="space-y-3">
-                        <!-- Image Preview Box -->
                         <div class="aspect-square w-full bg-slate-950/60 rounded-xl overflow-hidden flex items-center justify-center p-3 border border-white/5 relative group">
                             <img class="max-w-full max-h-full object-contain drop-shadow-[0_4px_6px_rgba(0,0,0,0.5)] transition-transform duration-300 group-hover:scale-110" 
                                  src="${getApiBase()}/${file.path}?t=${new Date(file.mtime).getTime()}" alt="${file.name}">
@@ -386,8 +817,6 @@
                                 ${tagText}
                             </span>
                         </div>
-                        
-                        <!-- File Details -->
                         <div class="space-y-1">
                             <h3 class="text-xs font-bold font-mono text-slate-300 truncate" title="${file.path}">${file.path}</h3>
                             <div class="flex justify-between items-center text-[10px] text-slate-500 font-semibold">
@@ -396,19 +825,16 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Action -->
                     <button onclick="openUploadModal('${file.path}')" 
                             class="w-full py-2 bg-emerald-600/10 hover:bg-emerald-600 border border-emerald-500/20 hover:border-emerald-500 text-emerald-400 hover:text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2">
                         <i class="fa-solid fa-pen-to-square"></i> Substituir
                     </button>
                 `;
-
                 grid.appendChild(card);
             });
         }
 
-        // Open Upload Modal
+        // Upload Modal Assets
         function openUploadModal(filePath) {
             selectedFile = allFiles.find(f => f.path === filePath);
             if (!selectedFile) return;
@@ -426,13 +852,10 @@
             document.getElementById('modal-img-placeholder').classList.remove('hidden');
             document.getElementById('btn-save-upload').disabled = true;
 
-            // Setup current image preview
             const currentImg = document.getElementById('modal-img-current');
             currentImg.src = `${getApiBase()}/${selectedFile.path}?t=${new Date().getTime()}`;
-            
             document.getElementById('modal-filepath').innerText = selectedFile.path;
 
-            // Setup spritesheet companion json section
             const jsonSection = document.getElementById('json-upload-section');
             if (filePath.includes('capybara_adventurer') || filePath.includes('atlas.webp')) {
                 jsonSection.classList.remove('hidden');
@@ -452,92 +875,50 @@
             const modal = document.getElementById('upload-modal');
             modal.classList.add('opacity-0');
             modal.querySelector('div').classList.add('scale-95');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 300);
+            setTimeout(() => modal.classList.add('hidden'), 300);
         }
 
-        // Preview local uploaded image
         function previewNewImage(input) {
             const file = input.files[0];
             if (!file) return;
-
             document.getElementById('image-filename').innerText = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
 
             const reader = new FileReader();
             reader.onload = function(e) {
-                const base64Content = e.target.result;
-                selectedImageBase64 = base64Content.split(',')[1]; // Strip prefix data:*/*;base64,
-
+                selectedImageBase64 = e.target.result.split(',')[1];
                 const previewImg = document.getElementById('modal-img-new');
-                previewImg.src = base64Content;
+                previewImg.src = e.target.result;
                 previewImg.classList.remove('hidden');
                 document.getElementById('modal-img-placeholder').classList.add('hidden');
-                
-                checkReadyToSave();
+                document.getElementById('btn-save-upload').disabled = false;
             };
             reader.readAsDataURL(file);
         }
 
-        // Preview local uploaded JSON
         function previewNewJson(input) {
             const file = input.files[0];
             if (!file) return;
-
             document.getElementById('json-filename').innerText = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
 
             const reader = new FileReader();
             reader.onload = function(e) {
-                const base64Content = e.target.result;
-                selectedJsonBase64 = base64Content.split(',')[1];
-                
-                try {
-                    // Try parsing as raw text to check validation
-                    const text = atob(selectedJsonBase64);
-                    JSON.parse(text); // Check valid JSON syntax
-                    selectedJsonText = text;
-                } catch (e) {
-                    showToast('Arquivo JSON inválido!', 'error');
-                    input.value = '';
-                    document.getElementById('json-filename').innerText = '';
-                    selectedJsonBase64 = null;
-                    selectedJsonText = null;
-                }
-                
-                checkReadyToSave();
+                selectedJsonBase64 = e.target.result.split(',')[1];
             };
             reader.readAsDataURL(file);
         }
 
-        function checkReadyToSave() {
-            const btn = document.getElementById('btn-save-upload');
-            if (selectedImageBase64) {
-                btn.disabled = false;
-            } else {
-                btn.disabled = true;
-            }
-        }
-
-        // Submit the replacement to backend API
         async function submitUpload() {
             if (!selectedFile || !selectedImageBase64) return;
-            
             const btn = document.getElementById('btn-save-upload');
             btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Enviando...`;
+            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Salvando...`;
 
-            // Prepare payload
-            const payload = {
-                filePath: selectedFile.path,
-                fileData: selectedImageBase64
-            };
+            const payload = { filePath: selectedFile.path, fileData: selectedImageBase64 };
 
-            // Include companion JSON if uploader has it
             if (selectedFile.path.includes('capybara_adventurer') || selectedFile.path.includes('atlas.webp')) {
                 if (selectedJsonBase64) {
-                    // Assume atlas.json in the same folder
                     const parts = selectedFile.path.split('/');
-                    parts.pop(); // Remove atlas.webp
+                    parts.pop();
                     payload.jsonPath = [...parts, 'atlas.json'].join('/');
                     payload.jsonData = selectedJsonBase64;
                 }
@@ -546,42 +927,455 @@
             try {
                 const response = await fetch(`${getApiBase()}/api/admin/upload`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: getAuthHeaders(),
                     body: JSON.stringify(payload)
                 });
                 
                 const data = await response.json();
                 if (data.success) {
-                    showToast('Asset atualizado com sucesso! O cache do PWA foi invalidado.', 'success');
+                    showToast('Asset atualizado com sucesso!', 'success');
                     closeModal();
-                    
-                    // Reload file list from server to show updated modification dates/sizes
                     fetchFiles();
                 } else {
                     showToast('Erro ao salvar asset: ' + data.error, 'error');
                     btn.disabled = false;
-                    btn.innerHTML = `<i class="fa-solid fa-check"></i> Salvar e Atualizar`;
                 }
             } catch (err) {
                 showToast('Erro de conexão com o servidor', 'error');
-                console.error(err);
                 btn.disabled = false;
-                btn.innerHTML = `<i class="fa-solid fa-check"></i> Salvar e Atualizar`;
             }
         }
 
-        // UI Load helpers
-        function showLoader(show) {
-            const loader = document.getElementById('loader');
-            const grid = document.getElementById('assets-grid');
-            if (show) {
-                loader.classList.remove('hidden');
-                grid.classList.add('hidden');
+        // SECTION 2: USERS SCRIPTS
+        function applyUserFilter() {
+            const query = document.getElementById('user-search-input').value.toLowerCase().trim();
+            filteredUsers = usersData.filter(u => 
+                u.name.toLowerCase().includes(query) || 
+                u.email.toLowerCase().includes(query)
+            );
+            renderUsersTable();
+        }
+
+        function renderUsersTable() {
+            const tbody = document.getElementById('users-tbody');
+            const emptyState = document.getElementById('empty-state-users');
+            tbody.innerHTML = '';
+
+            if (filteredUsers.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            emptyState.classList.add('hidden');
+
+            filteredUsers.forEach(u => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-white/5 transition-colors border-b border-white/5";
+
+                const coins = u.gameState ? u.gameState.seedCoins : 0;
+                const xp = u.gameState ? u.gameState.guardianXP : 0;
+                const streak = u.gameState ? u.gameState.currentStreak : 0;
+                const createdDate = new Date(u.createdAt).toLocaleDateString('pt-BR');
+
+                const avatarImg = u.avatar ? `<img class="w-8 h-8 rounded-full border border-white/10" src="${u.avatar}">` : `<div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center border border-white/10 font-bold text-xs capitalize">${u.name[0]}</div>`;
+
+                tr.innerHTML = `
+                    <td class="px-6 py-4 flex items-center gap-3 font-semibold text-white">
+                        ${avatarImg}
+                        <span>${u.name}</span>
+                    </td>
+                    <td class="px-6 py-4 font-mono text-xs text-slate-400">${u.email}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${u.role === 'admin' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-slate-800 text-slate-300'}">
+                            ${u.role}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-emerald-400 font-bold font-mono">${coins}</td>
+                    <td class="px-6 py-4 text-teal-400 font-bold font-mono">${xp}</td>
+                    <td class="px-6 py-4 text-amber-400 font-bold font-mono">${streak}</td>
+                    <td class="px-6 py-4 font-bold text-slate-300 font-mono">${u.animalsCount}</td>
+                    <td class="px-6 py-4 text-xs text-slate-500">${createdDate}</td>
+                    <td class="px-6 py-4 text-right space-x-2">
+                        <button onclick="openUserEditModal('${u.id}')" class="px-3 py-1.5 bg-emerald-600/10 hover:bg-emerald-600 text-emerald-400 hover:text-white rounded-lg text-xs font-bold transition-all"><i class="fa-solid fa-user-pen"></i></button>
+                        <button onclick="deleteUser('${u.id}', '${u.name}')" class="px-3 py-1.5 bg-red-600/10 hover:bg-red-600 text-red-400 hover:text-white rounded-lg text-xs font-bold transition-all"><i class="fa-solid fa-trash-can"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openUserEditModal(userId) {
+            selectedUser = usersData.find(u => u.id == userId);
+            if (!selectedUser) return;
+
+            document.getElementById('user-modal-title').innerText = `Editar: ${selectedUser.name}`;
+            document.getElementById('user-modal-email').innerText = selectedUser.email;
+            
+            document.getElementById('edit-user-role').value = selectedUser.role;
+            document.getElementById('edit-user-coins').value = selectedUser.gameState ? selectedUser.gameState.seedCoins : 0;
+            document.getElementById('edit-user-xp').value = selectedUser.gameState ? selectedUser.gameState.guardianXP : 0;
+            document.getElementById('edit-user-streak').value = selectedUser.gameState ? selectedUser.gameState.currentStreak : 0;
+
+            const modal = document.getElementById('user-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.querySelector('div').classList.remove('scale-95');
+            }, 50);
+        }
+
+        function closeUserModal() {
+            const modal = document.getElementById('user-modal');
+            modal.classList.add('opacity-0');
+            modal.querySelector('div').classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        async function submitUserEdit() {
+            if (!selectedUser) return;
+
+            const payload = {
+                role: document.getElementById('edit-user-role').value,
+                seedCoins: parseInt(document.getElementById('edit-user-coins').value),
+                guardianXP: parseInt(document.getElementById('edit-user-xp').value),
+                currentStreak: parseInt(document.getElementById('edit-user-streak').value)
+            };
+
+            try {
+                const res = await fetch(`${getApiBase()}/api/admin/users/${selectedUser.id}`, {
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Perfil do usuário atualizado!', 'success');
+                    closeUserModal();
+                    fetchUsers();
+                } else {
+                    showToast('Erro ao atualizar: ' + data.error, 'error');
+                }
+            } catch (err) {
+                showToast('Erro de conexão com o servidor', 'error');
+            }
+        }
+
+        async function deleteUser(userId, name) {
+            if (!confirm(`TEM CERTEZA? Isso excluirá永久mente o usuário ${name} e todo seu progresso de jogo.`)) return;
+
+            try {
+                const res = await fetch(`${getApiBase()}/api/admin/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Usuário deletado do banco de dados!', 'success');
+                    fetchUsers();
+                } else {
+                    showToast('Erro ao excluir: ' + data.error, 'error');
+                }
+            } catch (err) {
+                showToast('Erro de conexão com o servidor', 'error');
+            }
+        }
+
+        // SECTION 3: BGM SOUNDTRACK
+        function renderBgmTrackList() {
+            const list = document.getElementById('bgm-track-list');
+            list.innerHTML = '';
+            
+            Object.keys(bgmConfig).forEach(trackName => {
+                const btn = document.createElement('button');
+                btn.onclick = () => selectBgmTrack(trackName);
+                btn.id = `bgm-track-btn-${trackName}`;
+                
+                const active = trackName === activeBgmTrack;
+                btn.className = `w-full text-left px-4 py-3 rounded-2xl text-xs font-bold capitalize transition-all border flex justify-between items-center ${active ? 'bg-emerald-600/20 border-emerald-500 text-emerald-400' : 'bg-slate-900/50 border-white/5 text-slate-400 hover:text-white hover:bg-white/5'}`;
+                
+                let icon = 'fa-home';
+                if (trackName === 'vila') icon = 'fa-tree-city';
+                if (trackName === 'lab') icon = 'fa-flask-vial';
+                if (trackName === 'games') icon = 'fa-gamepad';
+                if (trackName === 'album') icon = 'fa-book-open-reader';
+                if (trackName === 'badges') icon = 'fa-award';
+                if (trackName === 'wardrobe') icon = 'fa-shirt';
+
+                btn.innerHTML = `
+                    <span class="flex items-center gap-2.5"><i class="fa-solid ${icon}"></i> ${trackName}</span>
+                    <i class="fa-solid fa-chevron-right text-[10px] opacity-40"></i>
+                `;
+                list.appendChild(btn);
+            });
+        }
+
+        function selectBgmTrack(trackName) {
+            activeBgmTrack = trackName;
+            renderBgmTrackList();
+            loadBgmTrackEditor();
+        }
+
+        function loadBgmTrackEditor() {
+            const spec = bgmConfig[activeBgmTrack];
+            if (!spec) return;
+
+            document.getElementById('bgm-editor-title').innerText = `Trilha: ${activeBgmTrack}`;
+
+            document.getElementById('bgm-bass-osc').value = spec.bassOsc || 'triangle';
+            document.getElementById('bgm-chord-osc').value = spec.chordOsc || 'sine';
+            document.getElementById('bgm-melody-osc').value = spec.melodyOsc || 'sine';
+
+            document.getElementById('bgm-master-vol').value = spec.masterVol;
+            document.getElementById('bgm-bass-vol').value = spec.bassVol;
+            document.getElementById('bgm-chord-vol').value = spec.chordVol;
+            document.getElementById('bgm-melody-vol').value = spec.melodyVol;
+            document.getElementById('bgm-melody-chance').value = spec.melodyChance;
+            document.getElementById('bgm-step-time').value = spec.stepTime;
+            document.getElementById('bgm-has-delay').checked = !!spec.hasDelay;
+
+            // Frequencies
+            document.getElementById('bgm-bass-notes').value = spec.bassNotes.join(', ');
+            document.getElementById('bgm-melody-scale').value = spec.melodyScale.join(', ');
+
+            for (let i = 0; i < 4; i++) {
+                document.getElementById(`bgm-chord-${i}`).value = spec.chordTones[i] ? spec.chordTones[i].join(', ') : '';
+            }
+
+            // Sync ranges labels
+            updateBgmRangeVal('master-vol');
+            updateBgmRangeVal('bass-vol');
+            updateBgmRangeVal('chord-vol');
+            updateBgmRangeVal('melody-vol');
+            updateBgmRangeVal('melody-chance');
+            updateBgmRangeVal('step-time');
+        }
+
+        function updateBgmRangeVal(id) {
+            const input = document.getElementById(`bgm-${id}`);
+            const label = document.getElementById(`val-${id}`);
+            if (!input || !label) return;
+            
+            if (id === 'melody-chance') {
+                label.innerText = `${Math.round(input.value * 100)}%`;
+            } else if (id === 'step-time') {
+                label.innerText = `${input.value}s`;
             } else {
-                loader.classList.add('hidden');
-                grid.classList.remove('hidden');
+                label.innerText = input.value;
+            }
+        }
+
+        async function saveBgmConfig() {
+            const spec = bgmConfig[activeBgmTrack];
+            if (!spec) return;
+
+            // Read BGM inputs values
+            spec.bassOsc = document.getElementById('bgm-bass-osc').value;
+            spec.chordOsc = document.getElementById('bgm-chord-osc').value;
+            spec.melodyOsc = document.getElementById('bgm-melody-osc').value;
+
+            spec.masterVol = parseFloat(document.getElementById('bgm-master-vol').value);
+            spec.bassVol = parseFloat(document.getElementById('bgm-bass-vol').value);
+            spec.chordVol = parseFloat(document.getElementById('bgm-chord-vol').value);
+            spec.melodyVol = parseFloat(document.getElementById('bgm-melody-vol').value);
+            spec.melodyChance = parseFloat(document.getElementById('bgm-melody-chance').value);
+            spec.stepTime = parseFloat(document.getElementById('bgm-step-time').value);
+            spec.hasDelay = document.getElementById('bgm-has-delay').checked;
+
+            // Parse frequencies
+            spec.bassNotes = document.getElementById('bgm-bass-notes').value.split(',').map(n => parseFloat(n.trim())).filter(n => !isNaN(n));
+            spec.melodyScale = document.getElementById('bgm-melody-scale').value.split(',').map(n => parseFloat(n.trim())).filter(n => !isNaN(n));
+
+            spec.chordTones = [];
+            for (let i = 0; i < 4; i++) {
+                const val = document.getElementById(`bgm-chord-${i}`).value;
+                const parsedNotes = val.split(',').map(n => parseFloat(n.trim())).filter(n => !isNaN(n));
+                spec.chordTones.push(parsedNotes);
+            }
+
+            try {
+                const response = await fetch(`${getApiBase()}/api/admin/bgm/config`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(bgmConfig)
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showToast('Preset de Trilha Sonora salvo!', 'success');
+                    fetchBgmConfig();
+                } else {
+                    showToast('Erro ao salvar som: ' + data.error, 'error');
+                }
+            } catch (err) {
+                showToast('Erro ao conectar com servidor', 'error');
+            }
+        }
+
+        // SECTION 4: NPCs Walkers
+        function renderNpcGrid() {
+            const grid = document.getElementById('npc-walkers-grid');
+            grid.innerHTML = '';
+
+            npcConfigs.forEach(npc => {
+                const card = document.createElement('div');
+                card.className = "p-5 bg-slate-900/50 rounded-2xl border border-white/5 flex items-center justify-between";
+                
+                const speedVal = npc.speed.toFixed(2);
+                card.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 h-16 bg-slate-950 rounded-xl overflow-hidden flex items-center justify-center border border-white/5 relative">
+                            <div class="scale-125" style="
+                                width: ${npc.frameWidth}px;
+                                height: ${npc.frameHeight}px;
+                                background-image: url('${getApiBase()}/${npc.spritesheet}');
+                                background-repeat: no-repeat;
+                                background-size: ${npc.frameWidth * 8}px ${npc.frameHeight * 6}px;
+                                background-position: 0px 0px;
+                            "></div>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white text-sm">${npc.name}</h4>
+                            <p class="text-xs text-slate-400 font-medium">${npc.role}</p>
+                            <p class="text-[9px] font-mono text-amber-400 font-semibold mt-1">Vel: ${speedVal} | Dim: ${npc.frameWidth}x${npc.frameHeight}px</p>
+                        </div>
+                    </div>
+                    <button onclick="removeNPC('${npc.color}')" class="px-3.5 py-2 bg-red-600/15 hover:bg-red-600 border border-red-500/20 hover:border-red-500 text-red-400 hover:text-white rounded-xl text-xs font-bold transition-all">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function previewNpcSpritesheet(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            document.getElementById('new-npc-filename').innerText = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                selectedNpcImageBase64 = e.target.result.split(',')[1];
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function createNewNPC(e) {
+            e.preventDefault();
+
+            if (!selectedNpcImageBase64) {
+                showToast('Selecione uma imagem de spritesheet primeiro!', 'error');
+                return;
+            }
+
+            const name = document.getElementById('new-npc-name').value.trim();
+            const role = document.getElementById('new-npc-role').value.trim();
+            const color = document.getElementById('new-npc-color').value.toLowerCase().replace(/\s+/g, '-').trim();
+            const speed = parseFloat(document.getElementById('new-npc-speed').value);
+            const width = parseInt(document.getElementById('new-npc-width').value);
+            const height = parseInt(document.getElementById('new-npc-height').value);
+
+            // Double check duplicate color keys
+            if (npcConfigs.some(n => n.color === color)) {
+                showToast('Já existe um NPC cadastrado com esse Identificador/Cor!', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btn-create-npc');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Injetando...`;
+
+            const imagePath = `capybara_${color}/atlas.webp`;
+
+            // Step 1: Upload Spritesheet Image
+            try {
+                const imgRes = await fetch(`${getApiBase()}/api/admin/upload`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({
+                        filePath: imagePath,
+                        fileData: selectedNpcImageBase64
+                    })
+                });
+                
+                const imgData = await imgRes.json();
+                if (!imgData.success) {
+                    showToast('Erro no upload do Spritesheet: ' + imgData.error, 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-solid fa-circle-plus"></i> Injetar NPC na Vila`;
+                    return;
+                }
+            } catch (err) {
+                showToast('Falha na comunicação de upload', 'error');
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-circle-plus"></i> Injetar NPC na Vila`;
+                return;
+            }
+
+            // Step 2: Save to config list
+            const newNpcObj = {
+                name: name,
+                color: color,
+                role: role,
+                speed: speed,
+                frameWidth: width,
+                frameHeight: height,
+                spritesheet: imagePath
+            };
+
+            npcConfigs.push(newNpcObj);
+
+            try {
+                const cfgRes = await fetch(`${getApiBase()}/api/admin/npc/config`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(npcConfigs)
+                });
+                const cfgData = await cfgRes.json();
+                if (cfgData.success) {
+                    showToast('Novo NPC injetado na vila com sucesso!', 'success');
+                    
+                    // Reset Form
+                    document.getElementById('new-npc-form').reset();
+                    document.getElementById('new-npc-filename').innerText = '';
+                    document.getElementById('val-new-npc-speed').innerText = '0.7';
+                    selectedNpcImageBase64 = null;
+
+                    fetchNpcConfig();
+                    fetchFiles();
+                } else {
+                    showToast('Erro ao salvar config do NPC: ' + cfgData.error, 'error');
+                }
+            } catch (err) {
+                showToast('Erro na requisição da configuração de NPCs', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-circle-plus"></i> Injetar NPC na Vila`;
+            }
+        }
+
+        async function removeNPC(color) {
+            const npcToRemove = npcConfigs.find(n => n.color === color);
+            if (!npcToRemove) return;
+
+            if (!confirm(`Remover capivara ${npcToRemove.name} da Eco-Vila?`)) return;
+
+            npcConfigs = npcConfigs.filter(n => n.color !== color);
+
+            try {
+                const res = await fetch(`${getApiBase()}/api/admin/npc/config`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(npcConfigs)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('NPC removido com sucesso!', 'success');
+                    fetchNpcConfig();
+                    fetchFiles();
+                } else {
+                    showToast('Erro ao salvar mudanças: ' + data.error, 'error');
+                }
+            } catch (err) {
+                showToast('Erro ao comunicar com o servidor', 'error');
             }
         }
 
@@ -600,18 +1394,10 @@
             `;
             
             container.appendChild(toast);
-            
-            // Trigger animation
-            setTimeout(() => {
-                toast.classList.remove('translate-y-2', 'opacity-0');
-            }, 50);
-
-            // Dismiss
+            setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 50);
             setTimeout(() => {
                 toast.classList.add('translate-y-2', 'opacity-0');
-                setTimeout(() => {
-                    toast.remove();
-                }, 300);
+                setTimeout(() => toast.remove(), 300);
             }, 4000);
         }
     </script>

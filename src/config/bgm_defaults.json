@@ -1,0 +1,142 @@
+{
+  "home": {
+    "stepTime": 0.333,
+    "bassNotes": [130.81, 164.81, 174.61, 196.00],
+    "chordTones": [
+      [261.63, 329.63, 392.00, 493.88],
+      [329.63, 392.00, 493.88, 587.33],
+      [349.23, 440.00, 523.25, 659.25],
+      [392.00, 493.88, 587.33, 698.46]
+    ],
+    "melodyScale": [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50],
+    "bassOsc": "triangle",
+    "chordOsc": "sine",
+    "melodyOsc": "sine",
+    "masterVol": 0.15,
+    "bassVol": 0.22,
+    "chordVol": 0.15,
+    "melodyVol": 0.08,
+    "melodyChance": 0.45,
+    "hasDelay": true
+  },
+  "album": {
+    "stepTime": 0.333,
+    "bassNotes": [130.81, 164.81, 174.61, 196.00],
+    "chordTones": [
+      [261.63, 329.63, 392.00, 493.88],
+      [329.63, 392.00, 493.88, 587.33],
+      [349.23, 440.00, 523.25, 659.25],
+      [392.00, 493.88, 587.33, 698.46]
+    ],
+    "melodyScale": [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50],
+    "bassOsc": "triangle",
+    "chordOsc": "sine",
+    "melodyOsc": "sine",
+    "masterVol": 0.15,
+    "bassVol": 0.22,
+    "chordVol": 0.15,
+    "melodyVol": 0.08,
+    "melodyChance": 0.45,
+    "hasDelay": true
+  },
+  "games": {
+    "stepTime": 0.24,
+    "bassNotes": [130.81, 110.00, 146.83, 98.00],
+    "chordTones": [
+      [261.63, 329.63, 392.00, 523.25],
+      [220.00, 261.63, 329.63, 440.00],
+      [146.83, 174.61, 220.00, 293.66],
+      [196.00, 246.94, 293.66, 392.00]
+    ],
+    "melodyScale": [523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77, 1046.50],
+    "bassOsc": "triangle",
+    "chordOsc": "triangle",
+    "melodyOsc": "square",
+    "masterVol": 0.08,
+    "bassVol": 0.18,
+    "chordVol": 0.08,
+    "melodyVol": 0.04,
+    "melodyChance": 0.6,
+    "hasDelay": false
+  },
+  "lab": {
+    "stepTime": 0.353,
+    "bassNotes": [110.00, 146.83, 87.31, 82.41],
+    "chordTones": [
+      [220.00, 261.63, 329.63, 493.88],
+      [293.66, 369.99, 440.00, 523.25, 659.25],
+      [174.61, 220.00, 261.63, 329.63],
+      [164.81, 220.00, 246.94, 293.66]
+    ],
+    "melodyScale": [440.00, 493.88, 523.25, 587.33, 659.25, 739.99, 783.99, 880.00],
+    "bassOsc": "sine",
+    "chordOsc": "sine",
+    "melodyOsc": "sine",
+    "masterVol": 0.18,
+    "bassVol": 0.24,
+    "chordVol": 0.14,
+    "melodyVol": 0.08,
+    "melodyChance": 0.4,
+    "hasDelay": true
+  },
+  "badges": {
+    "stepTime": 0.3,
+    "bassNotes": [174.61, 196.00, 164.81, 220.00],
+    "chordTones": [
+      [349.23, 440.00, 523.25, 659.25],
+      [392.00, 493.88, 587.33, 659.25],
+      [329.63, 392.00, 493.88, 587.33],
+      [220.00, 261.63, 329.63, 392.00]
+    ],
+    "melodyScale": [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50],
+    "bassOsc": "triangle",
+    "chordOsc": "sine",
+    "melodyOsc": "triangle",
+    "masterVol": 0.16,
+    "bassVol": 0.25,
+    "chordVol": 0.16,
+    "melodyVol": 0.09,
+    "melodyChance": 0.5,
+    "hasDelay": true
+  },
+  "vila": {
+    "stepTime": 0.272,
+    "bassNotes": [98.00, 130.81, 110.00, 146.83],
+    "chordTones": [
+      [196.00, 246.94, 293.66, 369.99],
+      [261.63, 329.63, 392.00, 493.88],
+      [220.00, 261.63, 329.63, 392.00],
+      [293.66, 369.99, 440.00, 523.25]
+    ],
+    "melodyScale": [392.00, 440.00, 493.88, 587.33, 659.25, 783.99],
+    "bassOsc": "triangle",
+    "chordOsc": "sine",
+    "melodyOsc": "sine",
+    "masterVol": 0.18,
+    "bassVol": 0.24,
+    "chordVol": 0.14,
+    "melodyVol": 0.08,
+    "melodyChance": 0.45,
+    "hasDelay": true
+  },
+  "wardrobe": {
+    "stepTime": 0.22,
+    "bassNotes": [130.81, 174.61, 196.00, 130.81],
+    "chordTones": [
+      [261.63, 329.63, 392.00, 493.88],
+      [349.23, 440.00, 523.25, 659.25],
+      [392.00, 493.88, 587.33, 659.25],
+      [261.63, 329.63, 392.00, 493.88]
+    ],
+    "melodyScale": [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50],
+    "bassOsc": "triangle",
+    "chordOsc": "sine",
+    "melodyOsc": "sine",
+    "masterVol": 0.15,
+    "bassVol": 0.22,
+    "chordVol": 0.15,
+    "melodyVol": 0.08,
+    "melodyChance": 0.45,
+    "hasDelay": true
+  }
+}

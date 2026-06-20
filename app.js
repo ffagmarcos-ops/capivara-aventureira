@@ -419,6 +419,11 @@ function unlockAudio() {
         }
         audioUnlocked = true;
         
+        const bgVideo = document.getElementById('villageBgVideo');
+        if (bgVideo) {
+            bgVideo.play().catch(e => {});
+        }
+        
         // Se estiver na aba da vila e o som estiver habilitado, inicia o som ambiente
         const vilaView = document.getElementById('vilaView');
         if (vilaView && !vilaView.classList.contains('hidden')) {
@@ -928,7 +933,7 @@ function claimDailyReward() {
     scheduleGameStateSync();
     const modal = document.getElementById('dailyRewardContent');
     modal.classList.remove('scale-100'); modal.classList.add('scale-0');
-    setTimeout(() => { document.getElementById('dailyRewardModal').classList.add('hidden'); showToast("+25 sementes hoje!", "🌟"); renderApp(); }, 300);
+    setTimeout(() => { document.getElementById('dailyRewardModal').classList.add('hidden'); showToast("+25 capins hoje!", "🌟"); renderApp(); }, 300);
 }
 
 // MINIGAMES LOGIC
@@ -1022,7 +1027,7 @@ function guessSilhouette(guess, btn) {
         seedCoins += 15; guardianXP += 10;
         localStorage.setItem('capy_seeds', seedCoins); localStorage.setItem('capy_xpPlay', guardianXP);
         scheduleGameStateSync();
-        showToast("Acertou! +15 sementes!", "seed_coin.png"); renderApp(); createConfetti();
+        showToast("Acertou! +15 capins!", "seed_coin.png"); renderApp(); createConfetti();
         setTimeout(loadSilhouetteGame, 2500);
     } else {
         playSound('click');
@@ -1123,7 +1128,7 @@ function checkMemoryMatch() {
 
             // Progress level
             if (currentMemoryLevel < 5) {
-                showToast(`Nível ${currentMemoryLevel} Concluído! +${spec.rewardSeeds} sementes!`, "seed_coin.png");
+                showToast(`Nível ${currentMemoryLevel} Concluído! +${spec.rewardSeeds} capins!`, "seed_coin.png");
                 currentMemoryLevel++;
                 localStorage.setItem('capy_memory_game_level', currentMemoryLevel);
                 
@@ -1136,7 +1141,7 @@ function checkMemoryMatch() {
                 seedCoins += bonusSeeds;
                 localStorage.setItem('capy_seeds', seedCoins);
                 
-                showToast(`Parabéns! Você zerou o Jogo da Memória! +100 sementes de bônus! 🏆`, "seed_coin.png");
+                showToast(`Parabéns! Você zerou o Jogo da Memória! +100 capins de bônus! 🏆`, "seed_coin.png");
                 
                 // Reset back to level 1
                 currentMemoryLevel = 1;
@@ -1180,7 +1185,7 @@ function answerQuiz(selected, correct) {
         localStorage.setItem('capy_seeds', seedCoins); localStorage.setItem('capy_xpPlay', guardianXP);
         quizDoneDate = new Date().toDateString(); localStorage.setItem('capy_quiz_done', quizDoneDate);
         scheduleGameStateSync();
-        document.getElementById('quizContainer').innerHTML = `<div class="text-center py-4 bg-green-100 rounded-3xl p-4 border border-green-300 animate-bounce"><span class="text-3xl">🎉 ACERTOU!</span><p class="text-xs text-green-800 font-bold mt-2">+15 <img src="seed_coin.png" class="w-3.5 h-3.5 object-contain inline-block -mt-0.5"> Sementes e 20 XP!</p></div>`;
+        document.getElementById('quizContainer').innerHTML = `<div class="text-center py-4 bg-green-100 rounded-3xl p-4 border border-green-300 animate-bounce"><span class="text-3xl">🎉 ACERTOU!</span><p class="text-xs text-green-800 font-bold mt-2">+15 <img src="seed_coin.png" class="w-3.5 h-3.5 object-contain inline-block -mt-0.5"> Capins e 20 XP!</p></div>`;
         showToast("Resposta Certa!", "🎯"); renderApp();
     } else { playSound('click'); showToast("Tente novamente!", "❌"); event.target.closest('button').classList.add('border-red-400', 'bg-red-50'); }
 }
@@ -1339,7 +1344,7 @@ async function buyAccessory(id, price) {
 
         if (authToken) await syncAccessoriesFromApi();
         playSound('success'); showToast("Item comprado!", "🎩"); renderCloset(); renderApp();
-    } else showToast("Sementes insuficientes!", "seed_coin.png");
+    } else showToast("Capim insuficiente!", "seed_coin.png");
 }
 async function equipAccessory(id, slot) {
     playSound('click');
@@ -1400,9 +1405,9 @@ async function unequipAll() {
 // ==========================================
 const defaultVillageState = {
     buildings: {
-        townHall: { level: 1, name: 'Centro da Vila', cost: 100, costMultiplier: 1.5, baseBonus: 0.05, desc: 'Aumenta em 5% a produção de sementes das outras construções.' },
-        farm: { level: 0, name: 'Horta de Capim', cost: 50, costMultiplier: 1.4, baseBonus: 1, desc: 'Produz 1 semente/h passivamente.' },
-        docks: { level: 0, name: 'Doca de Pesca', cost: 150, costMultiplier: 1.4, baseBonus: 3, desc: 'Produz 3 sementes/h passivamente.' },
+        townHall: { level: 1, name: 'Centro da Vila', cost: 100, costMultiplier: 1.5, baseBonus: 0.05, desc: 'Aumenta em 5% a produção de capim das outras construções.' },
+        farm: { level: 0, name: 'Horta de Capim', cost: 50, costMultiplier: 1.4, baseBonus: 1, desc: 'Produz 1 capim/h passivamente.' },
+        docks: { level: 0, name: 'Doca de Pesca', cost: 150, costMultiplier: 1.4, baseBonus: 3, desc: 'Produz 3 capins/h passivamente.' },
         lab: { level: 0, name: 'Laboratório Ecológico', cost: 200, costMultiplier: 1.5, baseBonus: 0.10, desc: 'Aumenta em 10% todo o XP ganho.' },
         tower: { level: 0, name: 'Torre de Vigia', cost: 250, costMultiplier: 1.5, baseBonus: 0.05, desc: 'Aumenta em 5% a chance de achar animais Brilhantes e Míticos.' }
     },
@@ -1440,7 +1445,7 @@ function initVillageOfflineGains() {
     
     if (Math.floor(offlineGains) >= 1) {
         setTimeout(() => {
-            showToast(`Sua vila produziu +${Math.floor(offlineGains)} Sementes enquanto esteve fora! 🌾`, "🏡");
+            showToast(`Sua vila produziu +${Math.floor(offlineGains)} Capins enquanto esteve fora! 🌾`, "🏡");
         }, 3000);
     }
 }
@@ -1451,7 +1456,7 @@ const constructionPhrases = {
         "Capivaras debatendo as leis ecológicas da vila...",
         "Varrendo a recepção para receber visitantes...",
         "Polindo o crachá do Prefeito Capivara...",
-        "Capivaras organizando uma festa com bolo de sementes..."
+        "Capivaras organizando uma festa com bolo de capim..."
     ],
     farm: [
         "Capivaras adubando a terra com folhas secas...",
@@ -1471,7 +1476,7 @@ const constructionPhrases = {
         "Capivaras limpando as lentes do microscópio...",
         "Ajustando misturas de poções coloridas e brilhantes...",
         "Capivaras batendo martelo nas bancadas de ciência...",
-        "Analisando amostras de sementes mágicas...",
+        "Analisando amostras de capim mágico...",
         "Capivaras debatendo a fórmula do capim super nutritivo..."
     ],
     tower: [
@@ -1542,7 +1547,7 @@ function upgradeBuilding(key) {
         renderApp();
     } else {
         playSound('error');
-        showToast("Sementes insuficientes!", "⚠️");
+        showToast("Capim insuficiente!", "⚠️");
     }
 }
 
@@ -1568,7 +1573,7 @@ function accelerateConstruction(key) {
         renderApp();
     } else {
         playSound('error');
-        showToast("Sementes insuficientes para acelerar!", "⚠️");
+        showToast("Capim insuficiente para acelerar!", "⚠️");
     }
 }
 
@@ -1614,7 +1619,7 @@ function claimVillageSeeds() {
         villageState.lastClaimTime = Date.now();
         localStorage.setItem('capy_seeds', seedCoins);
         localStorage.setItem('capy_village_state', JSON.stringify(villageState));
-        showToast(`Colheu +${claimable} Sementes! 🌾`, "🪙");
+        showToast(`Colheu +${claimable} Capins! 🌾`, "🪙");
         renderApp();
     }
 }
@@ -1624,6 +1629,8 @@ function claimVillageSeeds() {
 // ==========================================================================
 let villageNPCs = [];
 let npcIntervalId = null;
+let npcBubbleIntervalId = null;
+let npcBubbleTimeoutId = null;
 
 const villagePaths = [
     // Rota 1: Prefeitura ➔ Ponte ➔ Docas (Atravessa a ponte!)
@@ -1658,29 +1665,60 @@ const villagePaths = [
         { x: 66, y: 52 }, // No meio da ponte
         { x: 72, y: 50 }, // Entrada direita da ponte
         { x: 77, y: 49 }  // Margem direita da ponte
+    ],
+    // Rota 5: Fazenda (Fazendeira caminha apenas perto da horta)
+    [
+        { x: 18, y: 48 }, // Entrada esquerda da horta
+        { x: 22, y: 50 }, // Caminho interno
+        { x: 26, y: 47 }  // Saída direita da horta
+    ],
+    // Rota 6: Docas (Pescadora Animada caminha apenas no píer)
+    [
+        { x: 78, y: 53 }, // No píer das docas
+        { x: 82, y: 56 }, // Ponta do píer
+        { x: 85, y: 52 }  // Beira da água direita
+    ],
+    // Rota 7: Laboratório (Cientista caminha apenas perto do lab)
+    [
+        { x: 68, y: 36 }, // Entrada do laboratório
+        { x: 65, y: 39 }, // Margem inferior do laboratório
+        { x: 72, y: 33 }  // Subindo a trilha
+    ],
+    // Rota 8: Floresta (Bióloga caminha na área florestal do topo esquerdo)
+    [
+        { x: 30, y: 30 }, // Entre as árvores
+        { x: 35, y: 35 }, // Caminho da mata
+        { x: 42, y: 33 }  // Limite da floresta
     ]
 ];
 
 const npcConfigs = [
-    { name: 'Capy Exploradora', color: 'green', role: 'Exploradora', speed: 0.8 },
-    { name: 'Capy Pescadora', color: 'blue', role: 'Pescadora', speed: 0.6 },
-    { name: 'Capy Jardineira', color: 'red', role: 'Jardineira', speed: 0.9 },
-    { name: 'Capy Aventureira', color: 'adventurer', role: 'Aventureira', speed: 0.7 }
+    { name: 'Capy Aventureira', color: 'adventurer', role: 'Aventureira', speed: 0.7 },
+    { name: 'Capy Fazendeira', color: 'farmer', role: 'Fazendeira', speed: 0.65 },
+    { name: 'Capy Pescadora Animada', color: 'fisherman', role: 'Pescadora Pro', speed: 0.6 },
+    { name: 'Capy Cientista', color: 'scientist', role: 'Cientista', speed: 0.7 },
+    { name: 'Capy Bióloga', color: 'biologist', role: 'Bióloga', speed: 0.75 }
 ];
 
-function animateAdventurerSprite(npc) {
+const spritesheetColors = ['adventurer', 'farmer', 'fisherman', 'scientist', 'biologist'];
+const restrictedPaths = [3, 4, 5, 6, 7];
+
+function animateSpritesheetNPC(npc) {
     npc.frameIndex = ((npc.frameIndex || 0) + 1) % 8;
-    let row = 0; // default: idle (row 0)
+    let row = 0; // default: idle
     if (npc.state === 'walking') {
-        row = 1; // walk (row 1)
+        row = 1; // walk
     } else if (npc.state === 'working') {
-        row = 3; // attack/work (row 3)
+        row = 3; // attack/work
     } else if (npc.state === 'resting') {
-        row = 0; // idle/rest (row 0)
+        row = 0; // idle/rest
     }
-    const spriteDiv = npc.el.querySelector('.adventurer-npc-sprite');
+    
+    const spriteDiv = npc.el.querySelector('.spritesheet-npc-sprite');
     if (spriteDiv) {
-        spriteDiv.style.backgroundPosition = `-${npc.frameIndex * 33}px -${row * 38}px`;
+        const width = npc.frameWidth || 33;
+        const height = npc.frameHeight || 38;
+        spriteDiv.style.backgroundPosition = `-${npc.frameIndex * width}px -${row * height}px`;
     }
 }
 
@@ -1693,9 +1731,20 @@ function tickNPCs() {
                 const availablePaths = [];
                 
                 villagePaths.forEach((path, pIdx) => {
-                    // Filtrar Rota 4 (index 3) apenas para a Aventureira, e outras rotas apenas para NPCs normais
-                    if (npc.color === 'adventurer' && pIdx !== 3) return;
-                    if (npc.color !== 'adventurer' && pIdx === 3) return;
+                    // Filtrar rotas exclusivas para personagens de spritesheet e rotas normais para clássicos
+                    if (spritesheetColors.includes(npc.color)) {
+                        const colorToPathMap = {
+                            'adventurer': 3,
+                            'farmer': 4,
+                            'fisherman': 5,
+                            'scientist': 6,
+                            'biologist': 7
+                        };
+                        const mappedPath = colorToPathMap[npc.color] !== undefined ? colorToPathMap[npc.color] : npc.pathIndex;
+                        if (pIdx !== mappedPath) return;
+                    } else {
+                        if (restrictedPaths.includes(pIdx)) return;
+                    }
 
                     const startNode = path[0];
                     const endNode = path[path.length - 1];
@@ -1722,14 +1771,14 @@ function tickNPCs() {
                 }
                 
                 npc.state = 'walking';
-                if (npc.color === 'adventurer') {
-                    npc.el.className = 'village-npc npc-adventurer';
+                if (spritesheetColors.includes(npc.color)) {
+                    npc.el.className = `village-npc npc-${npc.color}`;
                 } else {
                     npc.el.className = 'village-npc npc-walk-anim';
                 }
             }
-            if (npc.color === 'adventurer') {
-                animateAdventurerSprite(npc);
+            if (spritesheetColors.includes(npc.color)) {
+                animateSpritesheetNPC(npc);
             }
             return;
         }
@@ -1752,8 +1801,8 @@ function tickNPCs() {
             if (npc.nodeIndex < 0 || npc.nodeIndex >= path.length) {
                 npc.state = Math.random() > 0.4 ? 'resting' : 'working';
                 npc.stateTimer = Math.floor(Math.random() * 4000) + 3000; // 3-7 segundos de descanso/trabalho
-                if (npc.color === 'adventurer') {
-                    npc.el.className = 'village-npc npc-adventurer';
+                if (spritesheetColors.includes(npc.color)) {
+                    npc.el.className = `village-npc npc-${npc.color}`;
                 } else {
                     npc.el.className = `village-npc ${npc.state === 'resting' ? 'npc-idle-anim' : 'npc-work-anim'}`;
                 }
@@ -1770,7 +1819,7 @@ function tickNPCs() {
             // Atualiza imagem do sprite conforme direção do movimento
             const spriteContainer = npc.el.querySelector('.npc-sprite-container');
             
-            if (npc.color !== 'adventurer') {
+            if (!spritesheetColors.includes(npc.color)) {
                 const spriteImg = npc.el.querySelector('.npc-sprite');
                 if (dy > 0.05) {
                     spriteImg.src = `capy_npc_${npc.color}_front.png`;
@@ -1786,8 +1835,8 @@ function tickNPCs() {
             }
         }
 
-        if (npc.color === 'adventurer') {
-            animateAdventurerSprite(npc);
+        if (spritesheetColors.includes(npc.color)) {
+            animateSpritesheetNPC(npc);
         }
     });
 }
@@ -1800,13 +1849,27 @@ function startVillageNPCs() {
     
     if (villageNPCs.length === 0) {
         container.innerHTML = '';
+        const colorToPathMap = {
+            'adventurer': 3,
+            'farmer': 4,
+            'fisherman': 5,
+            'scientist': 6,
+            'biologist': 7
+        };
         npcConfigs.forEach((cfg, idx) => {
-            const pathIdx = idx % villagePaths.length;
+            let pathIdx = idx % villagePaths.length;
+            if (colorToPathMap[cfg.color] !== undefined) {
+                pathIdx = colorToPathMap[cfg.color];
+            } else if (cfg.pathIndex !== undefined) {
+                pathIdx = cfg.pathIndex;
+            } else {
+                pathIdx = idx % 3; // Custom NPCs go on paths 0, 1, 2
+            }
             const startNode = villagePaths[pathIdx][0];
             
             const npcEl = document.createElement('div');
-            if (cfg.color === 'adventurer') {
-                npcEl.className = 'village-npc npc-adventurer';
+            if (spritesheetColors.includes(cfg.color)) {
+                npcEl.className = `village-npc npc-${cfg.color}`;
             } else {
                 npcEl.className = 'village-npc npc-walk-anim';
             }
@@ -1814,11 +1877,12 @@ function startVillageNPCs() {
             npcEl.style.top = startNode.y + '%';
             npcEl.style.zIndex = Math.round(startNode.y * 10);
             
-            if (cfg.color === 'adventurer') {
+            if (spritesheetColors.includes(cfg.color)) {
                 npcEl.innerHTML = `
                     <div class="npc-nametag">${cfg.name} (${cfg.role})</div>
+                    <div class="npc-bubble"></div>
                     <div class="npc-sprite-container" style="transition: transform 0.2s;">
-                        <div class="npc-sprite adventurer-npc-sprite" style="background-position: 0px 0px;"></div>
+                        <div class="npc-sprite spritesheet-npc-sprite npc-${cfg.color}-sprite" style="background-position: 0px 0px;"></div>
                     </div>
                 `;
             } else {
@@ -1837,6 +1901,8 @@ function startVillageNPCs() {
                 color: cfg.color,
                 role: cfg.role,
                 speed: cfg.speed,
+                frameWidth: cfg.frameWidth || 33,
+                frameHeight: cfg.frameHeight || 38,
                 x: startNode.x,
                 y: startNode.y,
                 pathIndex: pathIdx,
@@ -1856,6 +1922,7 @@ function startVillageNPCs() {
     }
     
     npcIntervalId = setInterval(tickNPCs, 150);
+    startNPCBubbles();
 }
 
 function stopVillageNPCs() {
@@ -1863,9 +1930,141 @@ function stopVillageNPCs() {
         clearInterval(npcIntervalId);
         npcIntervalId = null;
     }
+    stopNPCBubbles();
+}
+
+const npcPhrases = {
+    adventurer: [
+        "Explorar a ponte é o meu destino! 🗺️",
+        "Quantos segredos existem além do rio? 🌊",
+        "Aventura é encontrar o melhor matinho! 🍃",
+        "Lá vou eu desbravar novas terras! 🐾",
+        "Uh, de ponte em ponte eu vou passear... 🎵",
+        "Parar para um banho de sol na ponte! ☀️",
+        "Será que hoje eu acho um animal lendário? 🌌",
+        "Nenhuma correnteza assusta uma capivara! 💪",
+        "Minha bússola sempre aponta para o capim! 🧭",
+        "A jornada é mais gostosa que o destino! 🦫"
+    ],
+    farmer: [
+        "Este capim está crescendo verdinho! 🌾",
+        "Cuidar da terra é a minha paixão! 🚜",
+        "Nenhuma lagarta vai comer minhas cenouras! 🥕",
+        "Regar as plantas com amor e paciência! 💧",
+        "Planta, rega, colhe o capim... 🎵",
+        "Mais um dia perfeito na horta da vila! ☀️",
+        "Adubo orgânico de capivara é o melhor! 💩",
+        "Estou medindo a umidade do solo com a pata! 🌱",
+        "Cenouras gigantes a caminho! 🥕",
+        "Quem quer capim fresco colhido na hora? 🦫"
+    ],
+    fisherman: [
+        "Paciência é a alma do bom pescador! 🎣",
+        "Será que hoje o peixe morde a isca? 🐟",
+        "Peixinho do rio, vem até mim... 🎵",
+        "Este píer tem a melhor vista da cachoeira! 🌊",
+        "Olha o tamanho daquele peixe que escapou! 🐟",
+        "O rio hoje está perfeito para uma pesca! ☀️",
+        "Minha vara de pesca é feita de bambu nobre! 🎋",
+        "Sinto um puxão na linha! Atenção... 🎣",
+        "Peixe assado para o jantar das capivaras! 🍽️",
+        "Nenhum rio é fundo demais para nós! 🦫"
+    ],
+    scientist: [
+        "Análise química dos nutrientes da água... 🧪",
+        "Esta descoberta tem relevância científica! 🔬",
+        "A hipótese está confirmada pelos dados! 📊",
+        "Preciso calibrar o meu microscópio! 🔬",
+        "Átomos e moléculas a girar... 🎵",
+        "Uma nova espécie de capim mutante? 🧬",
+        "PH da água do rio está em níveis ideais! 🌊",
+        "Fascinante! A taxa de fotossíntese aumentou! 🍃",
+        "A ciência é o caminho para o progresso! 🚀",
+        "Minhas poções estão quase prontas! 🧪"
+    ],
+    biologist: [
+        "Catalogando a fauna e flora nativas! 📝",
+        "Uma borboleta rara acaba de passar! 🦋",
+        "Esta árvore tem mais de cem anos! 🌳",
+        "Devemos preservar cada canto da floresta! 💚",
+        "Flores e folhas no vento a dançar... 🎵",
+        "A biodiversidade desta mata é incrível! 🌿",
+        "Vaga-lumes brilhando na densidade da mata! 💡",
+        "Peguei uma amostra de solo para analisar! 🌱",
+        "Esta floresta respira vida! 🦫",
+        "Cuidar do nosso ecossistema é prioridade! 🌍"
+    ]
+};
+
+function triggerRandomNPCBubble() {
+    if (villageNPCs.length === 0) return;
+    
+    // Esconder bolhas existentes antes de abrir uma nova
+    villageNPCs.forEach(npc => {
+        const bubble = npc.el.querySelector('.npc-bubble');
+        if (bubble) bubble.classList.remove('show');
+    });
+    
+    // Escolher um NPC aleatório
+    const npc = villageNPCs[Math.floor(Math.random() * villageNPCs.length)];
+    if (!npc) return;
+    
+    const bubble = npc.el.querySelector('.npc-bubble');
+    if (!bubble) return;
+    
+    // Escolher uma frase aleatória
+    let phrases = npcPhrases[npc.color];
+    if (!phrases) {
+        phrases = [
+            `Olá, sou a capivara ${npc.name}! 🦫`,
+            `Lindo dia para passear pela vila! ☀️`,
+            `Eu amo a nossa Eco-Vila! 🌳`,
+            `Minha função como ${npc.role} é super divertida! ✨`,
+            `Que tal colher alguns capins hoje? 🌾`,
+            `Alguém viu o Bate-Capy por aí? 🕹️`
+        ];
+    }
+    const phrase = phrases[Math.floor(Math.random() * phrases.length)];
+    
+    // Definir texto e exibir bolha
+    bubble.innerText = phrase;
+    bubble.classList.add('show');
+    
+    // Esconder após 6 segundos
+    if (npcBubbleTimeoutId) clearTimeout(npcBubbleTimeoutId);
+    npcBubbleTimeoutId = setTimeout(() => {
+        bubble.classList.remove('show');
+    }, 6000);
+}
+
+function startNPCBubbles() {
+    stopNPCBubbles();
+    // Primeiro balão após 5 segundos para testar fácil
+    npcBubbleTimeoutId = setTimeout(triggerRandomNPCBubble, 5000);
+    // Intervalo de 2 minutos (120000ms)
+    npcBubbleIntervalId = setInterval(triggerRandomNPCBubble, 120000);
+}
+
+function stopNPCBubbles() {
+    if (npcBubbleIntervalId) {
+        clearInterval(npcBubbleIntervalId);
+        npcBubbleIntervalId = null;
+    }
+    if (npcBubbleTimeoutId) {
+        clearTimeout(npcBubbleTimeoutId);
+        npcBubbleTimeoutId = null;
+    }
+    // Ocultar bolhas remanescentes
+    villageNPCs.forEach(npc => {
+        const bubble = npc.el.querySelector('.npc-bubble');
+        if (bubble) bubble.classList.remove('show');
+    });
 }
 
 function focusBuilding(key) {
+    if (totalDragDistance > 10) {
+        return; // Ignore clicking on buildings if dragging/panning the map
+    }
     const cardEl = document.getElementById(`card-${key}`);
     if (cardEl) {
         cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1874,6 +2073,145 @@ function focusBuilding(key) {
         cardEl.classList.add('highlight-card');
     }
 }
+
+// ==========================================================================
+// CONTROLES DE ZOOM E PAN DO MAPA DA ECO-VILA
+// ==========================================================================
+let zoomScale = 1.0;
+let panX = 0;
+let panY = 0;
+let isPanning = false;
+let startX = 0;
+let startY = 0;
+let totalDragDistance = 0;
+
+function updateMapTransform() {
+    const container = document.getElementById('villageZoomContainer');
+    if (!container) return;
+    
+    if (zoomScale <= 1.0) {
+        panX = 0;
+        panY = 0;
+        zoomScale = 1.0;
+    } else {
+        const parent = document.getElementById('villageMapContainer');
+        if (parent) {
+            const rect = parent.getBoundingClientRect();
+            const maxPanX = (rect.width * (zoomScale - 1)) / 2;
+            const maxPanY = (rect.height * (zoomScale - 1)) / 2;
+            
+            panX = Math.max(-maxPanX, Math.min(maxPanX, panX));
+            panY = Math.max(-maxPanY, Math.min(maxPanY, panY));
+        }
+    }
+    
+    container.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomScale})`;
+}
+
+function zoomVillage(amount) {
+    zoomScale = Math.max(1.0, Math.min(3.0, zoomScale + amount));
+    updateMapTransform();
+}
+
+function resetZoom() {
+    zoomScale = 1.0;
+    panX = 0;
+    panY = 0;
+    updateMapTransform();
+}
+
+// Iniciar Listeners de Eventos para Arrastar e Zoom
+function initVillageMapGestures() {
+    const mapContainer = document.getElementById('villageMapContainer');
+    if (!mapContainer) return;
+    
+    // 1. Mouse Drag
+    mapContainer.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return; // botão esquerdo apenas
+        isPanning = true;
+        totalDragDistance = 0;
+        startX = e.clientX - panX;
+        startY = e.clientY - panY;
+        mapContainer.style.cursor = 'grabbing';
+    });
+    
+    window.addEventListener('mousemove', (e) => {
+        if (!isPanning) return;
+        const newPanX = e.clientX - startX;
+        const newPanY = e.clientY - startY;
+        
+        totalDragDistance += Math.hypot(newPanX - panX, newPanY - panY);
+        panX = newPanX;
+        panY = newPanY;
+        
+        updateMapTransform();
+    });
+    
+    window.addEventListener('mouseup', () => {
+        if (isPanning) {
+            isPanning = false;
+            mapContainer.style.cursor = 'default';
+        }
+    });
+    
+    // 2. Mouse Wheel Zoom
+    mapContainer.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const factor = 0.1;
+        if (e.deltaY < 0) {
+            zoomVillage(factor);
+        } else {
+            zoomVillage(-factor);
+        }
+    }, { passive: false });
+    
+    // 3. Touch Gestures (Pinch to zoom & Drag to pan)
+    let tpDistStart = 0;
+    let tpScaleStart = 1.0;
+    
+    mapContainer.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+            tpDistStart = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            tpScaleStart = zoomScale;
+        } else if (e.touches.length === 1) {
+            isPanning = true;
+            totalDragDistance = 0;
+            startX = e.touches[0].clientX - panX;
+            startY = e.touches[0].clientY - panY;
+        }
+    });
+    
+    mapContainer.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2 && tpDistStart > 0) {
+            const dist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            const factor = dist / tpDistStart;
+            zoomScale = Math.max(1.0, Math.min(3.0, tpScaleStart * factor));
+            updateMapTransform();
+        } else if (e.touches.length === 1 && isPanning) {
+            const newPanX = e.touches[0].clientX - startX;
+            const newPanY = e.touches[0].clientY - startY;
+            
+            totalDragDistance += Math.hypot(newPanX - panX, newPanY - panY);
+            panX = newPanX;
+            panY = newPanY;
+            
+            updateMapTransform();
+        }
+    });
+    
+    mapContainer.addEventListener('touchend', () => {
+        isPanning = false;
+        tpDistStart = 0;
+    });
+}
+
+window.addEventListener('resize', updateMapTransform);
 
 function renderVillage() {
     const grid = document.getElementById('villageGrid');
@@ -1975,9 +2313,9 @@ function renderVillage() {
         if (key === 'townHall') {
             bonusText = `Bônus Geral: +${b.level * 5}%`;
         } else if (key === 'farm') {
-            bonusText = `Produção: +${b.level * 1} sementes/h`;
+            bonusText = `Produção: +${b.level * 1} capins/h`;
         } else if (key === 'docks') {
-            bonusText = `Produção: +${b.level * 3} sementes/h`;
+            bonusText = `Produção: +${b.level * 3} capins/h`;
         } else if (key === 'lab') {
             bonusText = `XP extra: +${b.level * 10}%`;
         } else if (key === 'tower') {
@@ -1994,9 +2332,9 @@ function renderVillage() {
             if (key === 'townHall') {
                 nextBonusText = `Lvl ${nextLvl}: +${nextLvl * 5}%`;
             } else if (key === 'farm') {
-                nextBonusText = `Lvl ${nextLvl}: +${nextLvl * 1} sementes/h`;
+                nextBonusText = `Lvl ${nextLvl}: +${nextLvl * 1} capins/h`;
             } else if (key === 'docks') {
-                nextBonusText = `Lvl ${nextLvl}: +${nextLvl * 3} sementes/h`;
+                nextBonusText = `Lvl ${nextLvl}: +${nextLvl * 3} capins/h`;
             } else if (key === 'lab') {
                 nextBonusText = `Lvl ${nextLvl}: +${nextLvl * 10}%`;
             } else if (key === 'tower') {
@@ -2105,7 +2443,71 @@ setInterval(() => {
     }
 }, 5000);
 
+function injectDynamicNPCStyles(configs) {
+    let styleEl = document.getElementById('dynamic-npc-styles');
+    if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = 'dynamic-npc-styles';
+        document.head.appendChild(styleEl);
+    }
+    let css = '';
+    configs.forEach(cfg => {
+        const fw = cfg.frameWidth || 33;
+        const fh = cfg.frameHeight || 38;
+        const ss = cfg.spritesheet || '';
+        css += `
+.npc-${cfg.color}-sprite {
+    width: ${fw}px;
+    height: ${fh}px;
+    background-image: url('${ss}');
+    background-repeat: no-repeat;
+    background-size: ${fw * 8}px ${fh * 6}px;
+    display: inline-block;
+}
+.village-npc.npc-${cfg.color} {
+    width: ${fw}px !important;
+    height: ${fh}px !important;
+}
+`;
+    });
+    styleEl.textContent = css;
+}
+
+async function initializeDynamicConfigs() {
+    try {
+        const bgmRes = await fetch('/api/bgm/config');
+        if (bgmRes.ok) {
+            const bgmData = await bgmRes.json();
+            Object.assign(bgmTracksSpec, bgmData);
+            console.log('Procedural BGM configurations hydrated successfully.');
+        }
+    } catch (e) {
+        console.warn('Failed to load BGM configurations, using static defaults:', e);
+    }
+    
+    try {
+        const npcRes = await fetch('/api/npc/config');
+        if (npcRes.ok) {
+            const npcData = await npcRes.json();
+            npcConfigs.length = 0;
+            npcConfigs.push(...npcData);
+            spritesheetColors.length = 0;
+            npcConfigs.forEach(cfg => {
+                if (cfg.spritesheet) {
+                    spritesheetColors.push(cfg.color);
+                }
+            });
+            injectDynamicNPCStyles(npcConfigs);
+            console.log('NPC configurations hydrated and styles injected.');
+        }
+    } catch (e) {
+        console.warn('Failed to load NPC configurations, using static defaults:', e);
+        injectDynamicNPCStyles(npcConfigs);
+    }
+}
+
 window.onload = async () => {
+    await initializeDynamicConfigs();
     setTimeout(() => { 
         document.getElementById('splashScreen').style.opacity = '0'; 
         setTimeout(() => {
@@ -2119,6 +2521,7 @@ window.onload = async () => {
     await hydrateRemoteState();
     checkTimeOfDay(); checkStreaks(); initVillageOfflineGains(); renderApp(); loadDailyQuiz();
     loadSilhouetteGame(); loadEndlessQuiz(); updateSoundModeUI(); updateMemoryGameUI();
+    initVillageMapGestures();
     if (!sessionStorage.getItem('safetySeen') && currentUser) { setTimeout(toggleSafetyGuide, 2500); sessionStorage.setItem('safetySeen', 'true'); }
 };
 
@@ -2222,6 +2625,9 @@ function toggleFullscreenMap() {
         
         window.removeEventListener('keydown', handleMapFullscreenEscape);
     }
+    
+    // Recalculate transformations/boundaries after viewport sizes update
+    setTimeout(updateMapTransform, 100);
 }
 
 function handleMapFullscreenEscape(e) {
@@ -2244,6 +2650,10 @@ function showView(view) {
     if (view === 'vila') {
         startVillageAmbient();
         startVillageNPCs();
+        const bgVideo = document.getElementById('villageBgVideo');
+        if (bgVideo) {
+            bgVideo.play().catch(e => {});
+        }
     } else {
         stopVillageAmbient();
         stopVillageNPCs();
@@ -2252,13 +2662,26 @@ function showView(view) {
             toggleFullscreenMap();
         }
     }
-    
     if (view === 'lab') {
-        startComboRotation();
+        startLabSupervisorAnimation();
     } else {
-        stopComboRotation();
+        stopLabSupervisorAnimation();
     }
-    
+    if (view === 'album') {
+        startAlbumSupervisorAnimation();
+    } else {
+        stopAlbumSupervisorAnimation();
+    }
+    if (view === 'games') {
+        startGamesSupervisorAnimation();
+    } else {
+        stopGamesSupervisorAnimation();
+    }
+    if (view === 'home') {
+        startHomeSupervisorAnimation();
+    } else {
+        stopHomeSupervisorAnimation();
+    }
     const closetModal = document.getElementById('closetModal');
     const closetOpen = closetModal && !closetModal.classList.contains('hidden');
     if (!closetOpen) {
@@ -2637,7 +3060,7 @@ function claimMission(id) {
 
 function renderApp() {
     const level = Math.floor(guardianXP / 100) + 1;
-    if (level > userLevelMemo) { playSound('levelup'); showToast(`SUBIU DE NÍVEL! +50 Sementes`, "👑"); seedCoins += 50; localStorage.setItem('capy_seeds', seedCoins); userLevelMemo = level; localStorage.setItem('capy_level', userLevelMemo); }
+    if (level > userLevelMemo) { playSound('levelup'); showToast(`SUBIU DE NÍVEL! +50 Capins`, "👑"); seedCoins += 50; localStorage.setItem('capy_seeds', seedCoins); userLevelMemo = level; localStorage.setItem('capy_level', userLevelMemo); }
     scheduleGameStateSync();
 
     if (currentUser) {
@@ -2754,7 +3177,7 @@ function answerEndlessQuiz(selected, correct, btn) {
         localStorage.setItem('capy_seeds', seedCoins); localStorage.setItem('capy_xpPlay', guardianXP);
         scheduleGameStateSync();
         btn.classList.replace('bg-white', 'bg-green-500'); btn.classList.replace('text-orange-800', 'text-white');
-        showToast("+5 Sementes!", "💡"); renderApp();
+        showToast("+5 Capins!", "💡"); renderApp();
         setTimeout(loadEndlessQuiz, 1000);
     } else {
         playSound('click'); btn.classList.replace('bg-white', 'bg-red-500'); btn.classList.replace('text-orange-800', 'text-white');
@@ -2781,7 +3204,7 @@ function buyMysteryBox() {
                     ownedAccessories.push(won.id); localStorage.setItem('capy_owned_acc', JSON.stringify(ownedAccessories));
                     rewardMsg = `Você tirou: ${won.label}!`; icon = won.emoji; playSound('levelup');
                 } else {
-                    seedCoins += 150; rewardMsg = "Baú de Ouro! +150 sementes"; icon = "seed_coin.png"; playSound('coin');
+                    seedCoins += 150; rewardMsg = "Baú de Ouro! +150 capins"; icon = "seed_coin.png"; playSound('coin');
                 }
             } else if (rand < 0.45) {
                 // 30% chance XP
@@ -2789,14 +3212,14 @@ function buyMysteryBox() {
                 rewardMsg = "Livro Mágico! +200 XP"; icon = "📖"; playSound('success');
             } else {
                 // 55% chance refund small
-                seedCoins += 25; rewardMsg = "Sementes perdidas. +25 sementes"; icon = "seed_coin.png"; playSound('coin');
+                seedCoins += 25; rewardMsg = "Capim perdido. +25 capins"; icon = "seed_coin.png"; playSound('coin');
             }
             localStorage.setItem('capy_seeds', seedCoins);
             scheduleGameStateSync();
             showToast(rewardMsg, icon); renderCloset(); renderApp();
         }, 500);
     } else {
-        showToast("Precisa de 75 sementes!", "mystery_box.png");
+        showToast("Precisa de 75 capins!", "mystery_box.png");
     }
 }
 
@@ -2844,188 +3267,558 @@ function updateBadges() {
 }
 
 // ==========================================================================
-// PROVADOR DE COMBINAÇÕES CIENTÍFICAS ROTATIVAS (LAB)
+// SUPERVISOR DO LABORATÓRIO (DR. CAPY CIENTISTA)
+// ==========================================================================
+let labSupervisorIntervalId = null;
+let labSupervisorFrame = 0;
+let labSupervisorSpeechTimer = null;
+
+const labSupervisorSpeeches = [
+    "A ciência não para! Estamos analisando amostras de capim mutante. 🧪",
+    "Não toque nos frascos brilhantes sem luvas! São amostras radioativas de amora. 🍇",
+    "Catalogar descobertas nos ajuda a entender a riqueza da fauna local! 🌍",
+    "De acordo com meus cálculos, as capivaras são 100% adoráveis. 📊",
+    "Você sabia que a biodiversidade é a chave para o equilíbrio ambiental? 🌿",
+    "Minha lente de microscópio está perfeitamente calibrada hoje! 🔬",
+    "Estou desenvolvendo uma fórmula secreta para o capim de crescimento rápido. 🌾",
+    "Por favor, certifique-se de registrar cada nova espécie encontrada! 📝",
+    "A temperatura do rio está variando em 0.5 graus centígrados... Fascinante! 🌊",
+    "A curiosidade científica é o nosso superpoder! 🚀"
+];
+
+function startLabSupervisorAnimation() {
+    stopLabSupervisorAnimation();
+    
+    // Animar sprite a 6fps (aproximadamente 160ms)
+    labSupervisorIntervalId = setInterval(() => {
+        labSupervisorFrame = (labSupervisorFrame + 1) % 8;
+        const spriteEl = document.getElementById('labSupervisorSprite');
+        if (spriteEl) {
+            spriteEl.style.backgroundPosition = `-${labSupervisorFrame * 34}px -102px`;
+        }
+    }, 160);
+
+    // Mudar frase a cada 10 segundos
+    changeSupervisorSpeech();
+    labSupervisorSpeechTimer = setInterval(changeSupervisorSpeech, 10000);
+}
+
+function stopLabSupervisorAnimation() {
+    if (labSupervisorIntervalId) {
+        clearInterval(labSupervisorIntervalId);
+        labSupervisorIntervalId = null;
+    }
+    if (labSupervisorSpeechTimer) {
+        clearInterval(labSupervisorSpeechTimer);
+        labSupervisorSpeechTimer = null;
+    }
+}
+
+function changeSupervisorSpeech() {
+    const textEl = document.getElementById('labSupervisorSpeech');
+    if (textEl) {
+        const speech = labSupervisorSpeeches[Math.floor(Math.random() * labSupervisorSpeeches.length)];
+        textEl.innerHTML = `"${speech}"`;
+    }
+}
+
+// ==========================================================================
+// SUPERVISOR DO ÁLBUM (DRA. CAPY BIÓLOGA)
+// ==========================================================================
+let albumSupervisorIntervalId = null;
+let albumSupervisorFrame = 0;
+let albumSupervisorSpeechTimer = null;
+
+const albumSupervisorSpeeches = [
+    "Olhe aquela borboleta! A polinização é a engrenagem oculta do nosso ecossistema. 🦋",
+    "Cada figurinha no seu álbum representa uma vitória para a conservação da biodiversidade! 📖",
+    "Você já ouviu o canto do bem-te-vi hoje? Minhas anotações dizem que ele está super ativo. 🐦",
+    "Sabia que catalogar espécies nos ajuda a proteger seus habitats naturais da destruição? 🌳",
+    "Esta floresta esconde segredos incríveis... Vamos catalogar todos eles! 🔍",
+    "Seguindo os rastros na lama... Hum, parece que uma capivara passou por aqui recentemente! 🐾",
+    "Protejam as bacias hidrográficas! Sem água limpa, nossa fauna não sobrevive. 💧",
+    "Estou catalogando uma nova espécie de cogumelo brilhante. Que espetáculo da natureza! 🍄",
+    "A simbiose na nossa fazenda é fascinante. Plantas e animais cooperando em harmonia! 🌾",
+    "Mantenham os olhos bem abertos! A natureza sempre tem algo novo para nos ensinar. 🌿"
+];
+
+function startAlbumSupervisorAnimation() {
+    stopAlbumSupervisorAnimation();
+    
+    // Animar sprite a 6fps (aproximadamente 160ms)
+    albumSupervisorIntervalId = setInterval(() => {
+        albumSupervisorFrame = (albumSupervisorFrame + 1) % 8;
+        const spriteEl = document.getElementById('albumSupervisorSprite');
+        if (spriteEl) {
+            spriteEl.style.backgroundPosition = `-${albumSupervisorFrame * 33}px -114px`;
+        }
+    }, 160);
+
+    // Mudar frase a cada 10 segundos
+    changeAlbumSupervisorSpeech();
+    albumSupervisorSpeechTimer = setInterval(changeAlbumSupervisorSpeech, 10000);
+}
+
+function stopAlbumSupervisorAnimation() {
+    if (albumSupervisorIntervalId) {
+        clearInterval(albumSupervisorIntervalId);
+        albumSupervisorIntervalId = null;
+    }
+    if (albumSupervisorSpeechTimer) {
+        clearInterval(albumSupervisorSpeechTimer);
+        albumSupervisorSpeechTimer = null;
+    }
+}
+
+function changeAlbumSupervisorSpeech() {
+    const textEl = document.getElementById('albumSupervisorSpeech');
+    if (textEl) {
+        const speech = albumSupervisorSpeeches[Math.floor(Math.random() * albumSupervisorSpeeches.length)];
+        textEl.innerHTML = `"${speech}"`;
+    }
+}
+
+// ==========================================================================
+// SUPERVISOR DOS MINIGAMES (DONA CAPY FAZENDEIRA)
+// ==========================================================================
+let gamesSupervisorIntervalId = null;
+let gamesSupervisorFrame = 0;
+let gamesSupervisorSpeechTimer = null;
+
+const gamesSupervisorSpeeches = [
+    "Hora de relaxar um pouco dos campos! Qual jogo vamos jogar hoje? 🎮",
+    "Cultivar capim dá trabalho, mas ganhar capins nos minijogos é uma diversão! 🌾",
+    "Adivinhar as silhuetas me lembra de quando tentamos identificar as plantas jovens na horta. 🌿",
+    "O segredo de uma boa colheita e de um bom recorde é a paciência e persistência! 🏆",
+    "Um cérebro ativo com o jogo da memória é tão forte quanto uma terra bem adubada! 🧠",
+    "Sabia que as capivaras amam brincar tanto quanto amam um capim fresquinho no final do dia? 🦫",
+    "Trabalhar na fazenda é bom, mas exercitar a mente nos minigames é fundamental! ✨",
+    "Atenção máxima nas cartas do jogo da memória! Não vá confundir o jacaré com a capivara! 🐊",
+    "Nossa colheita está prosperando! Que tal celebrar batendo o recorde de adivinhação? 🥕",
+    "Mantenha o foco! Cada acerto aqui nos ajuda a expandir nossa amada Eco-Vila! 🌳"
+];
+
+function startGamesSupervisorAnimation() {
+    stopGamesSupervisorAnimation();
+    
+    // Animar sprite a 6fps (aproximadamente 160ms)
+    gamesSupervisorIntervalId = setInterval(() => {
+        gamesSupervisorFrame = (gamesSupervisorFrame + 1) % 8;
+        const spriteEl = document.getElementById('gamesSupervisorSprite');
+        if (spriteEl) {
+            spriteEl.style.backgroundPosition = `-${gamesSupervisorFrame * 36}px -105px`;
+        }
+    }, 160);
+
+    // Mudar frase a cada 10 segundos
+    changeGamesSupervisorSpeech();
+    gamesSupervisorSpeechTimer = setInterval(changeGamesSupervisorSpeech, 10000);
+}
+
+function stopGamesSupervisorAnimation() {
+    if (gamesSupervisorIntervalId) {
+        clearInterval(gamesSupervisorIntervalId);
+        gamesSupervisorIntervalId = null;
+    }
+    if (gamesSupervisorSpeechTimer) {
+        clearInterval(gamesSupervisorSpeechTimer);
+        gamesSupervisorSpeechTimer = null;
+    }
+}
+
+function changeGamesSupervisorSpeech() {
+    const textEl = document.getElementById('gamesSupervisorSpeech');
+    if (textEl) {
+        const speech = gamesSupervisorSpeeches[Math.floor(Math.random() * gamesSupervisorSpeeches.length)];
+        textEl.innerHTML = `"${speech}"`;
+    }
+}
+
+// ==========================================================================
+// SUPERVISOR DO DIÁRIO (DONA CAPY AVENTUREIRA)
+// ==========================================================================
+let homeSupervisorIntervalId = null;
+let homeSupervisorFrame = 0;
+let homeSupervisorSpeechTimer = null;
+
+const homeSupervisorSpeeches = [
+    "Bem-vindo ao seu diário de campo! Quantos animais registramos hoje? 📝",
+    "Cada foto tirada é um pedacinho da fauna brasileira que imortalizamos! 📸",
+    "Nossas expedições estão rendendo grandes descobertas. Continue explorando! 🧭",
+    "Mantenha o foco! O quintal é apenas o começo da nossa grande aventura. 🌳",
+    "Você sabia que a observação atenta é a maior virtude de um naturalista? 🧐",
+    "Estou revisando as anotações do diário... Cada espécie catalogada é fascinante! 📖",
+    "Prepare a câmera e as sementes (ou melhor, o capim)! Grandes mistérios nos aguardam. ✨",
+    "A vida selvagem é cheia de surpresas. Qual será o próximo animal brilhante? 🌟",
+    "Aventurar-se pela floresta exige respeito e carinho pela nossa biodiversidade! 🌿",
+    "Mochila pronta, espírito pronto... Vamos atualizar nosso diário ecológico! 🦫"
+];
+
+function startHomeSupervisorAnimation() {
+    stopHomeSupervisorAnimation();
+    
+    // Animar sprite a 6fps (aproximadamente 160ms)
+    homeSupervisorIntervalId = setInterval(() => {
+        homeSupervisorFrame = (homeSupervisorFrame + 1) % 8;
+        const spriteEl = document.getElementById('homeSupervisorSprite');
+        if (spriteEl) {
+            spriteEl.style.backgroundPosition = `-${homeSupervisorFrame * 33}px -114px`;
+        }
+    }, 160);
+
+    // Mudar frase a cada 10 segundos
+    changeHomeSupervisorSpeech();
+    homeSupervisorSpeechTimer = setInterval(changeHomeSupervisorSpeech, 10000);
+}
+
+function stopHomeSupervisorAnimation() {
+    if (homeSupervisorIntervalId) {
+        clearInterval(homeSupervisorIntervalId);
+        homeSupervisorIntervalId = null;
+    }
+    if (homeSupervisorSpeechTimer) {
+        clearInterval(homeSupervisorSpeechTimer);
+        homeSupervisorSpeechTimer = null;
+    }
+}
+
+function changeHomeSupervisorSpeech() {
+    const textEl = document.getElementById('homeSupervisorSpeech');
+    if (textEl) {
+        const speech = homeSupervisorSpeeches[Math.floor(Math.random() * homeSupervisorSpeeches.length)];
+        textEl.innerHTML = `"${speech}"`;
+    }
+}
+
+// ==========================================================================
+// BATE-CAPY — REDESIGN COM SPRITES REAIS + 10 NÍVEIS
 // ==========================================================================
 
-const scientificSlots = {
-    head: [
-        null,
-        { id: 'safari_helmet', image: 'acc_safari_helmet.png', label: 'Capacete Safári' },
-        { id: 'explorer_hat', image: 'acc_explorer_hat.png', label: 'Chapéu de Trilha' },
-        { id: 'beanie', image: 'acc_beanie.png', label: 'Gorro de Frio' }
-    ],
-    eyes: [
-        null,
-        { id: 'glasses', image: 'acc_glasses.png', label: 'Óculos Cientista' },
-        { id: 'goggles', image: 'acc_goggles.png', label: 'Óculos Mergulho' },
-        { id: 'monocle', image: 'acc_monocle.png', label: 'Monóculo Clássico' }
-    ],
-    body: [
-        null,
-        { id: 'lab_coat', image: 'acc_lab_coat.png', label: 'Jaleco de Ciência' },
-        { id: 'backpack', image: 'acc_backpack.png', label: 'Mochila de Campo' },
-        { id: 'vest', image: 'acc_vest.png', label: 'Colete de Guarda' }
-    ],
-    hand: [
-        null,
-        { id: 'magnifier', image: 'acc_magnifier.png', label: 'Lupa do Biólogo' },
-        { id: 'compass', image: 'acc_compass.png', label: 'Bússola' },
-        { id: 'flashlight', image: 'acc_flashlight.png', label: 'Lanterna' },
-        { id: 'net', image: 'acc_net.png', label: 'Rede de Insetos' },
-        { id: 'map', image: 'acc_map.png', label: 'Mapa das Matas' },
-        { id: 'microscope', image: 'acc_microscope.png', label: 'Microscópio' },
-        { id: 'notebook', image: 'acc_notebook.png', label: 'Diário Científico' },
-        { id: 'camera', image: 'acc_camera.png', label: 'Câmera Pro' },
-        { id: 'walkie_talkie', image: 'acc_walkie_talkie.png', label: 'Rádio Amador' },
-        { id: 'potion', image: 'acc_potion.png', label: 'Poção de Cura' }
-    ],
-    feet: [
-        null,
-        { id: 'boots', image: 'acc_boots.png', label: 'Botas de Trilha' },
-        { id: 'rain_boots', image: 'acc_rain_boots.png', label: 'Galochas' },
-        { id: 'sneakers', image: 'acc_sneakers.png', label: 'Tênis Rápido' },
-        { id: 'socks', image: 'acc_socks.png', label: 'Meias Quentinhas' }
-    ]
-};
+// Config de cada tipo de capivara (sprite sheet original 1×, idle = row 0)
+const wacCapyTypes = [
+    { name: 'Aventureira', src: 'capybara_adventurer/atlas.webp', w: 33, h: 38, sheetW: 264, sheetH: 228, frames: 4 },
+    { name: 'Fazendeira',  src: 'farmer_capybara/atlas.webp',     w: 36, h: 35, sheetW: 288, sheetH: 210, frames: 4 },
+    { name: 'Pescadora',   src: 'capybara_fisherman/atlas.webp',  w: 38, h: 34, sheetW: 304, sheetH: 204, frames: 4 },
+    { name: 'Cientista',   src: 'capybara_scientist/atlas.webp',  w: 34, h: 34, sheetW: 272, sheetH: 204, frames: 4 },
+    { name: 'Bióloga',     src: 'capybara_biologist/atlas.webp',  w: 33, h: 38, sheetW: 264, sheetH: 228, frames: 4 },
+];
 
-let currentComboIndices = { head: 0, eyes: 0, body: 0, hand: 0, feet: 0 };
-let comboRotationInterval = null;
-let comboRotationPlaying = true;
+const WAC_SCALE = 2; // pixel-art scale (2×)
 
-function calculateComboNumber() {
-    let index = currentComboIndices.feet;
-    index = index * scientificSlots.body.length + currentComboIndices.body;
-    index = index * scientificSlots.head.length + currentComboIndices.head;
-    index = index * scientificSlots.eyes.length + currentComboIndices.eyes;
-    index = index * scientificSlots.hand.length + currentComboIndices.hand;
-    return index + 1;
+// 10 níveis: mais buracos, mais rápido, mais recompensa
+const wacLevels = [
+    // lvl  holes  spawnMin spawnMax  upTime  reward  xp  cols  unlock
+    { level:  1, holes: 12, spawnMin:1200, spawnMax:1850, upTime:1600, reward: 10, xp: 10, cols:4, unlock: 4  },
+    { level:  2, holes: 12, spawnMin:1000, spawnMax:1600, upTime:1380, reward: 18, xp: 15, cols:4, unlock: 5  },
+    { level:  3, holes: 12, spawnMin: 850, spawnMax:1350, upTime:1150, reward: 27, xp: 20, cols:4, unlock: 6  },
+    { level:  4, holes: 12, spawnMin: 700, spawnMax:1100, upTime: 950, reward: 37, xp: 28, cols:4, unlock: 7  },
+    { level:  5, holes: 12, spawnMin: 580, spawnMax: 940, upTime: 800, reward: 50, xp: 36, cols:4, unlock: 8  },
+    { level:  6, holes: 12, spawnMin: 475, spawnMax: 775, upTime: 670, reward: 65, xp: 46, cols:4, unlock: 9  },
+    { level:  7, holes: 12, spawnMin: 385, spawnMax: 630, upTime: 560, reward: 82, xp: 58, cols:4, unlock:10  },
+    { level:  8, holes: 12, spawnMin: 305, spawnMax: 505, upTime: 460, reward:102, xp: 72, cols:4, unlock:12  },
+    { level:  9, holes: 12, spawnMin: 235, spawnMax: 395, upTime: 370, reward:126, xp: 88, cols:4, unlock:14  },
+    { level: 10, holes: 12, spawnMin: 165, spawnMax: 295, upTime: 280, reward:160, xp:110, cols:4, unlock:16  },
+];
+
+let wacCurrentLevel  = parseInt(localStorage.getItem('capy_wac_level')) || 1;
+let wacIsPlaying     = false;
+let wacScore         = 0;
+let wacTimeLeft      = 30;
+let wacTimerInterval = null;
+let wacSpawnTimeout  = null;
+let wacHoleTimeouts  = [];
+let wacHoleStates    = [];   // [{typeIdx, frameInterval, frame}, ...]
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+function wacSpec() {
+    return wacLevels[Math.min(wacCurrentLevel, wacLevels.length) - 1];
 }
 
-function startComboRotation() {
-    if (comboRotationInterval) clearInterval(comboRotationInterval);
-    updateScientificComboDOM();
-    if (comboRotationPlaying) {
-        comboRotationInterval = setInterval(rotateScientificAvatar, 2000);
-    }
+function wacUpdateHeaderUI() {
+    const s = wacSpec();
+    const lv = document.getElementById('wacLevelIndicator');
+    const rw = document.getElementById('wacRewardBadge');
+    if (lv) lv.textContent = `Nível ${wacCurrentLevel} / 10`;
+    if (rw) rw.innerHTML  = `+${s.reward} <img src="seed_coin.png" class="w-3 h-3 object-contain inline-block">`;
 }
 
-function stopComboRotation() {
-    if (comboRotationInterval) {
-        clearInterval(comboRotationInterval);
-        comboRotationInterval = null;
-    }
+// ─── Build grid ──────────────────────────────────────────────────────────────
+
+function wacBuildGrid() {
+    const s = wacSpec();
+    const grid = document.getElementById('wacGrid');
+    if (!grid) return;
+    grid.className = `wac-grid wac-grid-c${s.cols}`;
+    grid.innerHTML = Array.from({ length: s.holes }, (_, i) => `
+        <div class="wac-hole" id="wacHole${i}" onclick="wacWhack(${i})">
+            <div class="wac-mound-back"></div>
+            <div class="wac-mound-grass"></div>
+            <div class="wac-pit"></div>
+            <div class="wac-peek-window">
+                <div class="wac-sprite-inner" id="wacSprite${i}"></div>
+            </div>
+            <div class="wac-mound-front"></div>
+        </div>
+    `).join('');
+    wacHoleStates = Array.from({ length: s.holes }, () => ({
+        typeIdx: -1,
+        frameInterval: null,
+        frame: 0
+    }));
 }
 
-function togglePlayPauseCombo() {
+// ─── Game lifecycle ──────────────────────────────────────────────────────────
+
+function startWacGame() {
+    if (wacIsPlaying) return;
     playSound('click');
-    comboRotationPlaying = !comboRotationPlaying;
-    const btn = document.getElementById('btnPlayPauseCombo');
-    if (!btn) return;
-    
-    if (comboRotationPlaying) {
-        btn.innerHTML = `<i class="fas fa-pause"></i> Pausar`;
-        btn.classList.add('bg-green-700', 'hover:bg-green-800');
-        btn.classList.remove('bg-amber-600', 'hover:bg-amber-700');
-        startComboRotation();
+    wacIsPlaying = true;
+    wacScore     = 0;
+    wacTimeLeft  = 30;
+
+    const result   = document.getElementById('wacResult');
+    const startBtn = document.getElementById('wacStartBtn');
+    const scoreEl  = document.getElementById('wacScore');
+    if (result)   result.classList.add('hidden');
+    if (startBtn) startBtn.style.display = 'none';
+    if (scoreEl)  scoreEl.textContent = '0';
+
+    wacBuildGrid();
+    wacUpdateTimerBar();
+
+    wacTimerInterval = setInterval(() => {
+        wacTimeLeft--;
+        wacUpdateTimerBar();
+        if (wacTimeLeft <= 0) wacEndGame();
+    }, 1000);
+
+    wacScheduleSpawn();
+}
+
+function wacUpdateTimerBar() {
+    const bar = document.getElementById('wacTimerBar');
+    const lbl = document.getElementById('wacTimeLeft');
+    if (!bar || !lbl) return;
+    const pct = (wacTimeLeft / 30) * 100;
+    bar.style.width = pct + '%';
+    bar.className = 'wac-timer-bar' + (pct <= 20 ? ' danger' : pct <= 45 ? ' warning' : '');
+    lbl.textContent = wacTimeLeft + 's';
+}
+
+// ─── Spawning ────────────────────────────────────────────────────────────────
+
+function wacScheduleSpawn() {
+    if (!wacIsPlaying) return;
+    const s = wacSpec();
+    const delay = s.spawnMin + Math.random() * (s.spawnMax - s.spawnMin);
+    wacSpawnTimeout = setTimeout(wacSpawnCapy, delay);
+}
+
+function wacApplySpriteFrame(spriteEl, type, frame) {
+    const sc = WAC_SCALE;
+    // row 0 = idle: Y offset = 0; X offset = frame * width * scale
+    spriteEl.style.backgroundPosition = `-${frame * type.w * sc}px 0px`;
+}
+
+function wacSpawnCapy() {
+    if (!wacIsPlaying) return;
+    const s = wacSpec();
+
+    // Pick a free (down) hole
+    const down = [];
+    for (let i = 0; i < s.holes; i++) {
+        const h = document.getElementById('wacHole' + i);
+        if (h && !h.classList.contains('up') && !h.classList.contains('hit')) down.push(i);
+    }
+    if (!down.length) { wacScheduleSpawn(); return; }
+
+    const idx  = down[Math.floor(Math.random() * down.length)];
+    const hole = document.getElementById('wacHole' + idx);
+    const sp   = document.getElementById('wacSprite' + idx);
+    if (!hole || !sp) { wacScheduleSpawn(); return; }
+
+    // Pick random capybara type
+    const typeIdx = Math.floor(Math.random() * wacCapyTypes.length);
+    const type    = wacCapyTypes[typeIdx];
+    const sc      = WAC_SCALE;
+
+    wacHoleStates[idx].typeIdx = typeIdx;
+    wacHoleStates[idx].frame   = 0;
+
+    // Style the sprite (2× scaled spritesheet, idle row = 0)
+    sp.style.width            = (type.w * sc) + 'px';
+    sp.style.height           = (type.h * sc) + 'px';
+    sp.style.backgroundImage  = `url('${type.src}')`;
+    sp.style.backgroundRepeat = 'no-repeat';
+    sp.style.backgroundSize   = `${type.sheetW * sc}px ${type.sheetH * sc}px`;
+    wacApplySpriteFrame(sp, type, 0);
+
+    // Pop up (CSS transition handles animation)
+    hole.classList.add('up');
+
+    // Animate idle frames at ~3fps
+    clearInterval(wacHoleStates[idx].frameInterval);
+    wacHoleStates[idx].frameInterval = setInterval(() => {
+        if (!wacHoleStates[idx]) return;
+        wacHoleStates[idx].frame = (wacHoleStates[idx].frame + 1) % type.frames;
+        const spEl = document.getElementById('wacSprite' + idx);
+        if (spEl) wacApplySpriteFrame(spEl, type, wacHoleStates[idx].frame);
+    }, 320);
+
+    // Auto-retract after upTime
+    const autoHide = setTimeout(() => {
+        const h2 = document.getElementById('wacHole' + idx);
+        if (h2 && h2.classList.contains('up') && !h2.classList.contains('hit')) {
+            wacRetractHole(idx);
+        }
+    }, s.upTime);
+    wacHoleTimeouts.push(autoHide);
+
+    wacScheduleSpawn();
+}
+
+function wacRetractHole(idx) {
+    const hole = document.getElementById('wacHole' + idx);
+    if (hole) hole.classList.remove('up');
+    if (wacHoleStates[idx]) {
+        clearInterval(wacHoleStates[idx].frameInterval);
+        wacHoleStates[idx].frameInterval = null;
+    }
+}
+
+// ─── Interaction ─────────────────────────────────────────────────────────────
+
+function wacSpawnStars(holeEl) {
+    const icons = ['⭐','✨','💥','🌟','⚡'];
+    for (let i = 0; i < 5; i++) {
+        const star  = document.createElement('span');
+        star.className   = 'wac-star';
+        star.textContent = icons[i % icons.length];
+        const angle = (i / 5) * Math.PI * 2 - Math.PI / 2;
+        const dist  = 24 + Math.random() * 20;
+        star.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
+        star.style.setProperty('--ty', `${Math.sin(angle) * dist - 10}px`);
+        star.style.left      = '50%';
+        star.style.top       = '30%';
+        star.style.marginLeft = '-0.5em';
+        holeEl.appendChild(star);
+        setTimeout(() => star.remove(), 560);
+    }
+}
+
+function wacWhack(idx) {
+    if (!wacIsPlaying) return;
+    const hole = document.getElementById('wacHole' + idx);
+    if (!hole) return;
+
+    if (!hole.classList.contains('up') || hole.classList.contains('hit')) {
+        // Miss — red ripple
+        hole.classList.add('miss');
+        setTimeout(() => hole.classList.remove('miss'), 420);
+        return;
+    }
+
+    // HIT ✅
+    playSound('coin');
+    clearInterval(wacHoleStates[idx]?.frameInterval);
+    if (wacHoleStates[idx]) wacHoleStates[idx].frameInterval = null;
+
+    hole.classList.remove('up');
+    hole.classList.add('hit');
+
+    wacScore++;
+    const scoreEl = document.getElementById('wacScore');
+    if (scoreEl) scoreEl.textContent = wacScore;
+
+    // Floating +1
+    const pop = document.createElement('span');
+    pop.className   = 'wac-score-pop';
+    pop.textContent = '+1';
+    hole.appendChild(pop);
+    setTimeout(() => pop.remove(), 700);
+
+    // Star burst
+    wacSpawnStars(hole);
+
+    // Reset hole after hit animation
+    setTimeout(() => hole.classList.remove('hit'), 330);
+}
+
+// ─── End & rewards ───────────────────────────────────────────────────────────
+
+function wacEndGame() {
+    wacIsPlaying = false;
+    clearInterval(wacTimerInterval);
+    clearTimeout(wacSpawnTimeout);
+    wacHoleTimeouts.forEach(t => clearTimeout(t));
+    wacHoleTimeouts = [];
+
+    // Clean up all holes
+    const s = wacSpec();
+    for (let i = 0; i < s.holes; i++) {
+        const h = document.getElementById('wacHole' + i);
+        if (h) h.classList.remove('up', 'hit', 'miss');
+        if (wacHoleStates[i]) {
+            clearInterval(wacHoleStates[i].frameInterval);
+            wacHoleStates[i].frameInterval = null;
+        }
+    }
+
+    // Rewards (min 3 hits required)
+    const minHits = 3;
+    let earned = 0, earnedXP = 0;
+    if (wacScore >= minHits) {
+        earned   = s.reward + Math.max(0, wacScore - minHits) * 3;
+        earnedXP = s.xp;
+        seedCoins  += earned;
+        guardianXP += earnedXP;
+        localStorage.setItem('capy_seeds', seedCoins);
+        localStorage.setItem('capy_xpPlay', guardianXP);
+        scheduleGameStateSync();
+        playSound('success');
+        createConfetti();
     } else {
-        btn.innerHTML = `<i class="fas fa-play"></i> Iniciar`;
-        btn.classList.remove('bg-green-700', 'hover:bg-green-800');
-        btn.classList.add('bg-amber-600', 'hover:bg-amber-700');
-        stopComboRotation();
+        playSound('click');
     }
-}
 
-function nextComboManual() {
-    playSound('click');
-    rotateScientificAvatar();
-}
+    // Show result
+    const result     = document.getElementById('wacResult');
+    const resultText = document.getElementById('wacResultText');
+    const startBtn   = document.getElementById('wacStartBtn');
 
-function rotateScientificAvatar() {
-    currentComboIndices.hand = (currentComboIndices.hand + 1) % scientificSlots.hand.length;
-    if (currentComboIndices.hand === 0) {
-        currentComboIndices.eyes = (currentComboIndices.eyes + 1) % scientificSlots.eyes.length;
-        if (currentComboIndices.eyes === 0) {
-            currentComboIndices.head = (currentComboIndices.head + 1) % scientificSlots.head.length;
-            if (currentComboIndices.head === 0) {
-                currentComboIndices.body = (currentComboIndices.body + 1) % scientificSlots.body.length;
-                if (currentComboIndices.body === 0) {
-                    currentComboIndices.feet = (currentComboIndices.feet + 1) % scientificSlots.feet.length;
-                }
-            }
-        }
-    }
-    updateScientificComboDOM();
-}
-
-function updateScientificComboDOM() {
-    const baseMascotImg = document.getElementById('labMascotBase');
-    if (!baseMascotImg) return;
-    
-    const equipped = {
-        head: scientificSlots.head[currentComboIndices.head],
-        eyes: scientificSlots.eyes[currentComboIndices.eyes],
-        body: scientificSlots.body[currentComboIndices.body],
-        hand: scientificSlots.hand[currentComboIndices.hand],
-        feet: scientificSlots.feet[currentComboIndices.feet]
-    };
-    
-    let activeSetImage = null;
-    if (equipped.eyes && equipped.eyes.id === 'glasses' && equipped.body && equipped.body.id === 'lab_coat') {
-        activeSetImage = 'capy_set_scientist.png';
-    } else if (equipped.head && equipped.head.id === 'explorer_hat' && equipped.body && equipped.body.id === 'backpack') {
-        activeSetImage = 'capy_set_explorer.png';
-    }
-    
-    if (activeSetImage) {
-        baseMascotImg.src = activeSetImage;
-    } else if (equipped.body) {
-        baseMascotImg.src = 'capybara_mascot_clean.png';
-    } else {
-        baseMascotImg.src = 'capybara_mascot.png';
-    }
-    
-    const activeSetItems = activeSetImage ? (activeSetImage === 'capy_set_scientist.png' ? 
-        ['safari_helmet', 'glasses', 'lab_coat', 'microscope', 'sneakers'] : 
-        ['explorer_hat', 'sunglasses', 'backpack', 'compass', 'boots']) : [];
-        
-    ['head', 'eyes', 'body', 'hand', 'feet'].forEach(slot => {
-        const layer = slot === 'feet' ? document.getElementById('labSlotFeet') : document.getElementById('labSlot' + slot.charAt(0).toUpperCase() + slot.slice(1));
-        if (!layer) return;
-        
-        const item = equipped[slot];
-        const isDrawnInSet = item && activeSetItems.includes(item.id);
-        
-        if (item && !isDrawnInSet) {
-            layer.innerHTML = `<img src="${item.image}" class="acc-img acc-${item.id} w-full h-full object-contain select-none pointer-events-none transition-all duration-300">`;
+    if (result && resultText) {
+        result.classList.remove('hidden');
+        if (wacScore >= minHits) {
+            resultText.innerHTML = `Você acertou <strong>${wacScore}</strong> capivaras! +${earned} capins e +${earnedXP} XP 🎉`;
         } else {
-            if (slot === 'feet') {
-                layer.innerHTML = `<span class="foot-l"></span><span class="foot-r"></span>`;
-            } else {
-                layer.innerHTML = '';
-            }
-        }
-    });
-    
-    const equippedLabels = [];
-    ['head', 'eyes', 'body', 'hand', 'feet'].forEach(slot => {
-        if (equipped[slot]) equippedLabels.push(equipped[slot].label);
-    });
-    
-    const textEl = document.getElementById('labComboEquippedText');
-    if (textEl) {
-        if (equippedLabels.length === 0) {
-            textEl.innerHTML = `Nenhum equipamento equipado. (Capivara Cientista ao natural! 🦦🌿)`;
-        } else {
-            textEl.innerHTML = `Equipado: <span class="text-green-800">${equippedLabels.join(' + ')}</span>`;
+            resultText.innerHTML = `Você acertou ${wacScore} vez${wacScore !== 1 ? 'es' : ''}... Precisava de ${minHits} para ganhar! 💪`;
         }
     }
-    
-    const counterEl = document.getElementById('comboCounter');
-    if (counterEl) {
-        const comboNum = calculateComboNumber();
-        const totalCombos = scientificSlots.head.length * scientificSlots.eyes.length * scientificSlots.body.length * scientificSlots.hand.length * scientificSlots.feet.length;
-        counterEl.innerText = `Combo: ${comboNum}/${totalCombos}`;
+
+    // Level unlock
+    if (wacScore >= s.unlock && wacCurrentLevel < 10) {
+        wacCurrentLevel++;
+        localStorage.setItem('capy_wac_level', wacCurrentLevel);
+        showToast(`Nível ${wacCurrentLevel} desbloqueado! 🔓`, '🦫');
+    } else if (wacCurrentLevel >= 10 && wacScore >= s.unlock) {
+        showToast('Você é mestre do Bate-Capy! 🏆', '🦫');
+    }
+
+    wacUpdateHeaderUI();
+    renderApp();
+
+    if (startBtn) {
+        startBtn.textContent   = 'JOGAR NOVAMENTE';
+        startBtn.style.display = 'block';
     }
 }
+
+// ─── Init on DOMContentLoaded ────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    wacUpdateHeaderUI();
+    wacBuildGrid();
+});
 
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(e => {}));
+

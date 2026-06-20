@@ -79,3 +79,17 @@ Copie o arquivo `.env.example` para `.env` e suba o backend:
 docker compose up -d --build
 ```
 A API backend roda localmente na porta `3000`. O front-end em `app.js` detecta se a API está online de forma automática e faz a transição transparente de modo offline para modo sincronizado com banco MariaDB.
+
+---
+
+## 🎥 6. Vídeo de Fundo da Eco-Vila & Bypass de Range Requests
+
+A Eco-Vila conta com um plano de fundo dinâmico animado (`Trees_blowing_wind_river_birds_202606201621.mp4`) no lugar da imagem estática de fallback:
+
+*   **Enquadramento Isométrico e Crop de Barras Pretas**:
+    O vídeo original possui formato widescreen 16:9 (1280x720) com barras pretas (pillarboxing) nas laterais. O conteúdo ativo da animação é um quadrado 1:1 de 715x715px posicionado em `x=283, y=3`. Para alinhar esse vídeo de forma perfeita ao mapa e aos caminhos das capivaras, ele é renderizado com `width: 179.02%`, `height: 100.7%`, `left: -39.58%` e `top: -0.42%`, dentro de um contêiner com `overflow-hidden`. A propriedade `max-width: none` (classe `max-w-none`) sobrescreve o reset default do Tailwind para permitir que o vídeo estique além de 100% de largura.
+*   **Contexto de Empilhamento e z-index Negativo**:
+    Para evitar que o vídeo acelerado por hardware cubra os elementos da vila, a imagem de fallback estática utiliza `z-index: -2` e o contêiner de vídeo utiliza `z-index: -1`. Assim, todos os elementos e contêineres de jogo (como prédios em `z-10` e capivaras em `z-[12]`) aparecem por cima da animação.
+*   **Bypass de Range Requests no Service Worker**:
+    Navegadores como Safari (iOS/macOS) e Chrome requerem range requests (HTTP 206 Partial Content) para renderizar mídias HTML5. Para evitar falhas no carregamento de áudios/vídeos a partir do cache do Service Worker, configuramos o `service-worker.js` para não interceptar requisições com cabeçalho `Range` ou com extensões `.mp4` e `.ogg`.
+

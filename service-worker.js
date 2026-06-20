@@ -1,10 +1,19 @@
-const CACHE_NAME = 'capivara-v26';
+const CACHE_NAME = 'capivara-v41';
 const ASSETS = [
   './',
   './index.html',
   './style.css',
+  './Trees_blowing_wind_river_birds_202606201621.mp4',
   './capybara_adventurer/atlas.webp',
   './capybara_adventurer/atlas.json',
+  './farmer_capybara/atlas.webp',
+  './farmer_capybara/atlas.json',
+  './capybara_fisherman/atlas.webp',
+  './capybara_fisherman/atlas.json',
+  './capybara_scientist/atlas.webp',
+  './capybara_scientist/atlas.json',
+  './capybara_biologist/atlas.webp',
+  './capybara_biologist/atlas.json',
   './village_cloud.png',
   './capy_npc_green_front.png',
   './capy_npc_green_back.png',
@@ -28,6 +37,8 @@ const ASSETS = [
   './capy_set_musician.png',
   './splash_capybara.png',
   './seed_coin.png',
+  './wac_grass_bg.png',
+  './wac_hole.png',
   './mystery_box.png',
   './capy_village.png',
   './privacy.html',
@@ -138,6 +149,16 @@ self.addEventListener('fetch', event => {
 
   // Nao intercepta requests externas: evita erro de CSP no service worker.
   if (request.method !== 'GET' || url.origin !== self.location.origin) {
+    return;
+  }
+
+  // IGNORAR INTERCEPTAÇÃO DE VÍDEOS/ÁUDIOS E RANGE REQUESTS:
+  // Navegadores baseados em WebKit (Safari no iOS/macOS) e Chrome utilizam cabeçalhos 'Range' para buscar 
+  // arquivos de mídia por partes (chunks). Se o Service Worker tentar responder com caches.match() retornando 
+  // uma resposta padrão 200 completa, a reprodução de tags <video> e <audio> falha imediatamente.
+  // Ignoramos a interceptação para permitir que essas requisições cheguem diretamente ao backend Express, 
+  // que suporta range requests (HTTP 206 Partial Content) nativamente.
+  if (request.headers.get('range') || url.pathname.endsWith('.mp4') || url.pathname.endsWith('.ogg')) {
     return;
   }
 

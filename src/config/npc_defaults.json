@@ -1,0 +1,47 @@
+[
+  {
+    "name": "Capy Aventureira",
+    "color": "adventurer",
+    "role": "Aventureira",
+    "speed": 0.7,
+    "frameWidth": 33,
+    "frameHeight": 38,
+    "spritesheet": "capybara_adventurer/atlas.webp"
+  },
+  {
+    "name": "Capy Fazendeira",
+    "color": "farmer",
+    "role": "Fazendeira",
+    "speed": 0.65,
+    "frameWidth": 36,
+    "frameHeight": 35,
+    "spritesheet": "farmer_capybara/atlas.webp"
+  },
+  {
+    "name": "Capy Pescadora Animada",
+    "color": "fisherman",
+    "role": "Pescadora Pro",
+    "speed": 0.6,
+    "frameWidth": 38,
+    "frameHeight": 34,
+    "spritesheet": "capybara_fisherman/atlas.webp"
+  },
+  {
+    "name": "Capy Cientista",
+    "color": "scientist",
+    "role": "Cientista",
+    "speed": 0.7,
+    "frameWidth": 34,
+    "frameHeight": 34,
+    "spritesheet": "capybara_scientist/atlas.webp"
+  },
+  {
+    "name": "Capy Bióloga",
+    "color": "biologist",
+    "role": "Bióloga",
+    "speed": 0.75,
+    "frameWidth": 33,
+    "frameHeight": 38,
+    "spritesheet": "capybara_biologist/atlas.webp"
+  }
+]
