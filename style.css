@@ -1770,17 +1770,21 @@ body.night-mode .text-on-white {
     }
     body.on-vila-view #nextMissionCountdown {
         position: fixed !important;
-        bottom: 50px !important;
-        right: 8px !important;
+        left: 83% !important;
+        top: 75% !important;
+        bottom: auto !important;
+        right: auto !important;
+        transform: translate(-50%, -50%) !important;
         z-index: 10000 !important;
-        transform: none !important;
     }
     body.on-vila-view #btnObrasOpen {
         position: fixed !important;
-        bottom: 8px !important;
-        right: 8px !important;
+        left: 83% !important;
+        top: 84% !important;
+        bottom: auto !important;
+        right: auto !important;
+        transform: translate(-50%, -50%) !important;
         z-index: 10000 !important;
-        transform: none !important;
         width: auto !important;
         margin: 0 !important;
     }
