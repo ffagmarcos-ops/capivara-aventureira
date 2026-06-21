@@ -630,6 +630,26 @@ const bgmTracksSpec = {
         melodyVol: 0.11,
         melodyChance: 0.55,
         hasDelay: true
+    },
+    adventure: {
+        stepTime: 0.214, // 140 BPM (8th notes: 60 / 280)
+        bassNotes: [110.00, 110.00, 146.83, 164.81], // A2, A2, D3, E3
+        chordTones: [
+            [220.00, 261.63, 329.63, 392.00], // Am7
+            [220.00, 261.63, 329.63, 392.00], // Am7
+            [293.66, 349.23, 440.00, 523.25], // Dm7
+            [329.63, 392.00, 493.88, 587.33]  // Em7
+        ],
+        melodyScale: [440.00, 493.88, 523.25, 587.33, 659.25, 783.99, 880.00], // A minor pentatonic / natural scale
+        bassOsc: 'sawtooth',
+        chordOsc: 'triangle',
+        melodyOsc: 'sawtooth',
+        masterVol: 0.08,
+        bassVol: 0.16,
+        chordVol: 0.08,
+        melodyVol: 0.04,
+        melodyChance: 0.65,
+        hasDelay: true
     }
 };
 
@@ -790,6 +810,29 @@ function playSound(type) {
             gain2.connect(audioCtx.destination);
             osc2.start(now + 0.03);
             osc2.stop(now + 0.08);
+        } else if (type === 'alert') {
+            // Futurist double beep (880Hz -> 1174Hz)
+            const osc1 = audioCtx.createOscillator();
+            const gain1 = audioCtx.createGain();
+            osc1.type = 'sine';
+            osc1.frequency.setValueAtTime(880, now);
+            gain1.gain.setValueAtTime(0.12, now);
+            gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+            osc1.connect(gain1);
+            gain1.connect(audioCtx.destination);
+            osc1.start(now);
+            osc1.stop(now + 0.16);
+
+            const osc2 = audioCtx.createOscillator();
+            const gain2 = audioCtx.createGain();
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(1174.66, now + 0.12);
+            gain2.gain.setValueAtTime(0.12, now + 0.12);
+            gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.27);
+            osc2.connect(gain2);
+            gain2.connect(audioCtx.destination);
+            osc2.start(now + 0.12);
+            osc2.stop(now + 0.28);
         } else if (type === 'coin') {
             // Chime retrô fofo (E5 -> G5 -> C6 -> E6)
             const notes = [659.25, 783.99, 1046.50, 1318.51];
@@ -1641,6 +1684,10 @@ let minigameDuration = 0;
 let minigameIntervalId = null;
 let currentMinigameScore = 0;
 let targetMinigameScore = 0;
+let nextMissionTimestamp = parseInt(localStorage.getItem('capy_next_mission_time')) || (Date.now() + 180000);
+if (!localStorage.getItem('capy_next_mission_time')) {
+    localStorage.setItem('capy_next_mission_time', nextMissionTimestamp);
+}
 
 const villagePaths = [
     // Rota 1: Prefeitura ➔ Ponte ➔ Docas (Atravessa a ponte!)
@@ -2420,9 +2467,31 @@ setInterval(() => {
         }
     }
     
+    // Ticking the next mission countdown
+    const now = Date.now();
+    if (!activeMissionNpc) {
+        const timeLeft = Math.max(0, nextMissionTimestamp - now);
+        if (timeLeft <= 0) {
+            checkAndTriggerMission();
+        } else {
+            const countdownEl = document.getElementById('nextMissionCountdown');
+            if (countdownEl) {
+                const minutes = Math.floor(timeLeft / 60000);
+                const seconds = Math.floor((timeLeft % 60000) / 1000);
+                countdownEl.innerHTML = `<i class="fas fa-clock"></i> Próxima Missão: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                countdownEl.className = "bg-emerald-600/90 text-white font-black px-2.5 py-1 rounded-full text-[8px] tracking-wider uppercase border border-emerald-400 shadow pointer-events-auto mt-1 flex items-center gap-1";
+            }
+        }
+    } else {
+        const countdownEl = document.getElementById('nextMissionCountdown');
+        if (countdownEl) {
+            countdownEl.innerHTML = `<i class="fas fa-exclamation-triangle animate-pulse"></i> Missão Ativa! 🦫`;
+            countdownEl.className = "bg-amber-500/95 text-amber-950 font-black px-2.5 py-1 rounded-full text-[8px] tracking-wider uppercase border border-amber-300 shadow pointer-events-auto mt-1 flex items-center gap-1";
+        }
+    }
+    
     // Verifica status de construção para cada prédio
     let needsRender = false;
-    const now = Date.now();
     for (let key in villageState.buildings) {
         const b = villageState.buildings[key];
         if (b.underConstruction) {
@@ -3839,38 +3908,33 @@ function wacEndGame() {
 
 const npcMissionDialogues = {
     adventurer: {
-        text: "Ei! Encontrei um baú antigo trancado na floresta! Preciso de ajuda para abri-lo rápido antes que a chave quebre. Topa?",
+        text: "Ei! Encontrei um baú antigo trancado na floresta! Preciso de ajuda para abri-lo rápido antes que a chave quebre. Topa?\n\n[Como jogar: Clique ou toque repetidamente na tela o mais rápido possível para encher a barra de força antes que o tempo acabe!]",
         title: "Baú de Relíquias"
     },
     farmer: {
-        text: "Olá! A horta está cheia de vegetais prontos para colheita, mas as capivaras vizinhas estão querendo comê-los! Me ajuda na colheita relâmpago?",
+        text: "Olá! A horta está cheia de vegetais prontos para colheita, mas as capivaras vizinhas estão querendo comê-los! Me ajuda na colheita relâmpago?\n\n[Como jogar: Legumes vão brotar na terra e sumir rapidamente. Clique neles para colhê-los antes que desapareçam! Colha a quantidade necessária no tempo limite.]",
         title: "Colheita Relâmpago"
     },
     fisherman: {
-        text: "O rio está agitado e os peixes estão muito espertos hoje! Preciso de alguém com bons reflexos para me ajudar com a pescaria de precisão.",
+        text: "O rio está agitado e os peixes estão muito espertos hoje! Preciso de alguém com bons reflexos para me ajudar com a pescaria de precisão.\n\n[Como jogar: Uma linha de pesca vai oscilar na barra. Clique ou toque na tela exatamente quando o indicador estiver sobre a área verde marcada!]",
         title: "Fisgada de Precisão"
     },
     scientist: {
-        text: "Olá, assistente! Estou no meio de um experimento crítico e preciso misturar as poções nas cores corretas. Pode me ajudar no laboratório?",
+        text: "Olá, assistente! Estou no meio de um experimento crítico e preciso misturar as poções nas cores corretas. Pode me ajudar no laboratório?\n\n[Como jogar: Misture as cores dos frascos (Vermelho, Azul, Amarelo) para criar a cor alvo exibida na tela. Exemplo: Vermelho + Azul = Roxo!]",
         title: "Laboratório de Poções"
     },
     biologist: {
-        text: "Tudo bem? Estou catalogando a fauna da nossa vila, mas os animais se movem muito rápido! Preciso que você identifique o animal alvo rapidamente.",
+        text: "Tudo bem? Estou catalogando a fauna da nossa vila, mas os animais se movem muito rápido! Preciso que você identifique o animal alvo rapidamente.\n\n[Como jogar: Observe o animal solicitado no topo da tela e clique na foto correta dele na grade de opções logo abaixo antes do tempo acabar!]",
         title: "Foco na Fauna"
     }
 };
 
 function startVillageMissionTimer() {
-    stopVillageMissionTimer();
-    // 3 minutos (180000ms)
-    missionTimerId = setInterval(checkAndTriggerMission, 180000);
+    // Timer is managed globally in the 1-second interval loop
 }
 
 function stopVillageMissionTimer() {
-    if (missionTimerId) {
-        clearInterval(missionTimerId);
-        missionTimerId = null;
-    }
+    // Timer is managed globally
 }
 
 function checkAndTriggerMission() {
@@ -3880,6 +3944,19 @@ function checkAndTriggerMission() {
     // Escolhe um NPC aleatório
     const randomNpc = villageNPCs[Math.floor(Math.random() * villageNPCs.length)];
     triggerMissionForNpc(randomNpc);
+}
+
+function getActiveView() {
+    let activeView = 'vila';
+    const views = ['home', 'lab', 'vila', 'games', 'album', 'badges'];
+    for (const v of views) {
+        const el = document.getElementById(v + 'View');
+        if (el && !el.classList.contains('hidden')) {
+            activeView = v;
+            break;
+        }
+    }
+    return activeView;
 }
 
 function triggerMissionForNpc(npc) {
@@ -3894,6 +3971,10 @@ function triggerMissionForNpc(npc) {
     alertEl.className = 'npc-mission-alert';
     alertEl.innerText = '!';
     npc.el.appendChild(alertEl);
+    
+    if (getActiveView() === 'vila') {
+        playSound('alert');
+    }
 }
 
 function forceVillageMission() {
@@ -3959,7 +4040,7 @@ function openNpcMissionModal(npc) {
     };
     
     document.getElementById('npcMissionModal').classList.remove('hidden');
-    playSound('click');
+    playSound('alert');
 }
 
 function closeNpcMissionModal() {
@@ -3971,6 +4052,7 @@ function startNpcMinigame(npc) {
     minigameActive = true;
     document.getElementById('minigameArenaArea').innerHTML = '';
     document.getElementById('npcMinigameModal').classList.remove('hidden');
+    changeBgm('adventure');
     
     if (npc.color === 'farmer') {
         setupHortaMinigame();
@@ -4022,6 +4104,7 @@ function endMinigame(success) {
     stopPescaAnimation();
     
     document.getElementById('npcMinigameModal').classList.add('hidden');
+    changeBgm(getActiveView());
     
     if (success) {
         playSound('success');
@@ -4098,6 +4181,8 @@ function cleanupActiveMission() {
         if (alert) alert.remove();
         activeMissionNpc = null;
     }
+    nextMissionTimestamp = Date.now() + 180000;
+    localStorage.setItem('capy_next_mission_time', nextMissionTimestamp);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

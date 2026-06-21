@@ -444,8 +444,13 @@
                 </div>
 
                 <!-- Info overlays no topo do mapa -->
-                <div class="relative z-20 flex justify-between items-center pointer-events-none w-full">
-                    <span class="bg-amber-500/95 text-amber-950 font-black px-3 py-1 rounded-full text-[10px] tracking-wider uppercase border border-amber-300 shadow pointer-events-auto">Vila das Capivaras</span>
+                <div class="relative z-20 flex justify-between items-start pointer-events-none w-full">
+                    <div class="flex flex-col gap-1 items-start">
+                        <span class="bg-amber-500/95 text-amber-950 font-black px-3 py-1 rounded-full text-[10px] tracking-wider uppercase border border-amber-300 shadow pointer-events-auto">Vila das Capivaras</span>
+                        <span id="nextMissionCountdown" class="bg-emerald-600/90 text-white font-black px-2.5 py-1 rounded-full text-[8px] tracking-wider uppercase border border-emerald-400 shadow pointer-events-auto mt-1 flex items-center gap-1">
+                            <i class="fas fa-clock"></i> Próxima Missão: --:--
+                        </span>
+                    </div>
                     <div class="flex items-center gap-2 pointer-events-auto">
                         <button onclick="zoomVillage(0.25)" class="w-8 h-8 rounded-full bg-white/90 hover:bg-white text-green-800 border border-green-200 shadow flex items-center justify-center transition-all" title="Zoom In">
                             <i class="fas fa-plus text-xs"></i>
@@ -766,10 +771,13 @@
     <!-- MODAL DE DIÁLOGO DE MISSÃO -->
     <div id="npcMissionModal" class="fixed inset-0 z-[200] hidden bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-[3rem] p-8 text-center space-y-6 shadow-2xl relative border-4 border-amber-950/20 overflow-hidden">
-            <!-- Balão Decorativo -->
-            <div class="absolute -top-10 -right-10 text-9xl opacity-10 rotate-12">💬</div>
+            <!-- Crachá Decorativo de Missão -->
+            <img src="eco_mission_badge.png" class="absolute -top-4 -left-4 w-20 h-20 opacity-20 -rotate-12 select-none pointer-events-none">
             
-            <h3 id="missionModalTitle" class="brand-font text-2xl text-green-950">Missão da Vila!</h3>
+            <div class="flex flex-col items-center justify-center space-y-2">
+                <img src="eco_mission_badge.png" class="w-16 h-16 object-contain animate-bounce-subtle" alt="Eco Badge">
+                <h3 id="missionModalTitle" class="brand-font text-2xl text-green-950">Missão da Vila!</h3>
+            </div>
             
             <!-- Personagem Animado Visualizer -->
             <div class="w-24 h-24 mx-auto bg-green-50 rounded-full flex items-center justify-center border-4 border-green-200 overflow-hidden relative shadow-inner">
@@ -800,9 +808,12 @@
             <!-- Header do Jogo: Título, Placar e Tempo -->
             <div class="space-y-3">
                 <div class="flex justify-between items-center border-b border-emerald-100 pb-3">
-                    <div>
-                        <h4 id="minigameTitle" class="brand-font text-lg text-emerald-950 leading-none">Minijogo</h4>
-                        <span id="minigameSubtitle" class="text-[9px] font-black uppercase text-emerald-600 tracking-wider">Eco-Tarefa</span>
+                    <div class="flex items-center gap-2">
+                        <img src="eco_mission_badge.png" class="w-8 h-8 object-contain" alt="Badge">
+                        <div>
+                            <h4 id="minigameTitle" class="brand-font text-lg text-emerald-950 leading-none">Minijogo</h4>
+                            <span id="minigameSubtitle" class="text-[9px] font-black uppercase text-emerald-600 tracking-wider">Eco-Tarefa</span>
+                        </div>
                     </div>
                     <div class="flex gap-2">
                         <div class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-xs font-black">
@@ -832,7 +843,10 @@
     <!-- MODAL DE SELEÇÃO DE RECOMPENSA -->
     <div id="npcRewardModal" class="fixed inset-0 z-[200] hidden bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-[3rem] p-8 text-center space-y-6 shadow-2xl relative border-4 border-amber-950/20 overflow-hidden">
-            <div class="absolute -top-10 -right-10 text-9xl opacity-10 rotate-12">🏆</div>
+            <!-- Crachá Decorativo de Vitória -->
+            <img src="eco_mission_badge.png" class="absolute -top-6 -right-6 w-24 h-24 opacity-15 rotate-12 select-none pointer-events-none">
+            
+            <img src="eco_mission_badge.png" class="w-20 h-20 mx-auto object-contain animate-pulse" alt="Success Badge">
             
             <h3 class="brand-font text-2xl text-amber-950">Eco-Tarefa Concluída!</h3>
             <p class="text-xs text-gray-500 font-bold">Excelente trabalho! Escolha a sua recompensa ecológica:</p>
