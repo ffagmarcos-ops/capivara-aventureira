@@ -1,4 +1,4 @@
-const CACHE_NAME = 'capivara-v46';
+const CACHE_NAME = 'capivara-v47';
 const ASSETS = [
   './',
   './index.html',
@@ -6,6 +6,12 @@ const ASSETS = [
   './eco_mission_badge.png',
   './eco_fishing_fish.png',
   './eco_fishing_bobber.png',
+  './eco_veggie_carrot.png',
+  './eco_veggie_potato.png',
+  './eco_veggie_eggplant.png',
+  './eco_veggie_tomato.png',
+  './eco_lab_flask.png',
+  './eco_chest_open.png',
   './minigames_bgm.ogg',
   './adventure_bgm.ogg',
   './Trees_blowing_wind_river_birds_202606201621.mp4',

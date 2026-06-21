@@ -1045,8 +1045,9 @@ body.night-mode .text-on-white {
     bottom: -60px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 2.2rem;
-    line-height: 1;
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
     transition: bottom 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     pointer-events: none;
     user-select: none;
@@ -1101,6 +1102,20 @@ body.night-mode .text-on-white {
     top: 55px;
     animation: bobberSplash 0.15s infinite alternate;
 }
+.mg-success-spark {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2rem;
+    pointer-events: none;
+    z-index: 20;
+    animation: sparkPop 0.5s ease-out forwards;
+}
+@keyframes sparkPop {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+}
 .mg-bar-container {
     width: 100%;
     height: 20px;
@@ -1151,32 +1166,33 @@ body.night-mode .text-on-white {
     gap: 15px;
 }
 .mg-potion-target {
-    width: 64px;
-    height: 64px;
-    border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
-    border: 4px solid #475569;
+    width: 85px;
+    height: 85px;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-    transition: background-color 0.3s ease;
-    overflow: hidden;
+    margin: 0 auto;
 }
-.mg-potion-target::after {
-    content: '🧪';
-    font-size: 2rem;
+.mg-potion-flask-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
     z-index: 10;
+    pointer-events: none;
 }
 .mg-potion-liquid {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 60%;
+    bottom: 6px;
+    left: 10%;
+    right: 10%;
+    height: 48%;
+    border-radius: 50% 50% 30% 30%;
     background-color: #cbd5e1;
     transition: background-color 0.3s ease;
-    z-index: 0;
+    z-index: 5;
     animation: liquidBubble 1.5s infinite ease-in-out alternate;
 }
 .mg-potion-tubes {
@@ -1264,22 +1280,50 @@ body.night-mode .text-on-white {
     gap: 8px;
 }
 .mg-bio-card {
-    background: #f8fafc;
-    border: 2px solid #e2e8f0;
-    border-radius: 1rem;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    aspect-ratio: 0.82;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 6px 6px 8px 6px;
+    cursor: pointer;
+    transition: all 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.15);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    overflow: hidden;
+}
+.mg-bio-card:active {
+    transform: scale(0.94);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+}
+.mg-bio-card-photo {
+    width: 100%;
     aspect-ratio: 1;
+    background: #f0fdf4;
+    border-radius: 0.35rem;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 2rem;
-    cursor: pointer;
-    transition: all 0.15s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-    -webkit-tap-highlight-color: transparent;
+    border: 1px solid #dcfce7;
+    margin-bottom: 4px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
 }
-.mg-bio-card:active {
-    transform: scale(0.95);
-    background: #f1f5f9;
+.mg-bio-card-label {
+    font-size: 7px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #166534;
+    letter-spacing: 0.04em;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
 }
 
 /* Minijogo 5: Aventureira */
@@ -1294,7 +1338,9 @@ body.night-mode .text-on-white {
     gap: 15px;
 }
 .mg-chest {
-    font-size: 5rem;
+    width: 110px;
+    height: 110px;
+    object-fit: contain;
     cursor: pointer;
     user-select: none;
     -webkit-tap-highlight-color: transparent;

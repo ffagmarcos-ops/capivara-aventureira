@@ -4275,14 +4275,14 @@ function setupHortaMinigame() {
     for (let i = 0; i < 9; i++) {
         html += `
             <div class="mg-soil-patch" onclick="clickHortaVegetable(this)">
-                <span class="mg-vegetable">🥕</span>
+                <img class="mg-vegetable" src="eco_veggie_carrot.png" alt="Legume">
             </div>
         `;
     }
     html += '</div>';
     arena.innerHTML = html;
     
-    let vegetablePool = ['🥕', '🥔', '🍆', '🥬', '🌽', '🍅'];
+    let vegetablePool = ['eco_veggie_carrot.png', 'eco_veggie_potato.png', 'eco_veggie_eggplant.png', 'eco_veggie_tomato.png'];
     let activePatches = new Set();
     
     hortaIntervalId = setInterval(() => {
@@ -4301,16 +4301,16 @@ function setupHortaMinigame() {
         if (activePatches.has(randomIndex)) return;
         
         const patch = patches[randomIndex];
-        const vegSpan = patch.querySelector('.mg-vegetable');
-        if (!vegSpan) return;
+        const vegImg = patch.querySelector('.mg-vegetable');
+        if (!vegImg) return;
         
-        vegSpan.innerText = vegetablePool[Math.floor(Math.random() * vegetablePool.length)];
-        vegSpan.classList.add('up');
+        vegImg.src = vegetablePool[Math.floor(Math.random() * vegetablePool.length)];
+        vegImg.classList.add('up');
         activePatches.add(randomIndex);
         
         const timeoutId = setTimeout(() => {
-            if (vegSpan.classList.contains('up')) {
-                vegSpan.classList.remove('up');
+            if (vegImg.classList.contains('up')) {
+                vegImg.classList.remove('up');
             }
             activePatches.delete(randomIndex);
         }, 800);
@@ -4324,9 +4324,9 @@ function setupHortaMinigame() {
 function clickHortaVegetable(patchEl) {
     if (!minigameActive) return;
     
-    const vegSpan = patchEl.querySelector('.mg-vegetable');
-    if (vegSpan && vegSpan.classList.contains('up')) {
-        vegSpan.classList.remove('up');
+    const vegImg = patchEl.querySelector('.mg-vegetable');
+    if (vegImg && vegImg.classList.contains('up')) {
+        vegImg.classList.remove('up');
         playSound('click');
         currentMinigameScore++;
         document.getElementById('minigameScore').innerText = currentMinigameScore + "/" + targetMinigameScore;
@@ -4457,12 +4457,19 @@ function clickFishingZone() {
         }
         
         stopPescaAnimation();
-        const bobberEl = document.getElementById('pescaBobber');
-        if (bobberEl) bobberEl.innerText = "⭐";
+        
+        // Exibir faísca de sucesso no centro da água
+        const waterView = document.querySelector('.mg-water-view');
+        if (waterView) {
+            const spark = document.createElement('div');
+            spark.className = "mg-success-spark";
+            spark.innerText = "⭐";
+            waterView.appendChild(spark);
+            setTimeout(() => spark.remove(), 500);
+        }
         
         setTimeout(() => {
             if (!minigameActive) return;
-            if (bobberEl) bobberEl.innerText = "🎣";
             repositionSweetSpot();
             startPescaAnimation();
         }, 600);
@@ -4510,6 +4517,7 @@ function setupLabMinigame() {
         <div class="mg-lab-container">
             <div class="mg-potion-target">
                 <div id="labPotionLiquid" class="mg-potion-liquid" style="background-color: #cbd5e1;"></div>
+                <img class="mg-potion-flask-img" src="eco_lab_flask.png" alt="Frasco">
             </div>
             <div id="labTargetText" class="text-xs font-black uppercase text-purple-950">MISTURE: ...</div>
             <div class="mg-potion-tubes">
@@ -4665,7 +4673,8 @@ function generateNextBioPuzzle() {
         shuffledChoices.forEach(c => {
             gridHtml += `
                 <div class="mg-bio-card" onclick="clickBioCard('${c.emoji}')">
-                    ${c.emoji}
+                    <div class="mg-bio-card-photo">${c.emoji}</div>
+                    <div class="mg-bio-card-label">${c.name}</div>
                 </div>
             `;
         });
@@ -4688,7 +4697,7 @@ function setupAdventurerMinigame() {
     const arena = document.getElementById('minigameArenaArea');
     arena.innerHTML = `
         <div class="mg-chest-container">
-            <div id="adventureChest" class="mg-chest" onclick="clickAdventurerChest()">📦</div>
+            <img id="adventureChest" class="mg-chest" src="mystery_box.png" alt="Baú" onclick="clickAdventurerChest()">
             <div class="mg-tap-bar-container">
                 <div id="chestProgressBar" class="mg-tap-bar" style="width: 0%;"></div>
             </div>
@@ -4737,8 +4746,8 @@ function clickAdventurerChest() {
     }
     
     if (currentMinigameScore >= targetMinigameScore) {
-        if (chestEl) chestEl.innerText = "🔓";
-        setTimeout(() => endMinigame(true), 500);
+        if (chestEl) chestEl.src = "eco_chest_open.png";
+        setTimeout(() => endMinigame(true), 600);
     }
 }
 
