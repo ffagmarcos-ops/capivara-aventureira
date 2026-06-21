@@ -91,7 +91,7 @@ A API backend roda localmente na porta `3000`. O front-end em `app.js` detecta s
 
 ## 🎥 6. Vídeo de Fundo da Eco-Vila & Bypass de Range Requests
 
-A Eco-Vila conta com um plano de fundo dinâmico animado (`Trees_blowing_wind_river_birds_202606201621.mp4`) no lugar da imagem estática de fallback:
+A Eco-Vila conta com um plano de fundo dinâmico animado (`cenario 1.mp4`) no lugar da imagem estática de fallback:
 
 *   **Enquadramento Isométrico e Crop de Barras Pretas**:
     O vídeo original possui formato widescreen 16:9 (1280x720) com barras pretas (pillarboxing) nas laterais. O conteúdo ativo da animação é um quadrado 1:1 de 715x715px posicionado em `x=283, y=3`. Para alinhar esse vídeo de forma perfeita ao mapa e aos caminhos das capivaras, ele é renderizado com `width: 179.02%`, `height: 100.7%`, `left: -39.58%` e `top: -0.42%`, dentro de um contêiner com `overflow-hidden`. A propriedade `max-width: none` (classe `max-w-none`) sobrescreve o reset default do Tailwind para permitir que o vídeo estique além de 100% de largura.
