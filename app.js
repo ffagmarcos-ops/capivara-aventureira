@@ -331,7 +331,11 @@ async function loginExplorer() {
         await authenticateExplorer(name, tempAvatar, false);
         document.getElementById('authScreen').style.display = 'none';
         renderApp(); createConfetti();
-        setTimeout(() => { showToast(`Bem-vindo, ${currentUser.name}!`, tempAvatar); }, 800);
+        showView('vila');
+        setTimeout(() => {
+            showToast(`Bem-vindo, ${currentUser.name}!`, tempAvatar);
+            openMainMenu();
+        }, 600);
     } catch (error) {
         showToast(`Falha no login: ${error.message}`, "⚠️");
     }
@@ -351,7 +355,11 @@ async function loginWithGoogle() {
             await authenticateExplorer(name, '🎮', true);
             document.getElementById('authScreen').style.display = 'none';
             renderApp(); createConfetti();
-            setTimeout(() => { showToast(`Sincronizado com o Google!`, "🎮"); }, 800);
+            showView('vila');
+            setTimeout(() => {
+                showToast(`Sincronizado com o Google!`, "🎮");
+                openMainMenu();
+            }, 600);
         } catch (error) {
             showToast(`Falha no login Google: ${error.message}`, "⚠️");
         }
@@ -393,6 +401,7 @@ let bgmStep = 0;
 let bgmMasterGain = null;
 let currentTrackName = null;
 let currentBgmAudio = null;
+let minigameBgmAudio = null;
 
 
 const missionsPool = [
@@ -662,19 +671,32 @@ function changeBgm(trackName) {
         if (!audioUnlocked) return;
         if (soundMode !== 'both') return;
         
-        // Se a música ambiente já estiver tocando, simplesmente mantém tocando sem interromper
-        if (currentBgmAudio && !currentBgmAudio.paused) {
-            return;
+        if (trackName === 'adventure') {
+            // Toca a música acelerada do minijogo
+            if (currentBgmAudio) {
+                currentBgmAudio.pause();
+            }
+            if (!minigameBgmAudio) {
+                minigameBgmAudio = new Audio('./musicas/Capybara Quest Rush.mp3');
+                minigameBgmAudio.loop = true;
+                minigameBgmAudio.volume = 0.3;
+            }
+            minigameBgmAudio.currentTime = 0;
+            minigameBgmAudio.play().catch(e => console.warn("Erro ao iniciar minigame BGM:", e));
+        } else {
+            // Retoma a música principal da vila
+            if (minigameBgmAudio) {
+                minigameBgmAudio.pause();
+            }
+            if (!currentBgmAudio) {
+                currentBgmAudio = new Audio('./musicas/Sunlit Capybara Square.mp3');
+                currentBgmAudio.loop = true;
+                currentBgmAudio.volume = 0.3;
+            }
+            if (currentBgmAudio.paused) {
+                currentBgmAudio.play().catch(e => console.warn("Erro ao retomar BGM principal:", e));
+            }
         }
-        
-        // Se ainda não foi criada, inicializa apontando para a nova música do zoológico/praça
-        if (!currentBgmAudio) {
-            currentBgmAudio = new Audio('./musicas/Sunlit Capybara Square.mp3');
-            currentBgmAudio.loop = true;
-            currentBgmAudio.volume = 0.3;
-        }
-        
-        currentBgmAudio.play().catch(e => console.warn("Erro ao iniciar BGM:", e));
     } catch (e) {
         console.error("Erro no controle de BGM:", e);
     }
@@ -683,6 +705,9 @@ function changeBgm(trackName) {
 function stopBgm() {
     if (currentBgmAudio) {
         currentBgmAudio.pause();
+    }
+    if (minigameBgmAudio) {
+        minigameBgmAudio.pause();
     }
 }
 
@@ -1653,6 +1678,28 @@ let minigameDuration = 0;
 let minigameIntervalId = null;
 let currentMinigameScore = 0;
 let targetMinigameScore = 0;
+
+// Novos estados e assets para os mini-games aperfeiçoados
+let mgCharInterval = null;
+let mgCharFrame = 0;
+let mgCurrentAnimRow = 0;
+let mgCelebrateTimeout = null;
+
+const pescaSheetImg = new Image();
+pescaSheetImg.src = 'capybara_fisherman/atlas.webp';
+const pescaBobberImg = new Image();
+pescaBobberImg.src = 'eco_fishing_bobber.png';
+const pescaFishImg = new Image();
+pescaFishImg.src = 'eco_fishing_fish.png';
+
+let pescaFrameIndex = 0;
+let pescaState = 'fishing';
+let pescaCelebrateTimer = 0;
+let fishJumpTime = 1.0;
+let fishShadowX = 320;
+let fishShadowY = 150;
+let shakeFrames = 0;
+let bobberDipped = false;
 let nextMissionTimestamp = parseInt(localStorage.getItem('capy_next_mission_time')) || (Date.now() + 180000);
 if (!localStorage.getItem('capy_next_mission_time')) {
     localStorage.setItem('capy_next_mission_time', nextMissionTimestamp);
@@ -2096,17 +2143,49 @@ function stopNPCBubbles() {
     });
 }
 
+function openVillageDrawer() {
+    const drawer = document.getElementById('villageEvolutionDrawer');
+    const backdrop = document.getElementById('drawerBackdrop');
+    if (drawer) {
+        drawer.classList.add('open');
+    }
+    if (backdrop) {
+        backdrop.classList.remove('hidden');
+        void backdrop.offsetWidth; // Forçar reflow para animar opacidade
+        backdrop.classList.add('active');
+    }
+}
+
+function closeVillageDrawer() {
+    const drawer = document.getElementById('villageEvolutionDrawer');
+    const backdrop = document.getElementById('drawerBackdrop');
+    if (drawer) {
+        drawer.classList.remove('open');
+    }
+    if (backdrop) {
+        backdrop.classList.remove('active');
+        setTimeout(() => {
+            if (!backdrop.classList.contains('active')) {
+                backdrop.classList.add('hidden');
+            }
+        }, 300);
+    }
+}
+
 function focusBuilding(key) {
     if (totalDragDistance > 10) {
         return; // Ignore clicking on buildings if dragging/panning the map
     }
-    const cardEl = document.getElementById(`card-${key}`);
-    if (cardEl) {
-        cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        cardEl.classList.remove('highlight-card');
-        void cardEl.offsetWidth; // Forçar reflow para reiniciar animação
-        cardEl.classList.add('highlight-card');
-    }
+    openVillageDrawer();
+    setTimeout(() => {
+        const cardEl = document.getElementById(`card-${key}`);
+        if (cardEl) {
+            cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            cardEl.classList.remove('highlight-card');
+            void cardEl.offsetWidth; // Forçar reflow para reiniciar animação
+            cardEl.classList.add('highlight-card');
+        }
+    }, 150);
 }
 
 // ==========================================================================
@@ -2124,23 +2203,48 @@ function updateMapTransform() {
     const container = document.getElementById('villageZoomContainer');
     if (!container) return;
     
+    const parent = document.getElementById('villageMapContainer');
+    if (!parent) return;
+    
+    const rect = parent.getBoundingClientRect();
+    const parentWidth = rect.width;
+    const parentHeight = rect.height;
+    
+    if (parentWidth <= 0 || parentHeight <= 0) return;
+    
+    // Calcula o tamanho da área ativa da vila mantendo o aspect ratio padrão de 9:16
+    let w, h;
+    if (parentWidth / parentHeight < 9 / 16) {
+        h = parentHeight;
+        w = h * (9 / 16);
+    } else {
+        w = parentWidth;
+        h = w * (16 / 9);
+    }
+    
+    container.style.width = `${w}px`;
+    container.style.height = `${h}px`;
+    
+    // Centraliza o container da vila no container do mapa
+    const offsetLeft = (parentWidth - w) / 2;
+    const offsetTop = (parentHeight - h) / 2;
+    
     if (zoomScale <= 1.0) {
         panX = 0;
         panY = 0;
         zoomScale = 1.0;
     } else {
-        const parent = document.getElementById('villageMapContainer');
-        if (parent) {
-            const rect = parent.getBoundingClientRect();
-            const maxPanX = (rect.width * (zoomScale - 1)) / 2;
-            const maxPanY = (rect.height * (zoomScale - 1)) / 2;
-            
-            panX = Math.max(-maxPanX, Math.min(maxPanX, panX));
-            panY = Math.max(-maxPanY, Math.min(maxPanY, panY));
-        }
+        const maxPanX = Math.max(0, (w * zoomScale - parentWidth) / 2);
+        const maxPanY = Math.max(0, (h * zoomScale - parentHeight) / 2);
+        
+        panX = Math.max(-maxPanX, Math.min(maxPanX, panX));
+        panY = Math.max(-maxPanY, Math.min(maxPanY, panY));
     }
     
-    container.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomScale})`;
+    const finalX = offsetLeft + panX;
+    const finalY = offsetTop + panY;
+    
+    container.style.transform = `translate(${finalX}px, ${finalY}px) scale(${zoomScale})`;
 }
 
 function zoomVillage(amount) {
@@ -2621,6 +2725,14 @@ window.onload = async () => {
     checkTimeOfDay(); checkStreaks(); initVillageOfflineGains(); renderApp(); loadDailyQuiz();
     loadSilhouetteGame(); loadEndlessQuiz(); updateSoundModeUI(); updateMemoryGameUI();
     initVillageMapGestures();
+    if (currentUser) {
+        showView('vila', false);
+        // Adiciona botão de menu no header e abre menu principal ao retornar ao jogo
+        setTimeout(() => {
+            addMainMenuButtonToHeader();
+            openMainMenu();
+        }, 600);
+    }
     if (!sessionStorage.getItem('safetySeen') && currentUser) { setTimeout(toggleSafetyGuide, 2500); sessionStorage.setItem('safetySeen', 'true'); }
 };
 
@@ -2738,8 +2850,8 @@ function handleMapFullscreenEscape(e) {
     }
 }
 
-function showView(view) {
-    playSound('click');
+function showView(view, playClick = true) {
+    if (playClick) playSound('click');
     document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
     document.querySelectorAll('nav button').forEach(b => b.classList.remove('tab-active'));
     document.getElementById(view + 'View').classList.remove('hidden');
@@ -2753,9 +2865,11 @@ function showView(view) {
         if (bgVideo) {
             bgVideo.play().catch(e => {});
         }
+        setTimeout(updateMapTransform, 50);
     } else {
         stopVillageAmbient();
         stopVillageNPCs();
+        closeVillageDrawer();
         const container = document.getElementById('villageMapContainer');
         if (container && container.classList.contains('map-fullscreen')) {
             toggleFullscreenMap();
@@ -4818,6 +4932,14 @@ function endMinigame(success) {
     
     stopHortaInterval();
     stopPescaAnimation();
+    if (mgCharInterval) {
+        clearInterval(mgCharInterval);
+        mgCharInterval = null;
+    }
+    if (mgCelebrateTimeout) {
+        clearTimeout(mgCelebrateTimeout);
+        mgCelebrateTimeout = null;
+    }
     
     document.getElementById('npcMinigameModal').classList.add('hidden');
     changeBgm(getActiveView());
@@ -4910,6 +5032,43 @@ function cleanupActiveMission() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// CONTROLADORES DE ANIMAÇÃO DE PERSONAGENS NOS MINI-GAMES
+// ─────────────────────────────────────────────────────────────────────────────
+function startMgCharAnimation(color, defaultRow, frameW, frameH) {
+    if (mgCharInterval) clearInterval(mgCharInterval);
+    if (mgCelebrateTimeout) clearTimeout(mgCelebrateTimeout);
+    
+    mgCharFrame = 0;
+    mgCurrentAnimRow = defaultRow;
+    
+    const spriteEl = document.getElementById('mgCharSprite');
+    if (!spriteEl) return;
+    
+    mgCharInterval = setInterval(() => {
+        if (!minigameActive) {
+            clearInterval(mgCharInterval);
+            return;
+        }
+        mgCharFrame = (mgCharFrame + 1) % 8;
+        const el = document.getElementById('mgCharSprite');
+        if (el) {
+            el.style.backgroundPosition = `-${mgCharFrame * frameW}px -${mgCurrentAnimRow * frameH}px`;
+        }
+    }, 120);
+}
+
+function triggerMgCharCelebrate(color, defaultRow, frameW, frameH, celebrateRow = 5) {
+    if (mgCelebrateTimeout) clearTimeout(mgCelebrateTimeout);
+    
+    mgCurrentAnimRow = celebrateRow;
+    
+    mgCelebrateTimeout = setTimeout(() => {
+        if (!minigameActive) return;
+        mgCurrentAnimRow = defaultRow;
+    }, 1000);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // MINIJOGO 1: HORTA ("Colheita Relâmpago")
 // ─────────────────────────────────────────────────────────────────────────────
 let hortaIntervalId = null;
@@ -4925,16 +5084,29 @@ function setupHortaMinigame() {
     document.getElementById('minigameScore').innerText = currentMinigameScore + "/" + targetMinigameScore;
     
     const arena = document.getElementById('minigameArenaArea');
-    let html = '<div class="mg-horta-grid">';
-    for (let i = 0; i < 9; i++) {
-        html += `
-            <div class="mg-soil-patch" onclick="clickHortaVegetable(this)">
-                <img class="mg-vegetable" src="eco_veggie_carrot.png" alt="Legume">
+    
+    arena.innerHTML = `
+        <div class="mg-layout-with-char">
+            <div class="mg-char-showcase">
+                <div class="mg-char-wrapper">
+                    <div id="mgCharSprite" class="npc-sprite spritesheet-npc-sprite npc-farmer-sprite" style="background-position: 0px 0px;"></div>
+                </div>
             </div>
-        `;
-    }
-    html += '</div>';
-    arena.innerHTML = html;
+            <div class="mg-horta-grid">
+                <div class="mg-soil-patch" onclick="clickHortaVegetable(this)"><img class="mg-vegetable" src="eco_veggie_carrot.png" alt="Legume"></div>
+                <div class="mg-soil-patch" onclick="clickHortaVegetable(this)"><img class="mg-vegetable" src="eco_veggie_carrot.png" alt="Legume"></div>
+                <div class="mg-soil-patch" onclick="clickHortaVegetable(this)"><img class="mg-vegetable" src="eco_veggie_carrot.png" alt="Legume"></div>
+                <div class="mg-soil-patch" onclick="clickHortaVegetable(this)"><img class="mg-vegetable" src="eco_veggie_carrot.png" alt="Legume"></div>
+                <div class="mg-soil-patch" onclick="clickHortaVegetable(this)"><img class="mg-vegetable" src="eco_veggie_carrot.png" alt="Legume"></div>
+                <div class="mg-soil-patch" onclick="clickHortaVegetable(this)"><img class="mg-vegetable" src="eco_veggie_carrot.png" alt="Legume"></div>
+                <div class="mg-soil-patch" onclick="clickHortaVegetable(this)"><img class="mg-vegetable" src="eco_veggie_carrot.png" alt="Legume"></div>
+                <div class="mg-soil-patch" onclick="clickHortaVegetable(this)"><img class="mg-vegetable" src="eco_veggie_carrot.png" alt="Legume"></div>
+                <div class="mg-soil-patch" onclick="clickHortaVegetable(this)"><img class="mg-vegetable" src="eco_veggie_carrot.png" alt="Legume"></div>
+            </div>
+        </div>
+    `;
+    
+    startMgCharAnimation('farmer', 3, 36, 35); // Regando
     
     let vegetablePool = ['eco_veggie_carrot.png', 'eco_veggie_potato.png', 'eco_veggie_eggplant.png', 'eco_veggie_tomato.png'];
     let activePatches = new Set();
@@ -4967,12 +5139,12 @@ function setupHortaMinigame() {
                 vegImg.classList.remove('up');
             }
             activePatches.delete(randomIndex);
-        }, 800);
+        }, 1200);
         
         hortaTimeoutIds.push(timeoutId);
-    }, 450);
+    }, 700);
     
-    startMinigameTimer(12);
+    startMinigameTimer(15);
 }
 
 function clickHortaVegetable(patchEl) {
@@ -4984,6 +5156,8 @@ function clickHortaVegetable(patchEl) {
         playSound('click');
         currentMinigameScore++;
         document.getElementById('minigameScore').innerText = currentMinigameScore + "/" + targetMinigameScore;
+        
+        triggerMgCharCelebrate('farmer', 3, 36, 35);
         
         if (currentMinigameScore >= targetMinigameScore) {
             endMinigame(true);
@@ -5001,12 +5175,12 @@ function stopHortaInterval() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MINIJOGO 2: PESCA ("Fisgada de Precisão")
+// MINIJOGO 2: PESCA ("Fisgada de Precisão") - REDESENHADO EM CANVAS 2D
 // ─────────────────────────────────────────────────────────────────────────────
 let pescaAnimationId = null;
 let needlePosition = 0;
 let needleDirection = 1;
-let needleSpeed = 3.5;
+let needleSpeed = 2.0;
 let sweetSpotLeft = 40;
 let sweetSpotWidth = 20;
 
@@ -5021,32 +5195,27 @@ function setupPescaMinigame() {
     
     const arena = document.getElementById('minigameArenaArea');
     arena.innerHTML = `
-        <div class="mg-fishing-container" onclick="clickFishingZone()">
-            <div class="mg-water-view">
-                <img id="pescaBobber" class="mg-bobber" src="eco_fishing_bobber.png" alt="Boia">
-                <img class="mg-fish-shadow" src="eco_fishing_fish.png" alt="Peixe">
-            </div>
-            <div class="mg-bar-container">
-                <div id="fishingSweetSpot" class="mg-sweet-spot" style="left: 40%; width: 20%;"></div>
-                <div id="fishingNeedle" class="mg-needle" style="left: 0%;"></div>
-            </div>
+        <div class="mg-fishing-container">
+            <canvas id="pescaCanvas" width="320" height="200" onclick="clickFishingZone(event)"></canvas>
         </div>
     `;
     
+    pescaState = 'fishing';
+    pescaCelebrateTimer = 0;
+    fishJumpTime = 1.0;
+    fishShadowX = 320;
+    fishShadowY = 150;
+    shakeFrames = 0;
+    bobberDipped = false;
+    
     repositionSweetSpot();
     startPescaAnimation();
-    startMinigameTimer(10);
+    startMinigameTimer(15);
 }
 
 function repositionSweetSpot() {
     sweetSpotLeft = Math.floor(Math.random() * 50) + 15;
     sweetSpotWidth = currentMinigameScore === 0 ? 22 : 16;
-    
-    const spotEl = document.getElementById('fishingSweetSpot');
-    if (spotEl) {
-        spotEl.style.left = sweetSpotLeft + '%';
-        spotEl.style.width = sweetSpotWidth + '%';
-    }
 }
 
 function startPescaAnimation() {
@@ -5054,38 +5223,204 @@ function startPescaAnimation() {
     
     needlePosition = 0;
     needleDirection = 1;
+    needleSpeed = 2.0;
     
-    const needleEl = document.getElementById('fishingNeedle');
-    const bobberEl = document.getElementById('pescaBobber');
+    const canvas = document.getElementById('pescaCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
     
     let lastTime = Date.now();
+    let pescaFrameTimer = 0;
+    
+    const capyX = 15;
+    const capyY = 56;
+    const rodTipX = capyX + 70;
+    const rodTipY = capyY + 28;
+    const bobberX = 220;
+    const bobberY = 125;
+    
+    const barX = 20;
+    const barY = 175;
+    const barW = 280;
+    const barH = 14;
     
     function tick() {
         if (!minigameActive) return;
         
         const now = Date.now();
-        const delta = (now - lastTime) / 16;
+        const delta = (now - lastTime) / 16.67;
         lastTime = now;
         
-        needlePosition += needleDirection * needleSpeed * delta;
-        if (needlePosition >= 100) {
-            needlePosition = 100;
-            needleDirection = -1;
-        } else if (needlePosition <= 0) {
-            needlePosition = 0;
-            needleDirection = 1;
+        if (pescaState === 'fishing') {
+            needlePosition += needleDirection * needleSpeed * delta;
+            if (needlePosition >= 100) {
+                needlePosition = 100;
+                needleDirection = -1;
+            } else if (needlePosition <= 0) {
+                needlePosition = 0;
+                needleDirection = 1;
+            }
+            bobberDipped = needlePosition >= sweetSpotLeft && needlePosition <= (sweetSpotLeft + sweetSpotWidth);
+        } else {
+            bobberDipped = false;
         }
         
-        if (needleEl) {
-            needleEl.style.left = needlePosition + '%';
+        pescaFrameTimer += (now - (lastTime - 16.67));
+        if (pescaFrameTimer > 120) {
+            pescaFrameIndex = (pescaFrameIndex + 1) % 8;
+            pescaFrameTimer = 0;
         }
         
-        if (bobberEl) {
-            const inZone = needlePosition >= sweetSpotLeft && needlePosition <= (sweetSpotLeft + sweetSpotWidth);
-            if (inZone) {
-                bobberEl.classList.add('dip');
-            } else {
-                bobberEl.classList.remove('dip');
+        ctx.clearRect(0, 0, 320, 200);
+        
+        ctx.save();
+        if (shakeFrames > 0) {
+            const dx = (Math.random() - 0.5) * 6;
+            const dy = (Math.random() - 0.5) * 6;
+            ctx.translate(dx, dy);
+            shakeFrames--;
+        }
+        
+        let skyGrad = ctx.createLinearGradient(0, 0, 0, 120);
+        skyGrad.addColorStop(0, '#bae6fd');
+        skyGrad.addColorStop(1, '#e0f2fe');
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, 320, 120);
+        
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath();
+        ctx.arc(280, 25, 12, 0, Math.PI * 2);
+        ctx.fill();
+        
+        let waterGrad = ctx.createLinearGradient(0, 120, 0, 200);
+        waterGrad.addColorStop(0, '#38bdf8');
+        waterGrad.addColorStop(1, '#0284c7');
+        ctx.fillStyle = waterGrad;
+        ctx.fillRect(0, 120, 320, 80);
+        
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (let waveY = 135; waveY < 170; waveY += 15) {
+            let shift = (now / 400 + waveY) % (Math.PI * 2);
+            ctx.moveTo(0, waveY + Math.sin(shift) * 1.5);
+            for (let x = 10; x <= 320; x += 20) {
+                ctx.lineTo(x, waveY + Math.sin(x * 0.05 + shift) * 1.5);
+            }
+        }
+        ctx.stroke();
+        
+        ctx.fillStyle = '#78350f';
+        ctx.fillRect(0, 105, 80, 18);
+        ctx.fillStyle = '#451a03';
+        ctx.fillRect(15, 123, 10, 52);
+        ctx.fillRect(60, 123, 10, 52);
+        
+        ctx.strokeStyle = '#451a03';
+        ctx.lineWidth = 1;
+        for (let px = 10; px < 80; px += 14) {
+            ctx.beginPath();
+            ctx.moveTo(px, 105);
+            ctx.lineTo(px, 123);
+            ctx.stroke();
+        }
+        
+        let animRow = (pescaState === 'celebrating') ? 5 : 3;
+        let col = pescaFrameIndex % 8;
+        let sx = col * 720;
+        let sy = animRow * 647;
+        ctx.drawImage(pescaSheetImg, sx, sy, 720, 647, capyX, capyY, 80, 72);
+        
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(rodTipX, rodTipY);
+        ctx.lineTo(bobberX + 9, bobberY + 12 + Math.sin(now / 150) * 1);
+        ctx.stroke();
+        
+        let bobDelta = Math.sin(now / 200) * 1.2;
+        if (bobberDipped) bobDelta = 5 + Math.sin(now / 80) * 1.2;
+        ctx.drawImage(pescaBobberImg, bobberX, bobberY + bobDelta, 18, 18);
+        
+        if (bobberDipped || pescaState === 'celebrating') {
+            ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            let ringRadius = (now / 15) % 12 + 3;
+            ctx.arc(bobberX + 9, bobberY + 14, ringRadius, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+        
+        if (pescaState === 'fishing') {
+            let targetX = bobberX - 8;
+            let targetY = bobberY + 25;
+            fishShadowX += (targetX - fishShadowX) * 0.02 * delta;
+            fishShadowY += (targetY - fishShadowY) * 0.02 * delta;
+            
+            ctx.save();
+            ctx.globalAlpha = 0.35;
+            let scaleX = (targetX > fishShadowX) ? -1 : 1;
+            ctx.translate(fishShadowX, fishShadowY);
+            ctx.scale(scaleX, 1);
+            ctx.drawImage(pescaFishImg, -13, -8, 26, 16);
+            ctx.restore();
+        }
+        
+        if (pescaState === 'celebrating' && fishJumpTime < 1.0) {
+            let t = fishJumpTime;
+            let jx = bobberX * (1 - t) + (capyX + 50) * t;
+            let jy = bobberY * (1 - t) + (capyY + 40) * t - Math.sin(t * Math.PI) * 60;
+            
+            ctx.save();
+            ctx.translate(jx, jy);
+            ctx.rotate(t * Math.PI * 2.5);
+            ctx.drawImage(pescaFishImg, -13, -10, 26, 20);
+            ctx.restore();
+            
+            ctx.fillStyle = '#fef08a';
+            for (let i = 0; i < 3; i++) {
+                let px = jx + (Math.random() - 0.5) * 16;
+                let py = jy + (Math.random() - 0.5) * 16;
+                ctx.fillRect(px, py, 2.5, 2.5);
+            }
+            fishJumpTime += 0.03 * delta;
+        }
+        
+        ctx.fillStyle = '#e2e8f0';
+        ctx.beginPath();
+        ctx.roundRect(barX, barY, barW, barH, 7);
+        ctx.fill();
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        ctx.fillStyle = '#22c55e';
+        let spotX = barX + (sweetSpotLeft / 100) * barW;
+        let spotW = (sweetSpotWidth / 100) * barW;
+        ctx.fillRect(spotX, barY + 1, spotW, barH - 2);
+        ctx.strokeStyle = '#16a34a';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(spotX, barY + 1, spotW, barH - 2);
+        
+        let needleX = barX + (needlePosition / 100) * barW;
+        ctx.fillStyle = '#ef4444';
+        ctx.fillRect(needleX - 2, barY - 3, 4, barH + 6);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(needleX - 2, barY - 3, 4, barH + 6);
+        
+        ctx.restore();
+        
+        if (pescaState === 'celebrating') {
+            pescaCelebrateTimer -= 16.67 * delta;
+            if (pescaCelebrateTimer <= 0) {
+                if (currentMinigameScore >= targetMinigameScore) {
+                    endMinigame(true);
+                    return;
+                } else {
+                    pescaState = 'fishing';
+                    repositionSweetSpot();
+                }
             }
         }
         
@@ -5095,8 +5430,8 @@ function startPescaAnimation() {
     pescaAnimationId = requestAnimationFrame(tick);
 }
 
-function clickFishingZone() {
-    if (!minigameActive) return;
+function clickFishingZone(event) {
+    if (!minigameActive || pescaState === 'celebrating') return;
     
     const inZone = needlePosition >= sweetSpotLeft && needlePosition <= (sweetSpotLeft + sweetSpotWidth);
     
@@ -5105,35 +5440,13 @@ function clickFishingZone() {
         currentMinigameScore++;
         document.getElementById('minigameScore').innerText = currentMinigameScore + "/" + targetMinigameScore;
         
-        if (currentMinigameScore >= targetMinigameScore) {
-            endMinigame(true);
-            return;
-        }
+        pescaState = 'celebrating';
+        pescaCelebrateTimer = 1200;
+        fishJumpTime = 0.0;
         
-        stopPescaAnimation();
-        
-        // Exibir faísca de sucesso no centro da água
-        const waterView = document.querySelector('.mg-water-view');
-        if (waterView) {
-            const spark = document.createElement('div');
-            spark.className = "mg-success-spark";
-            spark.innerText = "⭐";
-            waterView.appendChild(spark);
-            setTimeout(() => spark.remove(), 500);
-        }
-        
-        setTimeout(() => {
-            if (!minigameActive) return;
-            repositionSweetSpot();
-            startPescaAnimation();
-        }, 600);
     } else {
         playSound('error');
-        const bar = document.querySelector('.mg-bar-container');
-        if (bar) {
-            bar.classList.add('border-red-500');
-            setTimeout(() => bar.classList.remove('border-red-500'), 200);
-        }
+        shakeFrames = 10;
     }
 }
 
@@ -5168,28 +5481,37 @@ function setupLabMinigame() {
     
     const arena = document.getElementById('minigameArenaArea');
     arena.innerHTML = `
-        <div class="mg-lab-container">
-            <div class="mg-potion-target">
-                <div id="labPotionLiquid" class="mg-potion-liquid" style="background-color: #cbd5e1;"></div>
-                <img class="mg-potion-flask-img" src="eco_lab_flask.png" alt="Frasco">
+        <div class="mg-layout-with-char">
+            <div class="mg-char-showcase">
+                <div class="mg-char-wrapper">
+                    <div id="mgCharSprite" class="npc-sprite spritesheet-npc-sprite npc-scientist-sprite" style="background-position: 0px 0px;"></div>
+                </div>
             </div>
-            <div id="labTargetText" class="text-xs font-black uppercase text-purple-950">MISTURE: ...</div>
-            <div class="mg-potion-tubes">
-                <div id="tube-red" class="mg-tube" onclick="clickLabTube('red')">
-                    <div class="mg-beaker"><div class="mg-beaker-liquid mg-beaker-red"></div></div>
-                    <span class="text-[8px] font-black uppercase text-gray-500">Vermelho</span>
+            <div class="mg-lab-container">
+                <div class="mg-potion-target">
+                    <div id="labPotionLiquid" class="mg-potion-liquid" style="background-color: #cbd5e1;"></div>
+                    <img class="mg-potion-flask-img" src="eco_lab_flask.png" alt="Frasco">
                 </div>
-                <div id="tube-yellow" class="mg-tube" onclick="clickLabTube('yellow')">
-                    <div class="mg-beaker"><div class="mg-beaker-liquid mg-beaker-yellow"></div></div>
-                    <span class="text-[8px] font-black uppercase text-gray-500">Amarelo</span>
-                </div>
-                <div id="tube-blue" class="mg-tube" onclick="clickLabTube('blue')">
-                    <div class="mg-beaker"><div class="mg-beaker-liquid mg-beaker-blue"></div></div>
-                    <span class="text-[8px] font-black uppercase text-gray-500">Azul</span>
+                <div id="labTargetText" class="text-xs font-black uppercase text-purple-950">MISTURE: ...</div>
+                <div class="mg-potion-tubes">
+                    <div id="tube-red" class="mg-tube" onclick="clickLabTube('red')">
+                        <div class="mg-beaker"><div class="mg-beaker-liquid mg-beaker-red"></div></div>
+                        <span class="text-[8px] font-black uppercase text-gray-500">Vermelho</span>
+                    </div>
+                    <div id="tube-yellow" class="mg-tube" onclick="clickLabTube('yellow')">
+                        <div class="mg-beaker"><div class="mg-beaker-liquid mg-beaker-yellow"></div></div>
+                        <span class="text-[8px] font-black uppercase text-gray-500">Amarelo</span>
+                    </div>
+                    <div id="tube-blue" class="mg-tube" onclick="clickLabTube('blue')">
+                        <div class="mg-beaker"><div class="mg-beaker-liquid mg-beaker-blue"></div></div>
+                        <span class="text-[8px] font-black uppercase text-gray-500">Azul</span>
+                    </div>
                 </div>
             </div>
         </div>
     `;
+    
+    startMgCharAnimation('scientist', 2, 34, 34);
     
     generateNextLabColor();
     startMinigameTimer(15);
@@ -5241,15 +5563,17 @@ function clickLabTube(color) {
             currentMinigameScore++;
             document.getElementById('minigameScore').innerText = currentMinigameScore + "/" + targetMinigameScore;
             
+            triggerMgCharCelebrate('scientist', 2, 34, 34);
+            
             const liquid = document.getElementById('labPotionLiquid');
             if (liquid) {
                 liquid.style.backgroundColor = recipe.hex;
             }
             
             if (currentMinigameScore >= targetMinigameScore) {
-                setTimeout(() => endMinigame(true), 600);
+                setTimeout(() => endMinigame(true), 1000);
             } else {
-                setTimeout(generateNextLabColor, 600);
+                setTimeout(generateNextLabColor, 1000);
             }
         } else {
             playSound('error');
@@ -5294,19 +5618,28 @@ function setupBioMinigame() {
     
     const arena = document.getElementById('minigameArenaArea');
     arena.innerHTML = `
-        <div class="mg-bio-container">
-            <div class="mg-bio-target-box">
-                <div class="mg-bio-target-label">Localizar:</div>
-                <div id="bioTargetText" class="text-xs font-black text-green-900">...</div>
+        <div class="mg-layout-with-char">
+            <div class="mg-char-showcase">
+                <div class="mg-char-wrapper">
+                    <div id="mgCharSprite" class="npc-sprite spritesheet-npc-sprite npc-biologist-sprite" style="background-position: 0px 0px;"></div>
+                </div>
             </div>
-            <div id="bioGrid" class="mg-bio-grid">
-                <!-- Cards injected here -->
+            <div class="mg-bio-container">
+                <div class="mg-bio-target-box">
+                    <div class="mg-bio-target-label">Localizar:</div>
+                    <div id="bioTargetText" class="text-xs font-black text-green-900">...</div>
+                </div>
+                <div id="bioGrid" class="mg-bio-grid">
+                    <!-- Cards injected here -->
+                </div>
             </div>
         </div>
     `;
     
+    startMgCharAnimation('biologist', 4, 33, 38);
+    
     generateNextBioPuzzle();
-    startMinigameTimer(12);
+    startMinigameTimer(15);
 }
 
 function generateNextBioPuzzle() {
@@ -5336,31 +5669,6 @@ function generateNextBioPuzzle() {
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// MINIJOGO 5: AVENTUREIRA ("Baú de Relíquias")
-// ─────────────────────────────────────────────────────────────────────────────
-function setupAdventurerMinigame() {
-    targetMinigameScore = 15;
-    currentMinigameScore = 0;
-    
-    document.getElementById('minigameTitle').innerText = "Baú de Relíquias";
-    document.getElementById('minigameSubtitle').innerText = "Aventureira";
-    document.getElementById('minigameInstructions').innerText = "Toque muito rápido no baú para abri-lo!";
-    document.getElementById('minigameScore').innerText = currentMinigameScore + "/" + targetMinigameScore;
-    
-    const arena = document.getElementById('minigameArenaArea');
-    arena.innerHTML = `
-        <div class="mg-chest-container">
-            <img id="adventureChest" class="mg-chest" src="mystery_box.png" alt="Baú" onclick="clickAdventurerChest()">
-            <div class="mg-tap-bar-container">
-                <div id="chestProgressBar" class="mg-tap-bar" style="width: 0%;"></div>
-            </div>
-        </div>
-    `;
-    
-    startMinigameTimer(8);
-}
-
 function clickBioCard(emoji) {
     if (!minigameActive) return;
     
@@ -5369,8 +5677,10 @@ function clickBioCard(emoji) {
         currentMinigameScore++;
         document.getElementById('minigameScore').innerText = currentMinigameScore + "/" + targetMinigameScore;
         
+        triggerMgCharCelebrate('biologist', 4, 33, 38);
+        
         if (currentMinigameScore >= targetMinigameScore) {
-            endMinigame(true);
+            setTimeout(() => endMinigame(true), 1000);
         } else {
             generateNextBioPuzzle();
         }
@@ -5380,12 +5690,54 @@ function clickBioCard(emoji) {
     }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// MINIJOGO 5: AVENTUREIRA ("Baú de Relíquias")
+// ─────────────────────────────────────────────────────────────────────────────
+function setupAdventurerMinigame() {
+    targetMinigameScore = 12;
+    currentMinigameScore = 0;
+    
+    document.getElementById('minigameTitle').innerText = "Baú de Relíquias";
+    document.getElementById('minigameSubtitle').innerText = "Aventureira";
+    document.getElementById('minigameInstructions').innerText = "Toque muito rápido no baú para abri-lo!";
+    document.getElementById('minigameScore').innerText = currentMinigameScore + "/" + targetMinigameScore;
+    
+    const arena = document.getElementById('minigameArenaArea');
+    arena.innerHTML = `
+        <div class="mg-layout-with-char">
+            <div class="mg-char-showcase">
+                <div class="mg-char-wrapper">
+                    <div id="mgCharSprite" class="npc-sprite spritesheet-npc-sprite npc-adventurer-sprite" style="background-position: 0px 0px;"></div>
+                </div>
+            </div>
+            <div class="mg-chest-container">
+                <img id="adventureChest" class="mg-chest" src="mystery_box.png" alt="Baú" onclick="clickAdventurerChest()">
+                <div class="mg-tap-bar-container">
+                    <div id="chestProgressBar" class="mg-tap-bar" style="width: 0%;"></div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    startMgCharAnimation('adventurer', 0, 33, 38);
+    
+    startMinigameTimer(12);
+}
+
 function clickAdventurerChest() {
     if (!minigameActive) return;
     
     playSound('click');
     currentMinigameScore++;
     document.getElementById('minigameScore').innerText = currentMinigameScore + "/" + targetMinigameScore;
+    
+    mgCurrentAnimRow = Math.random() > 0.5 ? 3 : 2;
+    if (mgCelebrateTimeout) clearTimeout(mgCelebrateTimeout);
+    mgCelebrateTimeout = setTimeout(() => {
+        if (minigameActive && currentMinigameScore < targetMinigameScore) {
+            mgCurrentAnimRow = 0;
+        }
+    }, 450);
     
     const chestEl = document.getElementById('adventureChest');
     if (chestEl) {
@@ -5401,7 +5753,8 @@ function clickAdventurerChest() {
     
     if (currentMinigameScore >= targetMinigameScore) {
         if (chestEl) chestEl.src = "eco_chest_open.png";
-        setTimeout(() => endMinigame(true), 600);
+        triggerMgCharCelebrate('adventurer', 0, 33, 38);
+        setTimeout(() => endMinigame(true), 1000);
     }
 }
 
@@ -5413,3 +5766,402 @@ document.addEventListener('DOMContentLoaded', () => {
 
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(e => {}));
 
+
+// =============================================================================
+//  MENU PRINCIPAL — CAPIVARA AVENTUREIRA
+// =============================================================================
+
+function openMainMenu() {
+    const menu = document.getElementById('mainMenuScreen');
+    if (!menu) return;
+    // Atualiza dados do usuário
+    if (currentUser) {
+        const nameEl = document.getElementById('menuUserName');
+        const coinsEl = document.getElementById('menuUserCoins');
+        const levelEl = document.getElementById('menuUserLevel');
+        if (nameEl) nameEl.textContent = currentUser.name || 'Aventureira';
+        if (coinsEl) coinsEl.textContent = seedCoins || 0;
+        if (levelEl) levelEl.textContent = userLevelMemo || 1;
+    }
+    menu.classList.remove('hidden');
+    menu.style.display = 'flex';
+    playSound('success');
+}
+
+function closeMainMenu(targetView) {
+    const menu = document.getElementById('mainMenuScreen');
+    if (menu) {
+        menu.style.opacity = '0';
+        menu.style.transform = 'scale(0.96)';
+        menu.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+        setTimeout(() => {
+            menu.style.display = 'none';
+            menu.classList.add('hidden');
+            menu.style.opacity = '';
+            menu.style.transform = '';
+        }, 250);
+    }
+    playSound('click');
+    if (targetView) {
+        setTimeout(() => showView(targetView), 200);
+    }
+}
+
+function closeMainMenuOnly() {
+    closeMainMenu(null);
+    // Mantém a view atual (vila por padrão)
+}
+
+function closeMainMenuAndOpenCloset() {
+    closeMainMenu(null);
+    setTimeout(() => {
+        showView('vila');
+        setTimeout(() => openCloset(), 300);
+    }, 200);
+}
+
+// =============================================================================
+//  BIBLIOTECA DE PERSONAGENS
+// =============================================================================
+
+const CHARACTER_DATA = [
+    {
+        id: 'adventurer',
+        name: 'Capy Aventureira',
+        role: 'Exploradora',
+        emoji: '🧭',
+        bgGradient: 'linear-gradient(135deg, #14532d, #166534)',
+        sprite: { atlas: 'capybara_adventurer/atlas.webp', w: 574, h: 654, framesPerRow: 8, idleRow: 0 },
+        setImage: 'capy_set_explorer.png',
+        story: 'Nascida nas margens do Rio Pantanal, Capy Aventureira sempre sonhou em explorar cada canto da floresta brasileira. Desde pequena, ela carregava sua mochila e saía em expedições, catalogando insetos, flores e aves raras.',
+        lore: 'Após descobrir um pergaminho secreto de uma lendária bióloga do século passado, ela partiu em jornada para encontrar os 100 animais mais raros do Brasil e registrá-los no Grande Diário da Fauna.',
+        goal: 'Catalogar todos os animais da fauna brasileira e proteger o habitat natural das espécies ameaçadas.',
+        stats: [
+            { label: 'Exploração', value: 95, color: '#22c55e' },
+            { label: 'Coragem', value: 88, color: '#f59e0b' },
+            { label: 'Ciência', value: 72, color: '#3b82f6' },
+            { label: 'Amizade', value: 90, color: '#ec4899' }
+        ],
+        skills: ['🗺️ Leitura de Mapas', '🔭 Observação Noturna', '📸 Fotografia Selvagem', '🥾 Trilha Avançada'],
+        funFact: 'A Capy Aventureira pode identificar mais de 300 espécies de pássaros só pelo canto!'
+    },
+    {
+        id: 'farmer',
+        name: 'Capy Fazendeira',
+        role: 'Agricultora Orgânica',
+        emoji: '🌾',
+        bgGradient: 'linear-gradient(135deg, #78350f, #92400e)',
+        sprite: { atlas: 'farmer_capybara/atlas.webp', w: 720, h: 691, framesPerRow: 8, idleRow: 0 },
+        setImage: 'capy_set_warrior.png',
+        story: 'Capy Fazendeira cresceu na Fazenda do Vale Verde, onde aprendeu os segredos da terra com sua avó. Ela sabe que a alimentação saudável começa na semente certa e no solo bem cuidado.',
+        lore: 'Guardiã da Eco-Vila, ela foi escolhida pelo Conselho das Capivaras para construir a fazenda comunitária. Com seu conhecimento ancestral de agricultura orgânica, ela transforma sementes em festim para toda a vila.',
+        goal: 'Desenvolver a fazenda da Eco-Vila e ensinar técnicas de agricultura sustentável para crianças.',
+        stats: [
+            { label: 'Cultivo', value: 98, color: '#22c55e' },
+            { label: 'Força', value: 82, color: '#f59e0b' },
+            { label: 'Paciência', value: 95, color: '#3b82f6' },
+            { label: 'Culinária', value: 87, color: '#ec4899' }
+        ],
+        skills: ['🌱 Plantio Orgânico', '🌿 Herbolaria', '🪴 Compostagem', '🍎 Colheita Sustentável'],
+        funFact: 'A Capy Fazendeira consegue prever o tempo só olhando para as nuvens e cheirando o vento!'
+    },
+    {
+        id: 'fisherman',
+        name: 'Capy Pescadora',
+        role: 'Guardiã dos Rios',
+        emoji: '🎣',
+        bgGradient: 'linear-gradient(135deg, #0c4a6e, #0369a1)',
+        sprite: { atlas: 'capybara_fisherman/atlas.webp', w: 720, h: 647, framesPerRow: 8, idleRow: 0 },
+        setImage: 'capy_set_explorer.png',
+        story: 'Filha de um pescador do Rio São Francisco, Capy Pescadora conhece cada pedra, cada corrente e cada peixe das águas brasileiras. Ela pesca não apenas para comer, mas para entender e proteger os rios.',
+        lore: 'Após ver seu rio favorito sofrer com poluição, ela se tornou a maior defensora dos ecossistemas aquáticos. Agora gerencia os Docas da Eco-Vila, ensinando o respeito pelas águas e as técnicas de pesca responsável.',
+        goal: 'Monitorar a saúde dos rios da região e ensinar pesca responsável e conservação aquática.',
+        stats: [
+            { label: 'Pesca', value: 97, color: '#22c55e' },
+            { label: 'Natação', value: 92, color: '#38bdf8' },
+            { label: 'Paciência', value: 99, color: '#3b82f6' },
+            { label: 'Ecologia', value: 85, color: '#a78bfa' }
+        ],
+        skills: ['🐟 Identificação de Peixes', '🌊 Navegação Fluvial', '🦦 Monitoramento Aquático', '♻️ Pesca Responsável'],
+        funFact: 'A Capy Pescadora consegue segurar a respiração por até 3 minutos debaixo d\'água!'
+    },
+    {
+        id: 'scientist',
+        name: 'Dr. Capy Cientista',
+        role: 'Cientista Chefe',
+        emoji: '🔬',
+        bgGradient: 'linear-gradient(135deg, #1e3a5f, #1d4ed8)',
+        sprite: { atlas: 'capybara_scientist/atlas.webp', w: 599, h: 607, framesPerRow: 8, idleRow: 0 },
+        setImage: 'capy_set_scientist.png',
+        story: 'Formado com distinção na Universidade Federal das Florestas, Dr. Capy Cientista dedicou sua vida ao estudo da biodiversidade brasileira. Seus artigos científicos já foram lidos por pesquisadores em mais de 40 países.',
+        lore: 'Ele fundou o Eco-Laboratório após descobrir uma nova espécie de bromélia na Mata Atlântica. Agora coordena todas as pesquisas da vila e transforma as descobertas das crianças exploradoras em ciência real.',
+        goal: 'Liderar pesquisas sobre biodiversidade e criar o maior banco de dados de fauna e flora brasileira.',
+        stats: [
+            { label: 'Ciência', value: 99, color: '#22c55e' },
+            { label: 'Inteligência', value: 97, color: '#f59e0b' },
+            { label: 'Pesquisa', value: 95, color: '#3b82f6' },
+            { label: 'Ensino', value: 88, color: '#ec4899' }
+        ],
+        skills: ['🧬 Genética', '🔭 Astronomia Botânica', '🧪 Química Verde', '📊 Análise de Dados'],
+        funFact: 'Dr. Capy Cientista já publicou 47 artigos científicos e tem seu nome em 3 espécies descobertas!'
+    },
+    {
+        id: 'biologist',
+        name: 'Dra. Capy Bióloga',
+        role: 'Bióloga & Curadora',
+        emoji: '🦋',
+        bgGradient: 'linear-gradient(135deg, #6b21a8, #7c3aed)',
+        sprite: { atlas: 'capybara_biologist/atlas.webp', w: 549, h: 635, framesPerRow: 8, idleRow: 0 },
+        setImage: 'capy_set_wizard.png',
+        story: 'Desde criança, Dra. Capy Bióloga colecionava folhas, insetos e conchas. Ela transformou essa paixão em uma carreira dedicada ao estudo dos seres vivos e à educação ambiental para crianças de todo o Brasil.',
+        lore: 'Curadora do Álbum Oficial da Fauna Brasileira, ela organiza cada descoberta feita pelos exploradores mirins em fichas científicas detalhadas. Seu trabalho garante que cada animal catalogado contribua para a proteção de sua espécie.',
+        goal: 'Catalogar a fauna brasileira e ensinar crianças a amar e proteger cada ser vivo da natureza.',
+        stats: [
+            { label: 'Zoologia', value: 98, color: '#22c55e' },
+            { label: 'Botânica', value: 90, color: '#a3e635' },
+            { label: 'Educação', value: 96, color: '#3b82f6' },
+            { label: 'Observação', value: 93, color: '#a78bfa' }
+        ],
+        skills: ['🦋 Entomologia', '🌺 Botânica Tropical', '📖 Taxonomia', '🎓 Educação Ambiental'],
+        funFact: 'A Dra. Capy Bióloga consegue identificar mais de 500 espécies de plantas só pela folha!'
+    }
+];
+
+let currentCharIndex = 0;
+const charSpriteTimers = {};
+
+function openCharacterLibrary() {
+    playSound('click');
+    const modal = document.getElementById('characterLibraryModal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+    renderCharTabs();
+    renderCharContent(0);
+}
+
+function closeCharacterLibrary() {
+    playSound('click');
+    const modal = document.getElementById('characterLibraryModal');
+    if (modal) {
+        modal.style.display = 'none';
+        modal.classList.add('hidden');
+    }
+    // Para animações de sprite
+    Object.values(charSpriteTimers).forEach(t => clearInterval(t));
+}
+
+function renderCharTabs() {
+    const row = document.getElementById('charTabsRow');
+    if (!row) return;
+    row.innerHTML = CHARACTER_DATA.map((c, i) => `
+        <button class="char-tab-btn ${i === 0 ? 'active' : ''}" onclick="renderCharContent(${i})" id="charTab_${i}">
+            ${c.emoji} ${c.name.split(' ').pop()}
+        </button>
+    `).join('');
+}
+
+function renderCharContent(idx) {
+    currentCharIndex = idx;
+    const char = CHARACTER_DATA[idx];
+    if (!char) return;
+
+    // Atualiza tabs
+    document.querySelectorAll('.char-tab-btn').forEach((b, i) => {
+        b.classList.toggle('active', i === idx);
+    });
+
+    const content = document.getElementById('charLibContent');
+    if (!content) return;
+
+    // Para timer anterior
+    Object.values(charSpriteTimers).forEach(t => clearInterval(t));
+
+    content.innerHTML = `
+        <!-- Hero do personagem -->
+        <div style="${char.bgGradient.replace('linear-gradient', 'background: linear-gradient')}; padding: 24px 20px 16px;">
+            <div style="display: flex; align-items: flex-end; gap: 16px;">
+                <!-- Sprite animado -->
+                <div style="flex-shrink: 0; position: relative; width: 100px; height: 110px;">
+                    <canvas id="charLibCanvas_${idx}" width="100" height="110" class="char-lib-sprite-canvas"
+                        style="width: 100px; height: 110px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));"></canvas>
+                    <!-- Set image como fallback -->
+                    <img src="${char.setImage}" id="charSetFallback_${idx}"
+                         style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 0;"
+                         onerror="this.style.opacity=0">
+                </div>
+                <!-- Nome e role -->
+                <div style="flex: 1;">
+                    <div style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 9999px; font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; background: rgba(255,255,255,0.2); color: rgba(255,255,255,0.9); margin-bottom: 4px;">
+                        ${char.emoji} ${char.role}
+                    </div>
+                    <h3 style="font-family: 'Fredoka One', cursive; font-size: 1.5rem; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.3); line-height: 1.1;">${char.name}</h3>
+                    <p style="font-size: 9px; color: rgba(255,255,255,0.7); font-weight: 700; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px;">Clique no sprite para animar!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conteúdo scrollável -->
+        <div style="padding: 16px 20px 40px; display: flex; flex-direction: column; gap: 16px;">
+
+            <!-- História -->
+            <div style="background: #fff; border-radius: 1.5rem; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.05);">
+                <h4 style="font-family: 'Fredoka One', cursive; font-size: 1rem; color: #166534; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                    📖 História
+                </h4>
+                <p style="font-size: 11px; color: #374151; line-height: 1.6; font-weight: 600;">${char.story}</p>
+            </div>
+
+            <!-- Lore -->
+            <div style="background: #fff; border-radius: 1.5rem; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.05);">
+                <h4 style="font-family: 'Fredoka One', cursive; font-size: 1rem; color: #166534; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                    🗺️ Missão
+                </h4>
+                <p style="font-size: 11px; color: #374151; line-height: 1.6; font-weight: 600;">${char.lore}</p>
+            </div>
+
+            <!-- Objetivo -->
+            <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border-radius: 1.5rem; padding: 14px 16px; border: 2px solid #86efac;">
+                <p style="font-size: 10px; font-weight: 800; color: #15803d; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">🎯 Objetivo Principal</p>
+                <p style="font-size: 11px; color: #166534; font-weight: 700; line-height: 1.5;">${char.goal}</p>
+            </div>
+
+            <!-- Stats -->
+            <div style="background: #fff; border-radius: 1.5rem; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.05);">
+                <h4 style="font-family: 'Fredoka One', cursive; font-size: 1rem; color: #166534; margin-bottom: 12px;">⭐ Atributos</h4>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    ${char.stats.map(s => `
+                        <div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                <span style="font-size: 10px; font-weight: 800; color: #374151; text-transform: uppercase;">${s.label}</span>
+                                <span style="font-size: 10px; font-weight: 900; color: ${s.color};">${s.value}/100</span>
+                            </div>
+                            <div style="height: 8px; background: #f3f4f6; border-radius: 9999px; overflow: hidden;">
+                                <div style="height: 100%; width: ${s.value}%; background: ${s.color}; border-radius: 9999px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1);"></div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+
+            <!-- Habilidades -->
+            <div style="background: #fff; border-radius: 1.5rem; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.05);">
+                <h4 style="font-family: 'Fredoka One', cursive; font-size: 1rem; color: #166534; margin-bottom: 10px;">⚡ Habilidades</h4>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                    ${char.skills.map(sk => `
+                        <span style="padding: 5px 10px; border-radius: 9999px; font-size: 10px; font-weight: 800; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0;">${sk}</span>
+                    `).join('')}
+                </div>
+            </div>
+
+            <!-- Fun Fact -->
+            <div style="background: linear-gradient(135deg, #fef9c3, #fef08a); border-radius: 1.5rem; padding: 14px 16px; border: 2px solid #fde047; display: flex; gap: 10px; align-items: flex-start;">
+                <span style="font-size: 1.5rem; flex-shrink: 0;">💡</span>
+                <div>
+                    <p style="font-size: 9px; font-weight: 800; color: #854d0e; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px;">Você Sabia?</p>
+                    <p style="font-size: 11px; color: #713f12; font-weight: 700; line-height: 1.5;">${char.funFact}</p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Inicia animação do sprite
+    startCharLibSprite(idx, char);
+}
+
+function startCharLibSprite(idx, char) {
+    const canvas = document.getElementById(`charLibCanvas_${idx}`);
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.src = char.sprite.atlas;
+
+    let frame = 0;
+    const totalIdleFrames = 8;
+    const frameW = char.sprite.w;
+    const frameH = char.sprite.h;
+
+    img.onload = () => {
+        const draw = () => {
+            ctx.clearRect(0, 0, 100, 110);
+            const srcX = (frame % char.sprite.framesPerRow) * frameW;
+            const srcY = Math.floor(frame / char.sprite.framesPerRow) * frameH;
+            // Escala para caber no canvas de 100x110
+            const scale = Math.min(100 / frameW, 110 / frameH);
+            const drawW = frameW * scale;
+            const drawH = frameH * scale;
+            const drawX = (100 - drawW) / 2;
+            const drawY = (110 - drawH) / 2;
+            ctx.drawImage(img, srcX, srcY, frameW, frameH, drawX, drawY, drawW, drawH);
+        };
+        draw();
+        const tid = setInterval(() => {
+            frame = (frame + 1) % totalIdleFrames;
+            draw();
+        }, 140);
+        charSpriteTimers[idx] = tid;
+    };
+
+    img.onerror = () => {
+        // Mostra imagem do set como fallback
+        const fallback = document.getElementById(`charSetFallback_${idx}`);
+        if (fallback) fallback.style.opacity = '1';
+    };
+
+    // Clique no canvas para animar ação especial (walk)
+    canvas.onclick = () => {
+        clearInterval(charSpriteTimers[idx]);
+        let walkFrame = 0;
+        const walkFrames = 8;
+        const walkRowY = frameH; // segunda linha = walk
+        const draw = () => {
+            ctx.clearRect(0, 0, 100, 110);
+            const srcX = (walkFrame % char.sprite.framesPerRow) * frameW;
+            const srcY = Math.floor(walkFrame / char.sprite.framesPerRow) * frameW + walkRowY;
+            // ...usa o mesmo cálculo de escala
+            const imgObj = new Image();
+            imgObj.src = char.sprite.atlas;
+            imgObj.onload = () => {
+                const scale = Math.min(100 / frameW, 110 / frameH);
+                const drawW = frameW * scale;
+                const drawH = frameH * scale;
+                ctx.drawImage(imgObj, srcX, walkRowY + (Math.floor(walkFrame / char.sprite.framesPerRow) * frameH), frameW, frameH, (100-drawW)/2, (110-drawH)/2, drawW, drawH);
+            };
+        };
+        // Re-usa o img já carregado para animação de walk
+        img.onload = null;
+        let wf = 0;
+        const walkTid = setInterval(() => {
+            ctx.clearRect(0, 0, 100, 110);
+            const srcX = (wf % char.sprite.framesPerRow) * frameW;
+            const scale = Math.min(100 / frameW, 110 / frameH);
+            const drawW = frameW * scale;
+            const drawH = frameH * scale;
+            ctx.drawImage(img, srcX, frameH, frameW, frameH, (100-drawW)/2, (110-drawH)/2, drawW, drawH);
+            wf = (wf + 1) % walkFrames;
+        }, 100);
+        charSpriteTimers[idx] = walkTid;
+        // Volta ao idle após 2s
+        setTimeout(() => {
+            clearInterval(walkTid);
+            startCharLibSprite(idx, char);
+        }, 2000);
+    };
+}
+
+// Integração: abre menu principal após login
+const _origShowView = showView;
+// Adiciona botão de menu no header
+function addMainMenuButtonToHeader() {
+    const header = document.querySelector('header .max-w-md');
+    if (!header || document.getElementById('headerMenuBtn')) return;
+    const btn = document.createElement('button');
+    btn.id = 'headerMenuBtn';
+    btn.onclick = openMainMenu;
+    btn.className = 'w-9 h-9 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center shadow-sm border border-amber-200 ml-1';
+    btn.title = 'Menu Principal';
+    btn.innerHTML = '<i class="fas fa-bars text-sm"></i>';
+    const right = header.querySelector('.flex.items-center.gap-2');
+    if (right) right.prepend(btn);
+}
