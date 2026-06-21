@@ -1770,10 +1770,19 @@ body.night-mode .text-on-white {
     }
     body.on-vila-view #nextMissionCountdown {
         position: fixed !important;
+        bottom: 50px !important;
+        right: 8px !important;
+        z-index: 10000 !important;
+        transform: none !important;
+    }
+    body.on-vila-view #btnObrasOpen {
+        position: fixed !important;
         bottom: 8px !important;
         right: 8px !important;
         z-index: 10000 !important;
         transform: none !important;
+        width: auto !important;
+        margin: 0 !important;
     }
     body.on-vila-view #villageEvolutionDrawer {
         max-width: 800px !important;
@@ -1786,6 +1795,40 @@ body.night-mode .text-on-white {
     body.on-vila-view #villageEvolutionDrawer.open {
         transform: translate(-50%, 0) !important;
     }
+    body.on-vila-view #villageEvolutionDrawer:not(.open) {
+        transform: translate(-50%, 100%) !important;
+    }
+    body.on-vila-view #villageEvolutionDrawer .px-5.pb-3 {
+        padding-left: 1.25rem !important;
+        padding-right: 1.25rem !important;
+        padding-bottom: 0.5rem !important;
+        padding-top: 0.5rem !important;
+    }
+    body.on-vila-view #villageEvolutionDrawer .w-12.h-1.5.bg-gray-300 {
+        margin-top: 0.5rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+    body.on-vila-view #villageEvolutionDrawer button[onclick="closeVillageDrawer()"] {
+        width: 1.75rem !important;
+        height: 1.75rem !important;
+        font-size: 0.75rem !important;
+    }
+    body.on-vila-view #villageEvolutionDrawer .bg-gradient-to-r.from-amber-500.to-amber-600 {
+        padding: 0.75rem 1.25rem !important;
+        border-radius: 1.5rem !important;
+        margin-bottom: 0.75rem !important;
+    }
+    body.on-vila-view #villageEvolutionDrawer .bg-gradient-to-r.from-amber-500.to-amber-600 p {
+        font-size: 8px !important;
+    }
+    body.on-vila-view #villageEvolutionDrawer .bg-gradient-to-r.from-amber-500.to-amber-600 span.brand-font {
+        font-size: 1.25rem !important;
+    }
+    body.on-vila-view #villageEvolutionDrawer .bg-gradient-to-r.from-amber-500.to-amber-600 button {
+        padding: 0.5rem 1rem !important;
+        font-size: 9px !important;
+        border-radius: 1rem !important;
+    }
     body.on-vila-view #villageGrid {
         display: grid !important;
         grid-template-columns: repeat(2, 1fr) !important;
@@ -1793,9 +1836,20 @@ body.night-mode .text-on-white {
     }
     /* Compact cards for widescreen evolutions drawer */
     body.on-vila-view .building-card {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
         padding: 0.75rem !important;
         border-radius: 1.5rem !important;
         gap: 8px !important;
+    }
+    body.on-vila-view .building-card .flex.items-start.gap-4 {
+        align-items: center !important;
+        gap: 0.75rem !important;
+    }
+    body.on-vila-view .building-card .flex-grow.flex.flex-col.gap-2 {
+        gap: 4px !important;
     }
     body.on-vila-view .building-card .w-14, 
     body.on-vila-view .building-card .w-10 {
@@ -1812,7 +1866,10 @@ body.night-mode .text-on-white {
     body.on-vila-view .building-card button {
         padding: 0.5rem 0.75rem !important;
         font-size: 8.5px !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
     }
+
 
     /* Side-by-side Layout for Character Minigames */
     body.on-vila-view .mg-layout-with-char {
