@@ -2741,6 +2741,8 @@ async function initializeDynamicConfigs() {
             const bgmData = await bgmRes.json();
             Object.assign(bgmTracksSpec, bgmData);
             console.log('Procedural BGM configurations hydrated successfully.');
+        } else {
+            throw new Error(`Server returned status ${bgmRes.status}`);
         }
     } catch (e) {
         console.warn('Failed to load BGM configurations, using static defaults:', e);
@@ -2760,6 +2762,8 @@ async function initializeDynamicConfigs() {
             });
             injectDynamicNPCStyles(npcConfigs);
             console.log('NPC configurations hydrated and styles injected.');
+        } else {
+            throw new Error(`Server returned status ${npcRes.status}`);
         }
     } catch (e) {
         console.warn('Failed to load NPC configurations, using static defaults:', e);
