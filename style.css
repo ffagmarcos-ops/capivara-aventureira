@@ -211,48 +211,36 @@ body.night-mode .text-on-white {
 
 .menu-main-btn {
     position: relative;
-    background: linear-gradient(to bottom, #854d0e 0%, #78350f 50%, #451a03 100%) !important;
-    border: 3px solid #3f1a04 !important;
-    border-top-color: #b45309 !important;
-    border-bottom-color: #1c0a01 !important;
-    border-radius: 16px !important;
-    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.15), 0 5px 0 #1c0a01, 0 8px 20px rgba(0,0,0,0.5) !important;
+    background: url('wood_button.png') no-repeat center center / 100% 100% !important;
+    border: none !important;
+    border-radius: 0px !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3) !important;
     font-family: 'brand-font', inherit;
     color: #fef9c3 !important;
     text-shadow: 0 2px 0 #1c0a01, 0 0 8px rgba(0, 0, 0, 0.8) !important;
-    transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275),
-                box-shadow 0.15s ease,
-                filter 0.15s ease;
+    transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
+    height: 46px !important;
+    padding: 0 16px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
 }
-.menu-main-btn::before, .menu-main-btn::after {
-    content: '' !important;
-    position: absolute !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    width: 6px !important;
-    height: 6px !important;
-    border-radius: 50% !important;
-    background: #5a6372 !important;
-    border: 1px solid #111827 !important;
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.8), 0 1px 0 rgba(255,255,255,0.4) !important;
-    z-index: 10 !important;
-}
-.menu-main-btn::before { left: 12px !important; }
-.menu-main-btn::after { right: 12px !important; }
 
 .menu-main-btn .brand-font {
     color: #fef9c3 !important;
+    font-size: 11.5px !important;
+    letter-spacing: 0.5px !important;
 }
 .menu-main-btn:hover {
-    transform: translateY(-2px) scale(1.02);
+    transform: translateY(-2px);
     filter: brightness(1.12);
 }
 .menu-main-btn:hover .brand-font {
     color: #ffe066 !important;
 }
 .menu-main-btn:active {
-    transform: scale(0.96) translateY(3px) !important;
-    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.15), 0 2px 0 #1c0a01, 0 4px 10px rgba(0,0,0,0.5) !important;
+    transform: translateY(1.5px) scale(0.98) !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
 }
 
 .social-btn {

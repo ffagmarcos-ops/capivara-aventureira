@@ -113,37 +113,51 @@
             </div>
 
             <!-- BOTÕES -->
-            <div class="flex flex-col gap-2.5 w-full">
-                <button onclick="closeMainMenu('vila')" class="menu-main-btn w-full flex items-center gap-3 px-5 py-3 rounded-2xl border-2 shadow-xl transition-all active:scale-95">
-                    <span class="text-xl">▶</span>
-                    <span class="brand-font text-white text-base tracking-wider">JOGAR</span>
-                    <span class="ml-auto text-yellow-200 text-[10px] font-bold opacity-80 uppercase tracking-wider">Eco-Vila</span>
+            <div class="flex flex-col gap-2 w-full max-w-[280px]">
+                <button onclick="closeMainMenu('vila')" class="menu-main-btn w-full flex items-center gap-2.5 px-4 rounded-xl transition-all active:scale-95">
+                    <div class="w-6 h-6 rounded-full overflow-hidden border border-amber-400 bg-amber-950/20 flex-shrink-0 flex items-center justify-center">
+                        <img src="capy_set_explorer.png" class="w-full h-full object-cover">
+                    </div>
+                    <span class="brand-font text-white text-[12px] tracking-wider">JOGAR</span>
+                    <span class="ml-auto text-yellow-200 text-[8px] font-bold opacity-80 uppercase tracking-wider">Eco-Vila</span>
                 </button>
-                <button onclick="closeMainMenu(); setTimeout(() => openCaptureForm(), 250);" class="menu-main-btn w-full flex items-center gap-3 px-5 py-3 rounded-2xl border-2 shadow-xl transition-all active:scale-95">
-                    <span class="text-xl">📸</span>
-                    <span class="brand-font text-white text-base tracking-wider">LENTE DE EXPLORADOR</span>
-                    <span class="ml-auto text-yellow-200 text-[10px] font-bold opacity-80 uppercase tracking-wider">Capturar</span>
+                <button onclick="closeMainMenu(); setTimeout(() => openCaptureForm(), 250);" class="menu-main-btn w-full flex items-center gap-2.5 px-4 rounded-xl transition-all active:scale-95">
+                    <div class="w-6 h-6 rounded-full overflow-hidden border border-amber-400 bg-amber-950/20 flex-shrink-0 flex items-center justify-center">
+                        <img src="capy_set_scientist.png" class="w-full h-full object-cover">
+                    </div>
+                    <span class="brand-font text-white text-[12px] tracking-wider">LENTE DE EXPLORADOR</span>
+                    <span class="ml-auto text-yellow-200 text-[8px] font-bold opacity-80 uppercase tracking-wider">Capturar</span>
                 </button>
-                <button onclick="openCharacterLibrary()" class="menu-main-btn w-full flex items-center gap-3 px-5 py-3 rounded-2xl border-2 shadow-xl transition-all active:scale-95">
-                    <span class="text-xl">🦫</span>
-                    <span class="brand-font text-white text-base tracking-wider">PERSONAGENS</span>
-                    <span class="ml-auto text-yellow-200 text-[10px] font-bold opacity-80 uppercase tracking-wider">5 Heróis</span>
+                <button onclick="openCharacterLibrary()" class="menu-main-btn w-full flex items-center gap-2.5 px-4 rounded-xl transition-all active:scale-95">
+                    <div class="w-6 h-6 rounded-full overflow-hidden border border-amber-400 bg-amber-950/20 flex-shrink-0 flex items-center justify-center">
+                        <img src="capybara_mascot_clean.png" class="w-full h-full object-cover">
+                    </div>
+                    <span class="brand-font text-white text-[12px] tracking-wider">PERSONAGENS</span>
+                    <span class="ml-auto text-yellow-200 text-[8px] font-bold opacity-80 uppercase tracking-wider">5 Heróis</span>
                 </button>
-                <button onclick="closeMainMenu('games')" class="menu-main-btn w-full flex items-center gap-3 px-5 py-3 rounded-2xl border-2 shadow-xl transition-all active:scale-95">
-                    <span class="text-xl">🎮</span>
-                    <span class="brand-font text-white text-base tracking-wider">ARCADE NATURAL</span>
+                <button onclick="closeMainMenu('games')" class="menu-main-btn w-full flex items-center gap-2.5 px-4 rounded-xl transition-all active:scale-95">
+                    <div class="w-6 h-6 rounded-full overflow-hidden border border-amber-400 bg-amber-950/20 flex-shrink-0 flex items-center justify-center">
+                        <img src="capy_set_musician.png" class="w-full h-full object-cover">
+                    </div>
+                    <span class="brand-font text-white text-[12px] tracking-wider">ARCADE NATURAL</span>
                 </button>
-                <button onclick="closeMainMenu('badges')" class="menu-main-btn w-full flex items-center gap-3 px-5 py-3 rounded-2xl border-2 shadow-xl transition-all active:scale-95">
-                    <span class="text-xl">🏆</span>
-                    <span class="brand-font text-white text-base tracking-wider">CONQUISTAS</span>
+                <button onclick="closeMainMenu('badges')" class="menu-main-btn w-full flex items-center gap-2.5 px-4 rounded-xl transition-all active:scale-95">
+                    <div class="w-6 h-6 rounded-full overflow-hidden border border-amber-400 bg-amber-950/20 flex-shrink-0 flex items-center justify-center">
+                        <img src="capy_set_warrior.png" class="w-full h-full object-cover">
+                    </div>
+                    <span class="brand-font text-white text-[12px] tracking-wider">CONQUISTAS</span>
                 </button>
-                <button onclick="closeMainMenuAndOpenCloset()" class="menu-main-btn w-full flex items-center gap-3 px-5 py-3 rounded-2xl border-2 shadow-xl transition-all active:scale-95">
-                    <span class="text-xl">👘</span>
-                    <span class="brand-font text-white text-base tracking-wider">GUARDA-ROUPA</span>
+                <button onclick="closeMainMenuAndOpenCloset()" class="menu-main-btn w-full flex items-center gap-2.5 px-4 rounded-xl transition-all active:scale-95">
+                    <div class="w-6 h-6 rounded-full overflow-hidden border border-amber-400 bg-amber-950/20 flex-shrink-0 flex items-center justify-center">
+                        <img src="capy_set_wizard.png" class="w-full h-full object-cover">
+                    </div>
+                    <span class="brand-font text-white text-[12px] tracking-wider">GUARDA-ROUPA</span>
                 </button>
-                <button onclick="closeMainMenuOnly()" class="menu-main-btn w-full flex items-center gap-3 px-5 py-3 rounded-2xl border-2 shadow-xl transition-all active:scale-95">
-                    <span class="text-xl">🌿</span>
-                    <span class="brand-font text-white text-base tracking-wider">CONTINUAR</span>
+                <button onclick="closeMainMenuOnly()" class="menu-main-btn w-full flex items-center gap-2.5 px-4 rounded-xl transition-all active:scale-95">
+                    <div class="w-6 h-6 rounded-full overflow-hidden border border-amber-400 bg-amber-950/20 flex-shrink-0 flex items-center justify-center">
+                        <img src="capybara_avatar.png" class="w-full h-full object-cover">
+                    </div>
+                    <span class="brand-font text-white text-[12px] tracking-wider">CONTINUAR</span>
                 </button>
             </div>
 

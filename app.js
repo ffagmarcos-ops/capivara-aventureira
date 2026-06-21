@@ -671,31 +671,42 @@ function changeBgm(trackName) {
         if (!audioUnlocked) return;
         if (soundMode !== 'both') return;
         
+        let desiredSrc = './musicas/Sunlit Capybara Square.mp3';
+        const isSplashVisible = document.getElementById('splashScreen') && !document.getElementById('splashScreen').classList.contains('hidden') && document.getElementById('splashScreen').style.display !== 'none';
+        const isMenuVisible = document.getElementById('mainMenuScreen') && !document.getElementById('mainMenuScreen').classList.contains('hidden') && document.getElementById('mainMenuScreen').style.display !== 'none';
+        
         if (trackName === 'adventure') {
-            // Toca a música acelerada do minijogo
-            if (currentBgmAudio) {
+            desiredSrc = './musicas/Capybara Quest Rush.mp3';
+        } else if (trackName === 'menu' || trackName === 'loading') {
+            desiredSrc = './musicas/Capybara Village.mp3';
+        } else if (trackName === 'wardrobe') {
+            desiredSrc = './musicas/Sunlit Capybara Square.mp3';
+        } else if (isSplashVisible || (isMenuVisible && trackName !== 'vila' && trackName !== 'home' && trackName !== 'lab' && trackName !== 'games' && trackName !== 'album' && trackName !== 'badges')) {
+            desiredSrc = './musicas/Capybara Village.mp3';
+        }
+        
+        // Se estiver tocando uma música diferente, pausa a atual
+        if (currentBgmAudio) {
+            const currentSrc = currentBgmAudio.src;
+            if (!currentSrc.endsWith(desiredSrc.replace('./', ''))) {
                 currentBgmAudio.pause();
+                currentBgmAudio = null;
             }
-            if (!minigameBgmAudio) {
-                minigameBgmAudio = new Audio('./musicas/Capybara Quest Rush.mp3');
-                minigameBgmAudio.loop = true;
-                minigameBgmAudio.volume = 0.3;
-            }
-            minigameBgmAudio.currentTime = 0;
-            minigameBgmAudio.play().catch(e => console.warn("Erro ao iniciar minigame BGM:", e));
-        } else {
-            // Retoma a música principal da vila
-            if (minigameBgmAudio) {
-                minigameBgmAudio.pause();
-            }
-            if (!currentBgmAudio) {
-                currentBgmAudio = new Audio('./musicas/Sunlit Capybara Square.mp3');
-                currentBgmAudio.loop = true;
-                currentBgmAudio.volume = 0.3;
-            }
-            if (currentBgmAudio.paused) {
-                currentBgmAudio.play().catch(e => console.warn("Erro ao retomar BGM principal:", e));
-            }
+        }
+        
+        if (minigameBgmAudio) {
+            minigameBgmAudio.pause();
+            minigameBgmAudio = null;
+        }
+        
+        if (!currentBgmAudio) {
+            currentBgmAudio = new Audio(desiredSrc);
+            currentBgmAudio.loop = true;
+            currentBgmAudio.volume = 0.3;
+        }
+        
+        if (currentBgmAudio.paused) {
+            currentBgmAudio.play().catch(e => console.warn("Erro ao iniciar BGM:", e));
         }
     } catch (e) {
         console.error("Erro no controle de BGM:", e);
@@ -5786,6 +5797,7 @@ function openMainMenu() {
     menu.classList.remove('hidden');
     menu.style.display = 'flex';
     playSound('success');
+    changeBgm('menu');
 }
 
 function closeMainMenu(targetView) {

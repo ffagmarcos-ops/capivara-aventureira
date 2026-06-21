@@ -1,8 +1,10 @@
-const CACHE_NAME = 'capivara-v58';
+const CACHE_NAME = 'capivara-v59';
 const ASSETS = [
   './',
   './index.html',
   './style.css',
+  './wood_button.png',
+  './musicas/Capybara Village.mp3',
   './eco_mission_badge.png',
   './eco_fishing_fish.png',
   './eco_fishing_bobber.png',
