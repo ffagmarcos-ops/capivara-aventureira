@@ -117,6 +117,7 @@ function mapAnimalFromApi(row) {
         photo: row.photoBase64 || null,
         curiosity: curio,
         description: row.notes || '',
+        story: row.story || '',
         timestamp: captured.toLocaleDateString('pt-BR'),
         premiumUnlocked: Boolean(row.premiumUnlocked),
         rarity: 'comum',
@@ -380,6 +381,7 @@ let currentPhoto = null;
 let selectedCategory = '';
 let selectedLocation = '';
 let currentAdAnimalId = null;
+let editingAnimalId = null;
 let pendingAction = null;
 let audioCtx = null;
 let audioUnlocked = false;
@@ -2960,6 +2962,15 @@ function closeCaptureForm() {
     selectedLocation = '';
     document.getElementById('animalName').value = ''; 
     document.getElementById('animalDescription').value = ''; 
+    document.getElementById('animalStory').value = '';
+    editingAnimalId = null;
+    
+    const saveBtn = document.getElementById('saveBtn');
+    if (saveBtn) {
+        saveBtn.innerHTML = 'CATALOGAR NO DIÁRIO! 📖';
+        saveBtn.className = 'w-full bg-green-700 hover:bg-green-800 text-white py-4 rounded-3xl brand-font shadow-lg btn-bounce text-sm tracking-wide';
+    }
+
     document.getElementById('safetyCheck').checked = false;
     document.querySelectorAll('.select-pill').forEach(p => p.classList.remove('active')); 
     
@@ -3290,6 +3301,7 @@ function selectLocationOption(val, element) {
 async function saveDiscoveryWithValidation() {
     const name = document.getElementById('animalName').value;
     const desc = document.getElementById('animalDescription').value;
+    const story = document.getElementById('animalStory').value;
     const safetyCheck = document.getElementById('safetyCheck').checked;
     
     if (!name) {
@@ -3304,13 +3316,16 @@ async function saveDiscoveryWithValidation() {
         playSound('alert');
         return showToast("Onde você encontrou ele?", "⚠️");
     }
-    if (currentPhoto && !safetyCheck) {
+    if (editingAnimalId === null && currentPhoto && !safetyCheck) {
         playSound('alert');
         return showToast("Confirme as regras de segurança!", "🛡️");
     }
     
-    // Call standard finalized save method
-    await saveDiscovery();
+    if (editingAnimalId !== null) {
+        await updateDiscovery(editingAnimalId, name, desc, story);
+    } else {
+        await saveDiscovery();
+    }
 }
 
 let pendingDiscovery = null;
@@ -3385,6 +3400,8 @@ async function finalizeDiscovery(name, desc) {
     const rand = Math.random(); let rarity = 'comum';
     if (rand < miticThreshold) rarity = 'mitico'; else if (rand < shinyThreshold) rarity = 'brilhante';
 
+    const story = document.getElementById('animalStory').value || '';
+
     let createdAnimal = {
         id: Date.now(),
         name: name,
@@ -3393,6 +3410,7 @@ async function finalizeDiscovery(name, desc) {
         photo: currentPhoto,
         curiosity: curio,
         description: desc,
+        story: story,
         timestamp: new Date().toLocaleDateString('pt-BR'),
         premiumUnlocked: false,
         rarity: rarity,
@@ -3408,6 +3426,7 @@ async function finalizeDiscovery(name, desc) {
                     category: finalCategory,
                     location: selectedLocation || 'natureza',
                     notes: desc,
+                    story: story,
                     photoBase64: currentPhoto,
                     premiumUnlocked: false,
                     capturedAt: new Date().toISOString()
@@ -3418,6 +3437,7 @@ async function finalizeDiscovery(name, desc) {
                 ...mapAnimalFromApi(created),
                 curiosity: curio,
                 description: desc,
+                story: story,
                 rarity
             };
         } catch (error) {
@@ -3446,6 +3466,145 @@ async function finalizeDiscovery(name, desc) {
     catch (e) { animals.shift(); return showToast("Memória cheia!", "⚠️"); }
     scheduleGameStateSync();
     closeCaptureForm(); renderApp(); createConfetti();
+}
+
+async function updateDiscovery(id, name, desc, story) {
+    const animal = animals.find(a => a.id === id);
+    if (!animal) return showToast("Animal não encontrado!", "⚠️");
+
+    // Validador de Categoria Biológica
+    let finalCategory = selectedCategory;
+    if (typeof getCorrectCategory === 'function') {
+        const correct = getCorrectCategory(name);
+        if (correct && correct !== selectedCategory) {
+            finalCategory = correct;
+            playSound('success');
+            setTimeout(() => {
+                showToast(`Corrigido! ${name} é da classe: ${correct.toUpperCase()}! 🤓`, "💡");
+            }, 1000);
+        }
+    }
+
+    // Busca os dados
+    const nameKey = name.toLowerCase();
+    const curioKey = Object.keys(curioData).find(k => nameKey.includes(k));
+    const curio = curioKey ? curioData[curioKey] : (typeof getPremiumData === 'function' ? getPremiumData(name).funFact : 'Uma espécie incrível e cheia de segredos da nossa fauna!');
+
+    // Atualiza propriedades
+    animal.name = name;
+    animal.category = finalCategory;
+    animal.location = selectedLocation || 'natureza';
+    animal.description = desc;
+    animal.story = story;
+    animal.curiosity = curio;
+
+    if (authToken) {
+        try {
+            await apiRequest(`/animals/${animal.id}`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    animalName: name,
+                    category: finalCategory,
+                    location: selectedLocation || 'natureza',
+                    notes: desc,
+                    story: story,
+                    photoBase64: animal.photo,
+                    premiumUnlocked: animal.premiumUnlocked
+                })
+            });
+        } catch (error) {
+            return showToast(`Erro ao atualizar na API: ${error.message}`, '⚠️');
+        }
+    }
+
+    playSound('success');
+    showToast("Diário atualizado! 💾", "🐾");
+
+    try {
+        localStorage.setItem('capy_vPlay', JSON.stringify(animals));
+    } catch (e) {
+        return showToast("Memória cheia!", "⚠️");
+    }
+
+    scheduleGameStateSync();
+    closeCaptureForm();
+    renderApp();
+    createConfetti();
+}
+
+function editDiscovery(id) {
+    playSound('click');
+    const animal = animals.find(a => a.id === id);
+    if (!animal) return showToast("Animal não encontrado!", "⚠️");
+    
+    editingAnimalId = id;
+    
+    // Preencher campos do formulário
+    document.getElementById('animalName').value = animal.name;
+    document.getElementById('animalDescription').value = animal.description || '';
+    document.getElementById('animalStory').value = animal.story || '';
+    document.getElementById('safetyCheck').checked = true; // Auto-seleciona para edição
+    
+    // Atualiza a ficha biológica didática
+    updateBiologicalCard(animal.name);
+    
+    // Foto
+    currentPhoto = animal.photo;
+    document.querySelectorAll('#photoPreviewImg').forEach(imgEl => {
+        imgEl.src = currentPhoto || '';
+    });
+    
+    // Selecionar visualmente as pílulas de classe (categoria)
+    selectedCategory = animal.category;
+    document.querySelectorAll('#categorySelection .select-pill').forEach(p => {
+        const onclickAttr = p.getAttribute('onclick') || '';
+        if (onclickAttr.includes(`'${animal.category}'`) || onclickAttr.includes(`"${animal.category}"`)) {
+            p.classList.add('active');
+            
+            // Renderizar sugestões visualmente sem acionar playSound de clique duplicado
+            const suggestionsGrid = document.getElementById('animalSuggestionsGrid');
+            const suggestions = getAnimalSuggestions(animal.category);
+            if (suggestions.length > 0) {
+                document.getElementById('suggestionsWrapper').classList.remove('hidden');
+                suggestionsGrid.innerHTML = suggestions.map(s => {
+                    return `
+                        <div onclick="selectSuggestedAnimal('${s.name}')" class="bg-white border border-gray-200 hover:bg-green-50 hover:border-green-300 p-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all btn-bounce text-green-955 cursor-pointer">
+                            <span class="text-base">${s.emoji}</span>
+                            <span>${s.name}</span>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                document.getElementById('suggestionsWrapper').classList.add('hidden');
+            }
+        } else {
+            p.classList.remove('active');
+        }
+    });
+
+    // Selecionar visualmente as pílulas de localização
+    selectedLocation = animal.location;
+    document.querySelectorAll('#locationSelection .select-pill').forEach(p => {
+        const onclickAttr = p.getAttribute('onclick') || '';
+        if (onclickAttr.includes(`'${animal.location}'`) || onclickAttr.includes(`"${animal.location}"`)) {
+            p.classList.add('active');
+        } else {
+            p.classList.remove('active');
+        }
+    });
+    
+    // Abrir o modal diretamente no formulário
+    document.getElementById('captureModal').classList.remove('hidden');
+    document.getElementById('captureCameraSection').classList.add('hidden');
+    document.getElementById('captureScanSection').classList.add('hidden');
+    document.getElementById('captureFormSection').classList.remove('hidden');
+    
+    // Modificar botão de salvamento
+    const saveBtn = document.getElementById('saveBtn');
+    if (saveBtn) {
+        saveBtn.innerHTML = 'ATUALIZAR DIÁRIO! 💾';
+        saveBtn.className = 'w-full bg-amber-600 hover:bg-amber-700 text-white py-4 rounded-3xl brand-font shadow-lg btn-bounce text-sm tracking-wide';
+    }
 }
 
 function createConfetti() {
@@ -3566,11 +3725,21 @@ function renderApp() {
                         </div>
                         <div class="flex flex-col items-end gap-2">
                             <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">${a.timestamp}</span>
-                            <button onclick="shareDiscovery(${a.id})" class="w-8 h-8 rounded-full bg-green-100 text-green-700 hover:bg-green-200 flex items-center justify-center transition-colors btn-bounce shadow-sm" title="Compartilhar"><i class="fas fa-share-alt"></i></button>
+                            <div class="flex gap-2">
+                                <button onclick="editDiscovery(${a.id})" class="w-8 h-8 rounded-full bg-amber-100 text-amber-700 hover:bg-amber-200 flex items-center justify-center transition-colors btn-bounce shadow-sm" title="Editar"><i class="fas fa-edit"></i></button>
+                                <button onclick="shareDiscovery(${a.id})" class="w-8 h-8 rounded-full bg-green-100 text-green-700 hover:bg-green-200 flex items-center justify-center transition-colors btn-bounce shadow-sm" title="Compartilhar"><i class="fas fa-share-alt"></i></button>
+                            </div>
                         </div>
                     </div>
 
                     ${a.description ? `<p class="text-[11px] text-gray-600 italic bg-gray-50 p-3 rounded-2xl border border-gray-100 font-bold mb-3 shadow-sm">"Eu vi: ${a.description}"</p>` : ''}
+
+                    ${a.story ? `
+                    <div class="mt-1 mb-3 p-4 bg-amber-50/70 border-l-4 border-amber-400 rounded-r-2xl shadow-sm">
+                        <span class="text-[9px] font-black text-amber-800 uppercase tracking-wider block mb-1">📖 Diário de Experiência</span>
+                        <p class="text-[11px] text-amber-900 font-bold italic leading-relaxed whitespace-pre-line">"${a.story}"</p>
+                    </div>
+                    ` : ''}
 
                     <div class="bg-green-50 p-4 rounded-2xl relative shadow-sm border border-green-100">
                         <span class="absolute -top-2.5 left-4 bg-green-600 text-white text-[8px] font-black px-2 py-0.5 rounded-full tracking-widest">DICA RÁPIDA</span>

@@ -188,3 +188,13 @@ A aba de Assets agora suporta uma quinta categoria de filtro:
 *   **Minijogos (`eco_*`)** — filtra todos os assets de minijogos dos NPCs: `eco_veggie_carrot.png`, `eco_veggie_potato.png`, `eco_veggie_eggplant.png`, `eco_veggie_tomato.png`, `eco_fishing_bobber.png`, `eco_fishing_fish.png`, `eco_lab_flask.png`, `eco_chest_open.png`, `eco_mission_badge.png`.
 *   Assets `eco_*` recebem a etiqueta **Minijogo** em roxo violeta nos cards da grade.
 *   O card de estatísticas da aba Assets agora exibe a contagem de arquivos `eco_*` em vez de Spritesheets.
+
+---
+
+## 📖 10. Edição de Descobertas e Diário de Relato Livre (NOVO)
+
+Implementamos suporte a edições retroativas no Diário de Campo para que o explorador mirim possa corrigir erros de digitação e enriquecer seus registros:
+
+*   **Lápis de Edição ✏️**: Cada cartão no grid de descobertas possui um botão com ícone de lápis. Clicar nele carrega os dados originais no modal de captura, abrindo-o diretamente na seção de formulário e contornando a câmera e scanner.
+*   **Controle Dinâmico de Ação**: O modal altera o texto do botão principal para **"ATUALIZAR DIÁRIO! 💾"** e adota o estilo âmbar de edição. O fluxo de salvamento aciona a função `updateDiscovery` que revalida a categoria biológica do animal, atualiza os dados em `localStorage` e envia uma requisição `PUT` para a API (caso autenticado).
+*   **Diário de Experiência**: Inclui o campo **"Conte como foi o dia que você encontrou o animal"**, estimulando relatos ricos e pessoais. O diário renderiza essas histórias em caixas personalizadas estilizadas como folhas de caderno, aproximando o jogo da vivência real de um pesquisador.
