@@ -93,3 +93,18 @@ A Eco-Vila conta com um plano de fundo dinâmico animado (`Trees_blowing_wind_ri
 *   **Bypass de Range Requests no Service Worker**:
     Navegadores como Safari (iOS/macOS) e Chrome requerem range requests (HTTP 206 Partial Content) para renderizar mídias HTML5. Para evitar falhas no carregamento de áudios/vídeos a partir do cache do Service Worker, configuramos o `service-worker.js` para não interceptar requisições com cabeçalho `Range` ou com extensões `.mp4` e `.ogg`.
 
+---
+
+## 🎮 7. Sistema de Missões e Minijogos dos NPCs (Eco-Tarefas)
+
+Adicionamos um sistema de missões dinâmico e interativo no mapa da Eco-Vila:
+*   **Gatilho Temporizado**: A cada 3 minutos na aba da Eco-Vila, um dos 5 NPCs animados da vila (Aventureira, Fazendeira, Pescadora, Cientista, Bióloga) é selecionado aleatoriamente para ativar uma missão, exibindo um balão pulsante `!` âmbar sobre sua cabeça.
+*   **Diálogos e Spritesheets Animados**: Clicar no NPC com a missão abre o modal de diálogo (`#npcMissionModal`), exibindo o spritesheet animado do personagem em idle e uma mensagem descritiva lúdica solicitando ajuda.
+*   **Minijogos Exclusivos (Eco-Tarefas)**:
+    1.  *Fazendeira (Colheita Relâmpago)*: Jogo tipo whack-a-mole onde o jogador deve colher 8 legumes que brotam da terra em menos de 12 segundos.
+    2.  *Pescadora (Fisgada de Precisão)*: Jogo de ritmo e precisão onde o jogador deve fisgar a agulha vermelha na zona verde 2 vezes em menos de 10 segundos.
+    3.  *Cientista (Laboratório de Poções)*: Jogo de mistura química onde o jogador deve clicar em duas cores primárias para compor a cor secundária alvo, completando 3 poções em menos de 15 segundos.
+    4.  *Bióloga (Foco na Fauna)*: Jogo de catalogação onde o jogador deve localizar e tocar em 4 animais solicitados em um grid embaralhado de cards em menos de 12 segundos.
+    5.  *Aventureira (Baú de Relíquias)*: Jogo de velocidade onde o jogador deve tocar 15 vezes no baú antigo para abri-lo antes que os 8 segundos se esgotem.
+*   **Escolha de Recompensa Ecológica**: Ao vencer um minijogo, abre-se o modal de recompensa (`#npcRewardModal`) onde o usuário pode optar por receber **+35 Capins** OU **Acelerar Obras** (reduzindo 15 minutos de tempo restante de todas as construções ativas). O botão de aceleração de obras fica desativado caso nenhuma construção esteja em andamento na vila.
+

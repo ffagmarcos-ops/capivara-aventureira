@@ -553,6 +553,7 @@ body.night-mode .bg-blue-50, body.night-mode .bg-amber-50, body.night-mode .bg-p
     align-items: center;
     justify-content: flex-end;
     pointer-events: auto;
+    cursor: pointer;
     transition: left 0.3s linear, top 0.3s linear;
     z-index: 15;
 }
@@ -959,6 +960,354 @@ body.night-mode .bg-blue-50, body.night-mode .bg-amber-50, body.night-mode .bg-p
     border-radius: 999px;
     box-shadow: 0 2px 8px rgba(21,128,61,0.45);
 }
+
+/* ==========================================================================
+   SISTEMA DE MISSÕES E MINIJOGOS DA ECO-VILA
+   ========================================================================== */
+
+/* Alerta visual de Missão no NPC */
+.npc-mission-alert {
+    position: absolute;
+    bottom: calc(100% + 4px);
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 900;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.8), 0 2px 4px rgba(0, 0, 0, 0.3);
+    border: 1px solid #fef3c7;
+    z-index: 30;
+    pointer-events: none;
+    animation: missionPulse 0.8s infinite alternate;
+}
+
+@keyframes missionPulse {
+    0% {
+        transform: scale(0.9);
+        box-shadow: 0 0 4px rgba(245, 158, 11, 0.6);
+    }
+    100% {
+        transform: scale(1.25);
+        box-shadow: 0 0 16px rgba(245, 158, 11, 0.95);
+    }
+}
+
+/* Minijogo 1: Horta */
+.mg-horta-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    width: 100%;
+    max-width: 250px;
+    margin: 0 auto;
+}
+.mg-soil-patch {
+    aspect-ratio: 1;
+    background: #855845;
+    border: 3px solid #6b4436;
+    border-radius: 1.25rem;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    box-shadow: inset 0 4px 10px rgba(0,0,0,0.4), 0 4px 6px rgba(0,0,0,0.1);
+    -webkit-tap-highlight-color: transparent;
+}
+.mg-soil-patch::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    background: rgba(0,0,0,0.1);
+    border-radius: 0.8rem;
+}
+.mg-vegetable {
+    position: absolute;
+    bottom: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2.2rem;
+    line-height: 1;
+    transition: bottom 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    pointer-events: none;
+    user-select: none;
+}
+.mg-vegetable.up {
+    bottom: 8px;
+}
+
+/* Minijogo 2: Pesca */
+.mg-fishing-container {
+    width: 100%;
+    max-width: 280px;
+    text-align: center;
+    margin: 0 auto;
+    position: relative;
+}
+.mg-water-view {
+    width: 100%;
+    height: 110px;
+    background: linear-gradient(180deg, #38bdf8, #0284c7);
+    border-radius: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    border: 3px solid #0369a1;
+    box-shadow: inset 0 4px 12px rgba(0,0,0,0.25);
+}
+.mg-fish-shadow {
+    position: absolute;
+    font-size: 2.4rem;
+    bottom: 8px;
+    left: -60px;
+    animation: fishSwim 2.5s infinite linear;
+    transform: scaleX(-1);
+    user-select: none;
+    pointer-events: none;
+}
+.mg-bobber {
+    position: absolute;
+    font-size: 1.8rem;
+    top: 35px;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: top 0.1s ease;
+    user-select: none;
+    pointer-events: none;
+}
+.mg-bobber.dip {
+    top: 55px;
+    animation: bobberSplash 0.15s infinite alternate;
+}
+.mg-bar-container {
+    width: 100%;
+    height: 20px;
+    background: #e2e8f0;
+    border: 3px solid #94a3b8;
+    border-radius: 10px;
+    position: relative;
+    margin-top: 15px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+.mg-sweet-spot {
+    position: absolute;
+    height: 100%;
+    background: #22c55e;
+    border-left: 2px solid #15803d;
+    border-right: 2px solid #15803d;
+}
+.mg-needle {
+    position: absolute;
+    width: 6px;
+    height: 100%;
+    background: #ef4444;
+    border-radius: 3px;
+    box-shadow: 0 0 6px rgba(239, 68, 68, 0.8);
+    top: 0;
+    left: 0;
+    transition: left 0.05s linear;
+}
+@keyframes fishSwim {
+    0% { left: -60px; }
+    100% { left: 105%; }
+}
+@keyframes bobberSplash {
+    0% { transform: translateX(-50%) translateY(0); }
+    100% { transform: translateX(-50%) translateY(-3px); }
+}
+
+/* Minijogo 3: Lab */
+.mg-lab-container {
+    width: 100%;
+    max-width: 250px;
+    margin: 0 auto;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+.mg-potion-target {
+    width: 64px;
+    height: 64px;
+    border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+    border: 4px solid #475569;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    transition: background-color 0.3s ease;
+    overflow: hidden;
+}
+.mg-potion-target::after {
+    content: '🧪';
+    font-size: 2rem;
+    z-index: 10;
+}
+.mg-potion-liquid {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60%;
+    background-color: #cbd5e1;
+    transition: background-color 0.3s ease;
+    z-index: 0;
+    animation: liquidBubble 1.5s infinite ease-in-out alternate;
+}
+.mg-potion-tubes {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    width: 100%;
+}
+.mg-tube {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    transition: transform 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+.mg-beaker {
+    width: 28px;
+    height: 52px;
+    border-radius: 4px 4px 12px 12px;
+    border: 3px solid #475569;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.mg-beaker-liquid {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 70%;
+}
+.mg-beaker-red { background-color: #ef4444; }
+.mg-beaker-yellow { background-color: #eab308; }
+.mg-beaker-blue { background-color: #3b82f6; }
+.mg-tube.selected {
+    transform: translateY(-8px) scale(1.05);
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.15));
+}
+.mg-tube.selected .mg-beaker {
+    border-color: #1e293b;
+    box-shadow: 0 0 8px rgba(0,0,0,0.3);
+}
+@keyframes liquidBubble {
+    0% { transform: translateY(0) scaleY(1); }
+    100% { transform: translateY(-2px) scaleY(1.05); }
+}
+
+/* Minijogo 4: Bióloga */
+.mg-bio-container {
+    width: 100%;
+    max-width: 260px;
+    margin: 0 auto;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.mg-bio-target-box {
+    background: #f0fdf4;
+    border: 3px solid #bbf7d0;
+    border-radius: 1.5rem;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.03);
+}
+.mg-bio-target-label {
+    font-size: 8px;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: #14532d;
+    letter-spacing: 0.05em;
+}
+.mg-bio-target-preview {
+    font-size: 2.2rem;
+    line-height: 1;
+}
+.mg-bio-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+.mg-bio-card {
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 1rem;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    -webkit-tap-highlight-color: transparent;
+}
+.mg-bio-card:active {
+    transform: scale(0.95);
+    background: #f1f5f9;
+}
+
+/* Minijogo 5: Aventureira */
+.mg-chest-container {
+    width: 100%;
+    max-width: 250px;
+    margin: 0 auto;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+.mg-chest {
+    font-size: 5rem;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.08s ease;
+    display: inline-block;
+}
+.mg-chest:active {
+    transform: scale(0.9);
+}
+.mg-chest-shake {
+    animation: chestShake 0.12s infinite alternate;
+}
+.mg-tap-bar-container {
+    width: 100%;
+    height: 14px;
+    background: #f1f5f9;
+    border: 2px solid #cbd5e1;
+    border-radius: 7px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+.mg-tap-bar {
+    height: 100%;
+    background: linear-gradient(to right, #fbbf24, #d97706);
+    width: 0%;
+    transition: width 0.1s ease-out;
+}
+@keyframes chestShake {
+    0% { transform: rotate(-4deg); }
+    100% { transform: rotate(4deg); }
+}
+
 
 
 

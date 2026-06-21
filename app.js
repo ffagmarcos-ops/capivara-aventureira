@@ -1632,6 +1632,16 @@ let npcIntervalId = null;
 let npcBubbleIntervalId = null;
 let npcBubbleTimeoutId = null;
 
+// Sistema de Missões e Minijogos dos NPCs
+let activeMissionNpc = null;
+let missionTimerId = null;
+let minigameActive = false;
+let minigameTimer = 0;
+let minigameDuration = 0;
+let minigameIntervalId = null;
+let currentMinigameScore = 0;
+let targetMinigameScore = 0;
+
 const villagePaths = [
     // Rota 1: Prefeitura ➔ Ponte ➔ Docas (Atravessa a ponte!)
     [
@@ -1897,7 +1907,7 @@ function startVillageNPCs() {
             
             container.appendChild(npcEl);
             
-            villageNPCs.push({
+            const npcObj = {
                 name: cfg.name,
                 color: cfg.color,
                 role: cfg.role,
@@ -1913,7 +1923,13 @@ function startVillageNPCs() {
                 stateTimer: 0,
                 frameIndex: 0,
                 el: npcEl
+            };
+            
+            npcEl.addEventListener('click', () => {
+                handleNpcClick(npcObj);
             });
+            
+            villageNPCs.push(npcObj);
         });
     } else {
         container.innerHTML = '';
@@ -1924,6 +1940,7 @@ function startVillageNPCs() {
     
     npcIntervalId = setInterval(tickNPCs, 150);
     startNPCBubbles();
+    startVillageMissionTimer();
 }
 
 function stopVillageNPCs() {
@@ -1932,6 +1949,7 @@ function stopVillageNPCs() {
         npcIntervalId = null;
     }
     stopNPCBubbles();
+    stopVillageMissionTimer();
 }
 
 const npcPhrases = {
@@ -3812,6 +3830,760 @@ function wacEndGame() {
     if (startBtn) {
         startBtn.textContent   = 'JOGAR NOVAMENTE';
         startBtn.style.display = 'block';
+    }
+}
+
+// ==========================================================================
+// SISTEMA DE MISSÕES E MINIJOGOS (NPC INTERACTION SYSTEM)
+// ==========================================================================
+
+const npcMissionDialogues = {
+    adventurer: {
+        text: "Ei! Encontrei um baú antigo trancado na floresta! Preciso de ajuda para abri-lo rápido antes que a chave quebre. Topa?",
+        title: "Baú de Relíquias"
+    },
+    farmer: {
+        text: "Olá! A horta está cheia de vegetais prontos para colheita, mas as capivaras vizinhas estão querendo comê-los! Me ajuda na colheita relâmpago?",
+        title: "Colheita Relâmpago"
+    },
+    fisherman: {
+        text: "O rio está agitado e os peixes estão muito espertos hoje! Preciso de alguém com bons reflexos para me ajudar com a pescaria de precisão.",
+        title: "Fisgada de Precisão"
+    },
+    scientist: {
+        text: "Olá, assistente! Estou no meio de um experimento crítico e preciso misturar as poções nas cores corretas. Pode me ajudar no laboratório?",
+        title: "Laboratório de Poções"
+    },
+    biologist: {
+        text: "Tudo bem? Estou catalogando a fauna da nossa vila, mas os animais se movem muito rápido! Preciso que você identifique o animal alvo rapidamente.",
+        title: "Foco na Fauna"
+    }
+};
+
+function startVillageMissionTimer() {
+    stopVillageMissionTimer();
+    // 3 minutos (180000ms)
+    missionTimerId = setInterval(checkAndTriggerMission, 180000);
+}
+
+function stopVillageMissionTimer() {
+    if (missionTimerId) {
+        clearInterval(missionTimerId);
+        missionTimerId = null;
+    }
+}
+
+function checkAndTriggerMission() {
+    if (activeMissionNpc) return;
+    if (villageNPCs.length === 0) return;
+    
+    // Escolhe um NPC aleatório
+    const randomNpc = villageNPCs[Math.floor(Math.random() * villageNPCs.length)];
+    triggerMissionForNpc(randomNpc);
+}
+
+function triggerMissionForNpc(npc) {
+    if (activeMissionNpc) {
+        const oldAlert = activeMissionNpc.el.querySelector('.npc-mission-alert');
+        if (oldAlert) oldAlert.remove();
+    }
+    
+    activeMissionNpc = npc;
+    
+    const alertEl = document.createElement('div');
+    alertEl.className = 'npc-mission-alert';
+    alertEl.innerText = '!';
+    npc.el.appendChild(alertEl);
+}
+
+function forceVillageMission() {
+    if (villageNPCs.length === 0) {
+        showToast("Nenhum NPC carregado no mapa!", "⚠️");
+        return;
+    }
+    const randomNpc = villageNPCs[Math.floor(Math.random() * villageNPCs.length)];
+    triggerMissionForNpc(randomNpc);
+    showToast(`Missão ativada para ${randomNpc.name}! 🦫`, "⚡");
+}
+
+function handleNpcClick(npc) {
+    if (activeMissionNpc && activeMissionNpc.color === npc.color) {
+        openNpcMissionModal(npc);
+    }
+}
+
+let modalSpriteIntervalId = null;
+function startModalSpriteAnimation(npc) {
+    if (modalSpriteIntervalId) clearInterval(modalSpriteIntervalId);
+    
+    let frameIndex = 0;
+    const spriteDiv = document.querySelector('#missionNpcSprite .spritesheet-npc-sprite');
+    if (!spriteDiv) return;
+    
+    const width = npc.frameWidth || 33;
+    const height = npc.frameHeight || 38;
+    const row = 0; // idle
+    
+    modalSpriteIntervalId = setInterval(() => {
+        frameIndex = (frameIndex + 1) % 8;
+        spriteDiv.style.backgroundPosition = `-${frameIndex * width}px -${row * height}px`;
+    }, 150);
+}
+
+function stopModalSpriteAnimation() {
+    if (modalSpriteIntervalId) {
+        clearInterval(modalSpriteIntervalId);
+        modalSpriteIntervalId = null;
+    }
+}
+
+function openNpcMissionModal(npc) {
+    const dialogSpec = npcMissionDialogues[npc.color] || {
+        text: "Olá! Preciso de uma ajudinha rápida com uma tarefa da vila. Você pode me ajudar?",
+        title: "Eco-Tarefa"
+    };
+    
+    document.getElementById('missionModalTitle').innerText = npc.name;
+    document.getElementById('missionModalText').innerText = dialogSpec.text;
+    
+    const spriteContainer = document.getElementById('missionNpcSprite');
+    if (spriteContainer) {
+        spriteContainer.innerHTML = `<div class="npc-sprite spritesheet-npc-sprite npc-${npc.color}-sprite" style="background-position: 0px 0px;"></div>`;
+        startModalSpriteAnimation(npc);
+    }
+    
+    const startBtn = document.getElementById('missionStartBtn');
+    startBtn.onclick = () => {
+        closeNpcMissionModal();
+        startNpcMinigame(npc);
+    };
+    
+    document.getElementById('npcMissionModal').classList.remove('hidden');
+    playSound('click');
+}
+
+function closeNpcMissionModal() {
+    document.getElementById('npcMissionModal').classList.add('hidden');
+    stopModalSpriteAnimation();
+}
+
+function startNpcMinigame(npc) {
+    minigameActive = true;
+    document.getElementById('minigameArenaArea').innerHTML = '';
+    document.getElementById('npcMinigameModal').classList.remove('hidden');
+    
+    if (npc.color === 'farmer') {
+        setupHortaMinigame();
+    } else if (npc.color === 'fisherman') {
+        setupPescaMinigame();
+    } else if (npc.color === 'scientist') {
+        setupLabMinigame();
+    } else if (npc.color === 'biologist') {
+        setupBioMinigame();
+    } else {
+        setupAdventurerMinigame();
+    }
+}
+
+function startMinigameTimer(durationSeconds) {
+    if (minigameIntervalId) clearInterval(minigameIntervalId);
+    
+    minigameDuration = durationSeconds;
+    minigameTimer = durationSeconds;
+    
+    const timeBar = document.getElementById('minigameTimeBar');
+    if (timeBar) timeBar.style.width = '100%';
+    
+    minigameIntervalId = setInterval(() => {
+        if (!minigameActive) {
+            clearInterval(minigameIntervalId);
+            return;
+        }
+        
+        minigameTimer -= 0.1;
+        const progress = Math.max(0, (minigameTimer / minigameDuration) * 100);
+        if (timeBar) timeBar.style.width = `${progress}%`;
+        
+        if (minigameTimer <= 0) {
+            clearInterval(minigameIntervalId);
+            endMinigame(false);
+        }
+    }, 100);
+}
+
+function endMinigame(success) {
+    minigameActive = false;
+    if (minigameIntervalId) {
+        clearInterval(minigameIntervalId);
+        minigameIntervalId = null;
+    }
+    
+    stopHortaInterval();
+    stopPescaAnimation();
+    
+    document.getElementById('npcMinigameModal').classList.add('hidden');
+    
+    if (success) {
+        playSound('success');
+        showToast("Você ajudou com sucesso! Escolha sua recompensa.", "🎉");
+        openRewardModal();
+    } else {
+        playSound('error');
+        showToast("O tempo acabou! Tente novamente na próxima.", "😢");
+        cleanupActiveMission();
+    }
+}
+
+function openRewardModal() {
+    let hasConstruction = false;
+    for (let key in villageState.buildings) {
+        if (villageState.buildings[key].underConstruction) {
+            hasConstruction = true;
+            break;
+        }
+    }
+    
+    const speedupBtn = document.getElementById('rewardSpeedupBtn');
+    const noBuildingsText = document.getElementById('rewardModalNoBuildingsText');
+    
+    if (speedupBtn) {
+        if (hasConstruction) {
+            speedupBtn.removeAttribute('disabled');
+            if (noBuildingsText) noBuildingsText.classList.add('hidden');
+        } else {
+            speedupBtn.setAttribute('disabled', 'true');
+            if (noBuildingsText) noBuildingsText.classList.remove('hidden');
+        }
+    }
+    
+    document.getElementById('npcRewardModal').classList.remove('hidden');
+}
+
+function claimMissionReward(type) {
+    document.getElementById('npcRewardModal').classList.add('hidden');
+    
+    if (type === 'coins') {
+        playSound('coin');
+        seedCoins += 35;
+        localStorage.setItem('capy_seeds', seedCoins);
+        showToast("Você recebeu +35 Capins! 💰", "🎉");
+    } else if (type === 'speedup') {
+        let speededUp = false;
+        for (let key in villageState.buildings) {
+            const b = villageState.buildings[key];
+            if (b.underConstruction) {
+                b.constructionEnd -= 900000; // 15 minutos
+                speededUp = true;
+            }
+        }
+        if (speededUp) {
+            playSound('levelup');
+            localStorage.setItem('capy_village_state', JSON.stringify(villageState));
+            showToast("Obras aceleradas em 15 minutos! ⚡", "🎉");
+        } else {
+            playSound('coin');
+            seedCoins += 35;
+            localStorage.setItem('capy_seeds', seedCoins);
+            showToast("Nenhuma obra em andamento. +35 Capins concedidos! 💰", "🎉");
+        }
+    }
+    
+    cleanupActiveMission();
+    renderApp();
+}
+
+function cleanupActiveMission() {
+    if (activeMissionNpc) {
+        const alert = activeMissionNpc.el.querySelector('.npc-mission-alert');
+        if (alert) alert.remove();
+        activeMissionNpc = null;
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MINIJOGO 1: HORTA ("Colheita Relâmpago")
+// ─────────────────────────────────────────────────────────────────────────────
+let hortaIntervalId = null;
+let hortaTimeoutIds = [];
+
+function setupHortaMinigame() {
+    targetMinigameScore = 8;
+    currentMinigameScore = 0;
+    
+    document.getElementById('minigameTitle').innerText = "Colheita Relâmpago";
+    document.getElementById('minigameSubtitle').innerText = "Fazendeira";
+    document.getElementById('minigameInstructions').innerText = "Clique rápido nos legumes que brotarem!";
+    document.getElementById('minigameScore').innerText = currentMinigameScore + "/" + targetMinigameScore;
+    
+    const arena = document.getElementById('minigameArenaArea');
+    let html = '<div class="mg-horta-grid">';
+    for (let i = 0; i < 9; i++) {
+        html += `
+            <div class="mg-soil-patch" onclick="clickHortaVegetable(this)">
+                <span class="mg-vegetable">🥕</span>
+            </div>
+        `;
+    }
+    html += '</div>';
+    arena.innerHTML = html;
+    
+    let vegetablePool = ['🥕', '🥔', '🍆', '🥬', '🌽', '🍅'];
+    let activePatches = new Set();
+    
+    hortaIntervalId = setInterval(() => {
+        if (!minigameActive) return;
+        
+        const patches = arena.querySelectorAll('.mg-soil-patch');
+        if (patches.length === 0) return;
+        
+        let attempts = 0;
+        let randomIndex = Math.floor(Math.random() * 9);
+        while (activePatches.has(randomIndex) && attempts < 20) {
+            randomIndex = Math.floor(Math.random() * 9);
+            attempts++;
+        }
+        
+        if (activePatches.has(randomIndex)) return;
+        
+        const patch = patches[randomIndex];
+        const vegSpan = patch.querySelector('.mg-vegetable');
+        if (!vegSpan) return;
+        
+        vegSpan.innerText = vegetablePool[Math.floor(Math.random() * vegetablePool.length)];
+        vegSpan.classList.add('up');
+        activePatches.add(randomIndex);
+        
+        const timeoutId = setTimeout(() => {
+            if (vegSpan.classList.contains('up')) {
+                vegSpan.classList.remove('up');
+            }
+            activePatches.delete(randomIndex);
+        }, 800);
+        
+        hortaTimeoutIds.push(timeoutId);
+    }, 450);
+    
+    startMinigameTimer(12);
+}
+
+function clickHortaVegetable(patchEl) {
+    if (!minigameActive) return;
+    
+    const vegSpan = patchEl.querySelector('.mg-vegetable');
+    if (vegSpan && vegSpan.classList.contains('up')) {
+        vegSpan.classList.remove('up');
+        playSound('click');
+        currentMinigameScore++;
+        document.getElementById('minigameScore').innerText = currentMinigameScore + "/" + targetMinigameScore;
+        
+        if (currentMinigameScore >= targetMinigameScore) {
+            endMinigame(true);
+        }
+    }
+}
+
+function stopHortaInterval() {
+    if (hortaIntervalId) {
+        clearInterval(hortaIntervalId);
+        hortaIntervalId = null;
+    }
+    hortaTimeoutIds.forEach(id => clearTimeout(id));
+    hortaTimeoutIds = [];
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MINIJOGO 2: PESCA ("Fisgada de Precisão")
+// ─────────────────────────────────────────────────────────────────────────────
+let pescaAnimationId = null;
+let needlePosition = 0;
+let needleDirection = 1;
+let needleSpeed = 3.5;
+let sweetSpotLeft = 40;
+let sweetSpotWidth = 20;
+
+function setupPescaMinigame() {
+    targetMinigameScore = 2;
+    currentMinigameScore = 0;
+    
+    document.getElementById('minigameTitle').innerText = "Fisgada de Precisão";
+    document.getElementById('minigameSubtitle').innerText = "Pescadora";
+    document.getElementById('minigameInstructions').innerText = "Clique quando a agulha vermelha estiver na área verde!";
+    document.getElementById('minigameScore').innerText = currentMinigameScore + "/" + targetMinigameScore;
+    
+    const arena = document.getElementById('minigameArenaArea');
+    arena.innerHTML = `
+        <div class="mg-fishing-container" onclick="clickFishingZone()">
+            <div class="mg-water-view">
+                <span id="pescaBobber" class="mg-bobber">🎣</span>
+                <span class="mg-fish-shadow">🐟</span>
+            </div>
+            <div class="mg-bar-container">
+                <div id="fishingSweetSpot" class="mg-sweet-spot" style="left: 40%; width: 20%;"></div>
+                <div id="fishingNeedle" class="mg-needle" style="left: 0%;"></div>
+            </div>
+        </div>
+    `;
+    
+    repositionSweetSpot();
+    startPescaAnimation();
+    startMinigameTimer(10);
+}
+
+function repositionSweetSpot() {
+    sweetSpotLeft = Math.floor(Math.random() * 50) + 15;
+    sweetSpotWidth = currentMinigameScore === 0 ? 22 : 16;
+    
+    const spotEl = document.getElementById('fishingSweetSpot');
+    if (spotEl) {
+        spotEl.style.left = sweetSpotLeft + '%';
+        spotEl.style.width = sweetSpotWidth + '%';
+    }
+}
+
+function startPescaAnimation() {
+    stopPescaAnimation();
+    
+    needlePosition = 0;
+    needleDirection = 1;
+    
+    const needleEl = document.getElementById('fishingNeedle');
+    const bobberEl = document.getElementById('pescaBobber');
+    
+    let lastTime = Date.now();
+    
+    function tick() {
+        if (!minigameActive) return;
+        
+        const now = Date.now();
+        const delta = (now - lastTime) / 16;
+        lastTime = now;
+        
+        needlePosition += needleDirection * needleSpeed * delta;
+        if (needlePosition >= 100) {
+            needlePosition = 100;
+            needleDirection = -1;
+        } else if (needlePosition <= 0) {
+            needlePosition = 0;
+            needleDirection = 1;
+        }
+        
+        if (needleEl) {
+            needleEl.style.left = needlePosition + '%';
+        }
+        
+        if (bobberEl) {
+            const inZone = needlePosition >= sweetSpotLeft && needlePosition <= (sweetSpotLeft + sweetSpotWidth);
+            if (inZone) {
+                bobberEl.classList.add('dip');
+            } else {
+                bobberEl.classList.remove('dip');
+            }
+        }
+        
+        pescaAnimationId = requestAnimationFrame(tick);
+    }
+    
+    pescaAnimationId = requestAnimationFrame(tick);
+}
+
+function clickFishingZone() {
+    if (!minigameActive) return;
+    
+    const inZone = needlePosition >= sweetSpotLeft && needlePosition <= (sweetSpotLeft + sweetSpotWidth);
+    
+    if (inZone) {
+        playSound('success');
+        currentMinigameScore++;
+        document.getElementById('minigameScore').innerText = currentMinigameScore + "/" + targetMinigameScore;
+        
+        if (currentMinigameScore >= targetMinigameScore) {
+            endMinigame(true);
+            return;
+        }
+        
+        stopPescaAnimation();
+        const bobberEl = document.getElementById('pescaBobber');
+        if (bobberEl) bobberEl.innerText = "⭐";
+        
+        setTimeout(() => {
+            if (!minigameActive) return;
+            if (bobberEl) bobberEl.innerText = "🎣";
+            repositionSweetSpot();
+            startPescaAnimation();
+        }, 600);
+    } else {
+        playSound('error');
+        const bar = document.querySelector('.mg-bar-container');
+        if (bar) {
+            bar.classList.add('border-red-500');
+            setTimeout(() => bar.classList.remove('border-red-500'), 200);
+        }
+    }
+}
+
+function stopPescaAnimation() {
+    if (pescaAnimationId) {
+        cancelAnimationFrame(pescaAnimationId);
+        pescaAnimationId = null;
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MINIJOGO 3: CIENTISTA ("Laboratório de Poções")
+// ─────────────────────────────────────────────────────────────────────────────
+let labTargetColor = '';
+let labSelectedTubes = [];
+
+const labRecipes = {
+    Laranja: { components: ['red', 'yellow'], hex: '#f97316' },
+    Verde: { components: ['yellow', 'blue'], hex: '#22c55e' },
+    Roxo: { components: ['red', 'blue'], hex: '#a855f7' }
+};
+
+function setupLabMinigame() {
+    targetMinigameScore = 3;
+    currentMinigameScore = 0;
+    labSelectedTubes = [];
+    
+    document.getElementById('minigameTitle').innerText = "Laboratório de Poções";
+    document.getElementById('minigameSubtitle').innerText = "Cientista";
+    document.getElementById('minigameInstructions').innerText = "Misture duas cores primárias para obter a cor alvo!";
+    document.getElementById('minigameScore').innerText = currentMinigameScore + "/" + targetMinigameScore;
+    
+    const arena = document.getElementById('minigameArenaArea');
+    arena.innerHTML = `
+        <div class="mg-lab-container">
+            <div class="mg-potion-target">
+                <div id="labPotionLiquid" class="mg-potion-liquid" style="background-color: #cbd5e1;"></div>
+            </div>
+            <div id="labTargetText" class="text-xs font-black uppercase text-purple-950">MISTURE: ...</div>
+            <div class="mg-potion-tubes">
+                <div id="tube-red" class="mg-tube" onclick="clickLabTube('red')">
+                    <div class="mg-beaker"><div class="mg-beaker-liquid mg-beaker-red"></div></div>
+                    <span class="text-[8px] font-black uppercase text-gray-500">Vermelho</span>
+                </div>
+                <div id="tube-yellow" class="mg-tube" onclick="clickLabTube('yellow')">
+                    <div class="mg-beaker"><div class="mg-beaker-liquid mg-beaker-yellow"></div></div>
+                    <span class="text-[8px] font-black uppercase text-gray-500">Amarelo</span>
+                </div>
+                <div id="tube-blue" class="mg-tube" onclick="clickLabTube('blue')">
+                    <div class="mg-beaker"><div class="mg-beaker-liquid mg-beaker-blue"></div></div>
+                    <span class="text-[8px] font-black uppercase text-gray-500">Azul</span>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    generateNextLabColor();
+    startMinigameTimer(15);
+}
+
+function generateNextLabColor() {
+    labSelectedTubes = [];
+    document.querySelectorAll('.mg-tube').forEach(el => el.classList.remove('selected'));
+    
+    const colors = Object.keys(labRecipes);
+    labTargetColor = colors[Math.floor(Math.random() * colors.length)];
+    
+    const targetText = document.getElementById('labTargetText');
+    if (targetText) {
+        targetText.innerText = "MISTURE: " + labTargetColor;
+        targetText.style.color = labRecipes[labTargetColor].hex;
+    }
+    
+    const liquid = document.getElementById('labPotionLiquid');
+    if (liquid) {
+        liquid.style.backgroundColor = '#cbd5e1';
+    }
+}
+
+function clickLabTube(color) {
+    if (!minigameActive) return;
+    
+    const tubeEl = document.getElementById('tube-' + color);
+    if (!tubeEl) return;
+    
+    playSound('click');
+    
+    if (labSelectedTubes.includes(color)) {
+        labSelectedTubes = labSelectedTubes.filter(c => c !== color);
+        tubeEl.classList.remove('selected');
+    } else {
+        if (labSelectedTubes.length < 2) {
+            labSelectedTubes.push(color);
+            tubeEl.classList.add('selected');
+        }
+    }
+    
+    if (labSelectedTubes.length === 2) {
+        const recipe = labRecipes[labTargetColor];
+        const isMatch = recipe.components.every(c => labSelectedTubes.includes(c));
+        
+        if (isMatch) {
+            playSound('success');
+            currentMinigameScore++;
+            document.getElementById('minigameScore').innerText = currentMinigameScore + "/" + targetMinigameScore;
+            
+            const liquid = document.getElementById('labPotionLiquid');
+            if (liquid) {
+                liquid.style.backgroundColor = recipe.hex;
+            }
+            
+            if (currentMinigameScore >= targetMinigameScore) {
+                setTimeout(() => endMinigame(true), 600);
+            } else {
+                setTimeout(generateNextLabColor, 600);
+            }
+        } else {
+            playSound('error');
+            const targetText = document.getElementById('labTargetText');
+            if (targetText) {
+                targetText.classList.add('animate-shake');
+                setTimeout(() => targetText.classList.remove('animate-shake'), 300);
+            }
+            setTimeout(() => {
+                labSelectedTubes = [];
+                document.querySelectorAll('.mg-tube').forEach(el => el.classList.remove('selected'));
+            }, 300);
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MINIJOGO 4: BIÓLOGA ("Foco na Fauna")
+// ─────────────────────────────────────────────────────────────────────────────
+let bioTargetAnimal = '';
+const bioAnimals = [
+    { emoji: '🐆', name: 'Jaguatirica' },
+    { emoji: '🐒', name: 'Macaco Prego' },
+    { emoji: '🦊', name: 'Lobo Guará' },
+    { emoji: '🦉', name: 'Coruja' },
+    { emoji: '🦎', name: 'Lagarto' },
+    { emoji: '🦋', name: 'Borboleta' },
+    { emoji: '🦀', name: 'Caranguejo' },
+    { emoji: '🦫', name: 'Capivara' },
+    { emoji: '🦜', name: 'Arara' },
+    { emoji: '🐢', name: 'Tartaruga' }
+];
+
+function setupBioMinigame() {
+    targetMinigameScore = 4;
+    currentMinigameScore = 0;
+    
+    document.getElementById('minigameTitle').innerText = "Foco na Fauna";
+    document.getElementById('minigameSubtitle').innerText = "Bióloga";
+    document.getElementById('minigameInstructions').innerText = "Toque na carta do animal solicitado!";
+    document.getElementById('minigameScore').innerText = currentMinigameScore + "/" + targetMinigameScore;
+    
+    const arena = document.getElementById('minigameArenaArea');
+    arena.innerHTML = `
+        <div class="mg-bio-container">
+            <div class="mg-bio-target-box">
+                <div class="mg-bio-target-label">Localizar:</div>
+                <div id="bioTargetText" class="text-xs font-black text-green-900">...</div>
+            </div>
+            <div id="bioGrid" class="mg-bio-grid">
+                <!-- Cards injected here -->
+            </div>
+        </div>
+    `;
+    
+    generateNextBioPuzzle();
+    startMinigameTimer(12);
+}
+
+function generateNextBioPuzzle() {
+    const targetItem = bioAnimals[Math.floor(Math.random() * bioAnimals.length)];
+    bioTargetAnimal = targetItem;
+    
+    document.getElementById('bioTargetText').innerText = targetItem.name.toUpperCase();
+    
+    const pool = bioAnimals.filter(a => a.emoji !== targetItem.emoji);
+    const shuffledPool = pool.sort(() => 0.5 - Math.random()).slice(0, 5);
+    
+    const choices = [targetItem, ...shuffledPool];
+    const shuffledChoices = choices.sort(() => 0.5 - Math.random());
+    
+    const gridEl = document.getElementById('bioGrid');
+    if (gridEl) {
+        let gridHtml = '';
+        shuffledChoices.forEach(c => {
+            gridHtml += `
+                <div class="mg-bio-card" onclick="clickBioCard('${c.emoji}')">
+                    ${c.emoji}
+                </div>
+            `;
+        });
+        gridEl.innerHTML = gridHtml;
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MINIJOGO 5: AVENTUREIRA ("Baú de Relíquias")
+// ─────────────────────────────────────────────────────────────────────────────
+function setupAdventurerMinigame() {
+    targetMinigameScore = 15;
+    currentMinigameScore = 0;
+    
+    document.getElementById('minigameTitle').innerText = "Baú de Relíquias";
+    document.getElementById('minigameSubtitle').innerText = "Aventureira";
+    document.getElementById('minigameInstructions').innerText = "Toque muito rápido no baú para abri-lo!";
+    document.getElementById('minigameScore').innerText = currentMinigameScore + "/" + targetMinigameScore;
+    
+    const arena = document.getElementById('minigameArenaArea');
+    arena.innerHTML = `
+        <div class="mg-chest-container">
+            <div id="adventureChest" class="mg-chest" onclick="clickAdventurerChest()">📦</div>
+            <div class="mg-tap-bar-container">
+                <div id="chestProgressBar" class="mg-tap-bar" style="width: 0%;"></div>
+            </div>
+        </div>
+    `;
+    
+    startMinigameTimer(8);
+}
+
+function clickBioCard(emoji) {
+    if (!minigameActive) return;
+    
+    if (emoji === bioTargetAnimal.emoji) {
+        playSound('success');
+        currentMinigameScore++;
+        document.getElementById('minigameScore').innerText = currentMinigameScore + "/" + targetMinigameScore;
+        
+        if (currentMinigameScore >= targetMinigameScore) {
+            endMinigame(true);
+        } else {
+            generateNextBioPuzzle();
+        }
+    } else {
+        playSound('error');
+        generateNextBioPuzzle();
+    }
+}
+
+function clickAdventurerChest() {
+    if (!minigameActive) return;
+    
+    playSound('click');
+    currentMinigameScore++;
+    document.getElementById('minigameScore').innerText = currentMinigameScore + "/" + targetMinigameScore;
+    
+    const chestEl = document.getElementById('adventureChest');
+    if (chestEl) {
+        chestEl.classList.add('mg-chest-shake');
+        setTimeout(() => chestEl.classList.remove('mg-chest-shake'), 120);
+    }
+    
+    const barEl = document.getElementById('chestProgressBar');
+    if (barEl) {
+        const percent = Math.min(100, (currentMinigameScore / targetMinigameScore) * 100);
+        barEl.style.width = percent + '%';
+    }
+    
+    if (currentMinigameScore >= targetMinigameScore) {
+        if (chestEl) chestEl.innerText = "🔓";
+        setTimeout(() => endMinigame(true), 500);
     }
 }
 

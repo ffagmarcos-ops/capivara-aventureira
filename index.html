@@ -618,6 +618,10 @@
                     <span>Política de Privacidade</span>
                     <i class="fas fa-chevron-right text-xs opacity-30"></i>
                 </button>
+                <button onclick="document.getElementById('settingsModal').classList.add('hidden'); forceVillageMission();" class="w-full text-left p-4 bg-amber-50 text-amber-800 rounded-2xl flex items-center justify-between font-bold text-sm">
+                    <span>⚡ Forçar Missão na Vila (Teste)</span>
+                    <i class="fas fa-play text-xs"></i>
+                </button>
                 <button onclick="confirmDeleteData()" class="w-full text-left p-4 bg-red-50 text-red-600 rounded-2xl flex items-center justify-between font-bold text-sm">
                     <span class="uppercase">Apagar meus dados</span>
                     <i class="fas fa-trash text-xs"></i>
@@ -756,6 +760,104 @@
             </div>
             
             <button onclick="claimDailyReward()" class="w-full bg-amber-500 hover:bg-amber-600 text-white py-4 rounded-3xl brand-font shadow-lg btn-bounce text-lg">RESGATAR!</button>
+        </div>
+    </div>
+
+    <!-- MODAL DE DIÁLOGO DE MISSÃO -->
+    <div id="npcMissionModal" class="fixed inset-0 z-[200] hidden bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-[3rem] p-8 text-center space-y-6 shadow-2xl relative border-4 border-amber-950/20 overflow-hidden">
+            <!-- Balão Decorativo -->
+            <div class="absolute -top-10 -right-10 text-9xl opacity-10 rotate-12">💬</div>
+            
+            <h3 id="missionModalTitle" class="brand-font text-2xl text-green-950">Missão da Vila!</h3>
+            
+            <!-- Personagem Animado Visualizer -->
+            <div class="w-24 h-24 mx-auto bg-green-50 rounded-full flex items-center justify-center border-4 border-green-200 overflow-hidden relative shadow-inner">
+                <div id="missionNpcSprite" class="scale-[2.2] origin-center translate-y-2 select-none pointer-events-none"></div>
+            </div>
+
+            <!-- Diálogo do Personagem -->
+            <div class="bg-green-50/70 p-5 rounded-2xl border border-green-100 relative">
+                <p id="missionModalText" class="text-xs font-black text-green-900 leading-relaxed"></p>
+                <!-- Setinha do balão de fala -->
+                <div class="absolute bottom-full left-1/2 -translate-x-1/2 border-8 border-transparent border-b-green-50/70"></div>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <button id="missionStartBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-3xl brand-font shadow-lg btn-bounce uppercase tracking-wider text-xs">
+                    🤝 AJUDAR! (JOGAR)
+                </button>
+                <button onclick="closeNpcMissionModal()" class="w-full py-4 text-xs font-black text-gray-500 hover:text-gray-700 uppercase tracking-wider">
+                    Agora não
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE ARENA DO MINIJOGO -->
+    <div id="npcMinigameModal" class="fixed inset-0 z-[200] hidden bg-green-950/90 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-[3rem] p-6 shadow-2xl relative border-4 border-emerald-950/30 overflow-hidden flex flex-col justify-between min-h-[420px]">
+            <!-- Header do Jogo: Título, Placar e Tempo -->
+            <div class="space-y-3">
+                <div class="flex justify-between items-center border-b border-emerald-100 pb-3">
+                    <div>
+                        <h4 id="minigameTitle" class="brand-font text-lg text-emerald-950 leading-none">Minijogo</h4>
+                        <span id="minigameSubtitle" class="text-[9px] font-black uppercase text-emerald-600 tracking-wider">Eco-Tarefa</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <div class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-xs font-black">
+                            ✨ Placar: <span id="minigameScore">0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Barra de Tempo -->
+                <div class="w-full bg-emerald-100 rounded-full h-3 overflow-hidden border border-emerald-200">
+                    <div id="minigameTimeBar" class="h-full bg-gradient-to-r from-emerald-500 to-green-600 rounded-full transition-all duration-100" style="width: 100%;"></div>
+                </div>
+            </div>
+
+            <!-- Content Area (Gerada Dinamicamente) -->
+            <div id="minigameArenaArea" class="flex-1 my-4 flex items-center justify-center overflow-hidden">
+                <!-- Conteúdo do jogo é injetado aqui -->
+            </div>
+
+            <!-- Instruções Rápidas no Rodapé -->
+            <div class="text-center py-2 bg-emerald-50/50 rounded-2xl border border-emerald-100/50">
+                <p id="minigameInstructions" class="text-[10px] font-black uppercase tracking-wider text-emerald-800"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE SELEÇÃO DE RECOMPENSA -->
+    <div id="npcRewardModal" class="fixed inset-0 z-[200] hidden bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-[3rem] p-8 text-center space-y-6 shadow-2xl relative border-4 border-amber-950/20 overflow-hidden">
+            <div class="absolute -top-10 -right-10 text-9xl opacity-10 rotate-12">🏆</div>
+            
+            <h3 class="brand-font text-2xl text-amber-950">Eco-Tarefa Concluída!</h3>
+            <p class="text-xs text-gray-500 font-bold">Excelente trabalho! Escolha a sua recompensa ecológica:</p>
+
+            <div class="grid grid-cols-1 gap-3">
+                <!-- Opção 1: Moedas -->
+                <button onclick="claimMissionReward('coins')" class="flex items-center gap-4 p-4 rounded-2xl bg-amber-50 hover:bg-amber-100 border-2 border-amber-200 transition-all text-left w-full group">
+                    <div class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">💰</div>
+                    <div>
+                        <h4 class="brand-font text-base text-amber-900 leading-tight">Ganhar Capins</h4>
+                        <p class="text-[10px] font-bold text-amber-700 mt-0.5">+35 Capins para o seu saldo!</p>
+                    </div>
+                </button>
+
+                <!-- Opção 2: Acelerar Obras -->
+                <button id="rewardSpeedupBtn" onclick="claimMissionReward('speedup')" class="flex items-center gap-4 p-4 rounded-2xl bg-sky-50 hover:bg-sky-100 border-2 border-sky-200 transition-all text-left w-full group disabled:opacity-50 disabled:pointer-events-none">
+                    <div class="w-12 h-12 rounded-xl bg-sky-100 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">⚡</div>
+                    <div class="flex-1">
+                        <h4 class="brand-font text-base text-sky-900 leading-tight">Acelerar Obras</h4>
+                        <p id="rewardSpeedupText" class="text-[10px] font-bold text-sky-700 mt-0.5">-15 minutos em todas as obras!</p>
+                    </div>
+                </button>
+            </div>
+            
+            <p id="rewardModalNoBuildingsText" class="text-[9px] font-bold text-red-500 uppercase tracking-wider hidden">Nenhuma obra em andamento na vila</p>
         </div>
     </div>
 
