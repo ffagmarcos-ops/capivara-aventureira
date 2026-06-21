@@ -674,6 +674,8 @@ function changeBgm(trackName) {
         let desiredSrc = './musicas/Sunlit Capybara Square.mp3';
         const isSplashVisible = document.getElementById('splashScreen') && !document.getElementById('splashScreen').classList.contains('hidden') && document.getElementById('splashScreen').style.display !== 'none';
         const isMenuVisible = document.getElementById('mainMenuScreen') && !document.getElementById('mainMenuScreen').classList.contains('hidden') && document.getElementById('mainMenuScreen').style.display !== 'none';
+        const isAuthVisible = document.getElementById('authScreen') && !document.getElementById('authScreen').classList.contains('hidden') && document.getElementById('authScreen').style.display !== 'none';
+        const noUser = !currentUser;
         
         if (trackName === 'adventure') {
             desiredSrc = './musicas/Capybara Quest Rush.mp3';
@@ -681,13 +683,13 @@ function changeBgm(trackName) {
             desiredSrc = './musicas/Capybara Village.mp3';
         } else if (trackName === 'wardrobe') {
             desiredSrc = './musicas/Sunlit Capybara Square.mp3';
-        } else if (isSplashVisible || (isMenuVisible && trackName !== 'vila' && trackName !== 'home' && trackName !== 'lab' && trackName !== 'games' && trackName !== 'album' && trackName !== 'badges')) {
+        } else if (isSplashVisible || isAuthVisible || noUser || (isMenuVisible && trackName !== 'vila' && trackName !== 'home' && trackName !== 'lab' && trackName !== 'games' && trackName !== 'album' && trackName !== 'badges')) {
             desiredSrc = './musicas/Capybara Village.mp3';
         }
         
         // Se estiver tocando uma música diferente, pausa a atual
         if (currentBgmAudio) {
-            const currentSrc = currentBgmAudio.src;
+            const currentSrc = decodeURIComponent(currentBgmAudio.src);
             if (!currentSrc.endsWith(desiredSrc.replace('./', ''))) {
                 currentBgmAudio.pause();
                 currentBgmAudio = null;
