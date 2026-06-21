@@ -98,13 +98,12 @@ A Eco-Vila conta com um plano de fundo dinâmico animado (`Trees_blowing_wind_ri
 ## 🎮 7. Sistema de Missões e Minijogos dos NPCs (Eco-Tarefas)
 
 Adicionamos um sistema de missões dinâmico e interativo no mapa da Eco-Vila:
-*   **Gatilho Temporizado**: A cada 3 minutos na aba da Eco-Vila, um dos 5 NPCs animados da vila (Aventureira, Fazendeira, Pescadora, Cientista, Bióloga) é selecionado aleatoriamente para ativar uma missão, exibindo um balão pulsante `!` âmbar sobre sua cabeça.
-*   **Diálogos e Spritesheets Animados**: Clicar no NPC com a missão abre o modal de diálogo (`#npcMissionModal`), exibindo o spritesheet animado do personagem em idle e uma mensagem descritiva lúdica solicitando ajuda.
-*   **Minijogos Exclusivos (Eco-Tarefas)**:
-    1.  *Fazendeira (Colheita Relâmpago)*: Jogo tipo whack-a-mole onde o jogador deve colher 8 legumes que brotam da terra em menos de 12 segundos.
-    2.  *Pescadora (Fisgada de Precisão)*: Jogo de ritmo e precisão onde o jogador deve fisgar a agulha vermelha na zona verde 2 vezes em menos de 10 segundos.
-    3.  *Cientista (Laboratório de Poções)*: Jogo de mistura química onde o jogador deve clicar em duas cores primárias para compor a cor secundária alvo, completando 3 poções em menos de 15 segundos.
-    4.  *Bióloga (Foco na Fauna)*: Jogo de catalogação onde o jogador deve localizar e tocar em 4 animais solicitados em um grid embaralhado de cards em menos de 12 segundos.
-    5.  *Aventureira (Baú de Relíquias)*: Jogo de velocidade onde o jogador deve tocar 15 vezes no baú antigo para abri-lo antes que os 8 segundos se esgotem.
+*   **Gatilho Temporizado e Temporizador Persistente**: A cada 3 minutos na aba da Eco-Vila, um dos 5 NPCs animados da vila (Aventureira, Fazendeira, Pescadora, Cientista, Bióloga) é selecionado aleatoriamente para ativar uma missão, exibindo um balão pulsante `!` âmbar sobre sua cabeça. O tempo é gerenciado por um timestamp absoluto `nextMissionTimestamp` salvo no `localStorage` (`capy_next_mission_time`) para evitar que resete ao recarregar a página ou navegar pelo jogo.
+*   **Contador Flutuante Global**: O cronômetro regressivo da próxima missão é exibido em um botão flutuante global (`fixed bottom-24 right-4 z-40`). Ao clicar nele em qualquer tela, o jogador é redirecionado imediatamente para a aba da Vila das Capivaras. Se houver uma missão ativa no mapa, o botão se altera para indicar a atividade em cor âmbar (`Missão Ativa! 🦫`).
+*   **Efeitos Sonoros e Sirene Retrô**: Adicionamos um som de sirene com oscilações de frequência em onda triangular (440Hz a 880Hz por 1,2s) via Web Audio API, que toca no momento em que a missão é iniciada na vila ou quando o diálogo do NPC correspondente é aberto.
+*   **Trilha Sonora de Aventura Urgente**: Durante a execução dos minijogos, a música ambiente muda para a trilha `'adventure'` sintonizada a 160 BPM com timbres dente-de-serra (*sawtooth*) urgentes e dinâmicos para acentuar a aventura dramática, retornando à música da aba anterior suavemente ao final do jogo.
+*   **Diálogos com Explicações**: Todas as telas de diálogo de NPCs exibem instruções claras `[Como jogar: ...]` descrevendo explicitamente a mecânica do minijogo antes do início da partida.
+*   **Pesca Visual Aprimorada**: O minijogo de pesca substitui os emojis antigos `🎣` e `🐟` por artes transparentes personalizadas (`eco_fishing_bobber.png` e `eco_fishing_fish.png`), com suporte a efeitos e animações dinâmicas na água.
+*   **Melhorias do Modo Noturno (Contraste)**: Adicionamos regras CSS que convertem caixas e balões translúcidos (`bg-white/90` e `bg-green-50/70`) e campos de entrada de texto e números (`bg-gray-50`) em tons perfeitamente escuros e contrastantes com texto branco para evitar texto claro sobre fundo claro durante a noite.
 *   **Escolha de Recompensa Ecológica**: Ao vencer um minijogo, abre-se o modal de recompensa (`#npcRewardModal`) onde o usuário pode optar por receber **+35 Capins** OU **Acelerar Obras** (reduzindo 15 minutos de tempo restante de todas as construções ativas). O botão de aceleração de obras fica desativado caso nenhuma construção esteja em andamento na vila.
 

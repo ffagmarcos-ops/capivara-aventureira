@@ -154,6 +154,22 @@ body.night-mode .text-gray-600 { color: #94a3b8; }
 body.night-mode .bg-green-50 { background-color: #0f172a; border-color: #334155; }
 body.night-mode .text-amber-900 { color: #fbbf24; }
 body.night-mode .bg-blue-50, body.night-mode .bg-amber-50, body.night-mode .bg-purple-50 { background-color: #0f172a; border-color: #334155; }
+body.night-mode .bg-white\/90 { background-color: rgba(30, 41, 59, 0.9) !important; color: #f8fafc !important; }
+body.night-mode .bg-white\/95 { background-color: rgba(30, 41, 59, 0.95) !important; color: #f8fafc !important; }
+body.night-mode .bg-green-50\/70 { background-color: rgba(15, 23, 42, 0.7) !important; border-color: #334155 !important; }
+body.night-mode .bg-gray-50 { background-color: #0f172a !important; color: #f8fafc !important; border-color: #334155 !important; }
+body.night-mode input[type="text"],
+body.night-mode input[type="number"] {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
+body.night-mode input::placeholder {
+    color: #64748b !important;
+}
+body.night-mode .text-on-white {
+    color: #0f172a !important;
+}
 
 /* Álbum de Figurinhas */
 .sticker {
@@ -1059,23 +1075,27 @@ body.night-mode .bg-blue-50, body.night-mode .bg-amber-50, body.night-mode .bg-p
 }
 .mg-fish-shadow {
     position: absolute;
-    font-size: 2.4rem;
     bottom: 8px;
     left: -60px;
     animation: fishSwim 2.5s infinite linear;
     transform: scaleX(-1);
     user-select: none;
     pointer-events: none;
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
 }
 .mg-bobber {
     position: absolute;
-    font-size: 1.8rem;
     top: 35px;
     left: 50%;
     transform: translateX(-50%);
     transition: top 0.1s ease;
     user-select: none;
     pointer-events: none;
+    width: 55px;
+    height: 55px;
+    object-fit: contain;
 }
 .mg-bobber.dip {
     top: 55px;

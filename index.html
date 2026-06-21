@@ -447,9 +447,6 @@
                 <div class="relative z-20 flex justify-between items-start pointer-events-none w-full">
                     <div class="flex flex-col gap-1 items-start">
                         <span class="bg-amber-500/95 text-amber-950 font-black px-3 py-1 rounded-full text-[10px] tracking-wider uppercase border border-amber-300 shadow pointer-events-auto">Vila das Capivaras</span>
-                        <span id="nextMissionCountdown" class="bg-emerald-600/90 text-white font-black px-2.5 py-1 rounded-full text-[8px] tracking-wider uppercase border border-emerald-400 shadow pointer-events-auto mt-1 flex items-center gap-1">
-                            <i class="fas fa-clock"></i> Próxima Missão: --:--
-                        </span>
                     </div>
                     <div class="flex items-center gap-2 pointer-events-auto">
                         <button onclick="zoomVillage(0.25)" class="w-8 h-8 rounded-full bg-white/90 hover:bg-white text-green-800 border border-green-200 shadow flex items-center justify-center transition-all" title="Zoom In">
@@ -917,6 +914,11 @@
             <button onclick="closePrivacy()" class="w-full bg-green-600 hover:bg-green-700 text-white font-black py-4 rounded-xl uppercase btn-bounce shadow-md">Estou Seguro!</button>
         </div>
     </div>
+
+    <!-- CONTADOR DE MISSÃO FLUTUANTE GLOBAL -->
+    <button onclick="showView('vila')" id="nextMissionCountdown" class="fixed bottom-24 right-4 z-40 bg-emerald-600/90 text-white font-black px-2.5 py-2 rounded-full text-[9px] tracking-wider uppercase border-2 border-emerald-400 shadow-lg flex items-center gap-1 transition-all hover:scale-105 active:scale-95 cursor-pointer">
+        <i class="fas fa-clock"></i> Próxima Missão: --:--
+    </button>
 
     <script src="data.js"></script>
     <script src="app.js"></script>

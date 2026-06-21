@@ -632,7 +632,7 @@ const bgmTracksSpec = {
         hasDelay: true
     },
     adventure: {
-        stepTime: 0.214, // 140 BPM (8th notes: 60 / 280)
+        stepTime: 0.187, // ~160 BPM (8th notes: 60 / 320)
         bassNotes: [110.00, 110.00, 146.83, 164.81], // A2, A2, D3, E3
         chordTones: [
             [220.00, 261.63, 329.63, 392.00], // Am7
@@ -648,7 +648,7 @@ const bgmTracksSpec = {
         bassVol: 0.16,
         chordVol: 0.08,
         melodyVol: 0.04,
-        melodyChance: 0.65,
+        melodyChance: 0.75,
         hasDelay: true
     }
 };
@@ -833,6 +833,25 @@ function playSound(type) {
             gain2.connect(audioCtx.destination);
             osc2.start(now + 0.12);
             osc2.stop(now + 0.28);
+        } else if (type === 'siren') {
+            // Sirene de alerta (pitch oscilando urgente)
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(440, now);
+            osc.frequency.linearRampToValueAtTime(880, now + 0.3);
+            osc.frequency.linearRampToValueAtTime(440, now + 0.6);
+            osc.frequency.linearRampToValueAtTime(880, now + 0.9);
+            osc.frequency.linearRampToValueAtTime(440, now + 1.2);
+            
+            gainNode.gain.setValueAtTime(0.12, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+            
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 1.2);
         } else if (type === 'coin') {
             // Chime retrô fofo (E5 -> G5 -> C6 -> E6)
             const notes = [659.25, 783.99, 1046.50, 1318.51];
@@ -2479,14 +2498,14 @@ setInterval(() => {
                 const minutes = Math.floor(timeLeft / 60000);
                 const seconds = Math.floor((timeLeft % 60000) / 1000);
                 countdownEl.innerHTML = `<i class="fas fa-clock"></i> Próxima Missão: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-                countdownEl.className = "bg-emerald-600/90 text-white font-black px-2.5 py-1 rounded-full text-[8px] tracking-wider uppercase border border-emerald-400 shadow pointer-events-auto mt-1 flex items-center gap-1";
+                countdownEl.className = "fixed bottom-24 right-4 z-40 bg-emerald-600/90 text-white font-black px-2.5 py-2 rounded-full text-[9px] tracking-wider uppercase border-2 border-emerald-400 shadow-lg flex items-center gap-1 transition-all hover:scale-105 active:scale-95 cursor-pointer";
             }
         }
     } else {
         const countdownEl = document.getElementById('nextMissionCountdown');
         if (countdownEl) {
             countdownEl.innerHTML = `<i class="fas fa-exclamation-triangle animate-pulse"></i> Missão Ativa! 🦫`;
-            countdownEl.className = "bg-amber-500/95 text-amber-950 font-black px-2.5 py-1 rounded-full text-[8px] tracking-wider uppercase border border-amber-300 shadow pointer-events-auto mt-1 flex items-center gap-1";
+            countdownEl.className = "fixed bottom-24 right-4 z-40 bg-amber-500/95 text-amber-950 font-black px-2.5 py-2 rounded-full text-[9px] tracking-wider uppercase border-2 border-amber-300 shadow-lg flex items-center gap-1 transition-all hover:scale-105 active:scale-95 cursor-pointer";
         }
     }
     
@@ -3973,7 +3992,7 @@ function triggerMissionForNpc(npc) {
     npc.el.appendChild(alertEl);
     
     if (getActiveView() === 'vila') {
-        playSound('alert');
+        playSound('siren');
     }
 }
 
@@ -4040,7 +4059,7 @@ function openNpcMissionModal(npc) {
     };
     
     document.getElementById('npcMissionModal').classList.remove('hidden');
-    playSound('alert');
+    playSound('siren');
 }
 
 function closeNpcMissionModal() {
@@ -4299,8 +4318,8 @@ function setupPescaMinigame() {
     arena.innerHTML = `
         <div class="mg-fishing-container" onclick="clickFishingZone()">
             <div class="mg-water-view">
-                <span id="pescaBobber" class="mg-bobber">🎣</span>
-                <span class="mg-fish-shadow">🐟</span>
+                <img id="pescaBobber" class="mg-bobber" src="eco_fishing_bobber.png" alt="Boia">
+                <img class="mg-fish-shadow" src="eco_fishing_fish.png" alt="Peixe">
             </div>
             <div class="mg-bar-container">
                 <div id="fishingSweetSpot" class="mg-sweet-spot" style="left: 40%; width: 20%;"></div>
