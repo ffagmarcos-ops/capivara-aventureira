@@ -3203,42 +3203,72 @@ function startScanningSequence() {
 function getAnimalSuggestions(category) {
     const suggestions = {
         inseto: [
+            { name: 'Formiga', emoji: '🐜' },
+            { name: 'Mosca', emoji: '🪰' },
+            { name: 'Pernilongo', emoji: '🦟' },
+            { name: 'Borboleta', emoji: '🦋' },
             { name: 'Joaninha', emoji: '🐞' },
             { name: 'Abelha', emoji: '🐝' },
-            { name: 'Borboleta', emoji: '🦋' },
-            { name: 'Saúva', emoji: '🐜' }
+            { name: 'Grilo', emoji: '🦗' },
+            { name: 'Barata', emoji: '🪳' },
+            { name: 'Gafanhoto', emoji: '🦗' },
+            { name: 'Lagarta', emoji: '🐛' },
+            { name: 'Mariposa', emoji: '🦋' }
+        ],
+        aracnideo: [
+            { name: 'Aranha de parede', emoji: '🕷️' },
+            { name: 'Aranha de jardim', emoji: '🕸️' },
+            { name: 'Opilião', emoji: '🕷️' }
+        ],
+        miriapode: [
+            { name: 'Piolho-de-cobra', emoji: '🐛' },
+            { name: 'Centopeia', emoji: '🐛' }
+        ],
+        crustaceo: [
+            { name: 'Tatu-de-jardim', emoji: '🛡️' },
+            { name: 'Caranguejo', emoji: '🦀' }
+        ],
+        molusco: [
+            { name: 'Caracol', emoji: '🐌' },
+            { name: 'Caramujo', emoji: '🐌' },
+            { name: 'Lesma', emoji: '🐌' }
+        ],
+        anelideo: [
+            { name: 'Minhoca', emoji: '🪱' }
         ],
         ave: [
-            { name: 'Tucano', emoji: '🦚' },
             { name: 'Bem-te-vi', emoji: '🐤' },
+            { name: 'Pardal', emoji: '🐦' },
+            { name: 'Pombo', emoji: '🐦' },
+            { name: 'Rolinha', emoji: '🪶' },
             { name: 'Beija-flor', emoji: '🌸' },
-            { name: 'Quero-quero', emoji: '🌾' }
+            { name: 'Sabiá', emoji: '🐦' },
+            { name: 'Galinha', emoji: '🐔' }
         ],
         mamifero: [
-            { name: 'Capivara', emoji: '🦦' },
+            { name: 'Cachorro', emoji: '🐶' },
+            { name: 'Gato', emoji: '🐱' },
+            { name: 'Rato de quintal', emoji: '🐭' },
+            { name: 'Coelho', emoji: '🐰' },
             { name: 'Sagui', emoji: '🐒' },
-            { name: 'Tatu-bola', emoji: '🛡️' },
-            { name: 'Lobo-guará', emoji: '🦊' }
-        ],
-        felino: [
-            { name: 'Onça-pintada', emoji: '🐆' },
-            { name: 'Jaguatirica', emoji: '🐱' },
-            { name: 'Gato', emoji: '🐈' }
+            { name: 'Capivara', emoji: '🦦' }
         ],
         reptil: [
             { name: 'Lagartixa', emoji: '🦎' },
-            { name: 'Teiú', emoji: '🦎' },
             { name: 'Jabuti', emoji: '🐢' },
-            { name: 'Cobra', emoji: '🐍' }
+            { name: 'Teiú', emoji: '🦎' },
+            { name: 'Cobrinha-de-jardim', emoji: '🐍' }
         ],
         anfibio: [
             { name: 'Sapo-cururu', emoji: '🐸' },
-            { name: 'Rã', emoji: '🐸' },
-            { name: 'Perereca', emoji: '🐸' }
+            { name: 'Perereca-de-banheiro', emoji: '🐸' },
+            { name: 'Rã', emoji: '🐸' }
         ],
-        aracnideo: [
-            { name: 'Aranha', emoji: '🕷️' },
-            { name: 'Escorpião', emoji: '🦂' }
+        peixe: [
+            { name: 'Peixinho de Aquário', emoji: '🐟' },
+            { name: 'Betta', emoji: '🐟' },
+            { name: 'Cascudo', emoji: '🐟' },
+            { name: 'Tilápia', emoji: '🐟' }
         ]
     };
     return suggestions[category] || [];
@@ -3831,7 +3861,7 @@ function updateAchStat(key, val, mode = 'add') {
 }
 
 function updateBadges() {
-    const stats = { inseto: 0, ave: 0, mamifero: 0, reptil: 0 }; animals.forEach(a => { if (stats[a.category] !== undefined) stats[a.category]++; });
+    const stats = { inseto: 0, ave: 0, mamifero: 0, reptil: 0, aracnideo: 0, miriapode: 0, crustaceo: 0, molusco: 0, anelideo: 0, anfibio: 0, peixe: 0 }; animals.forEach(a => { if (stats[a.category] !== undefined) stats[a.category]++; });
     const qc = animals.filter(a => a.location === 'quintal').length; const pc = animals.filter(a => a.location === 'parque').length; const ec = animals.filter(a => a.location === 'escola').length;
     const sc = animals.filter(a => a.rarity === 'brilhante').length; const mc = animals.filter(a => a.rarity === 'mitico').length; const prc = animals.filter(a => a.premiumUnlocked).length;
     const level = Math.floor(guardianXP / 100) + 1; const hours = animals.map(a => new Date(a.capturedAt || a.createdEpoch || Date.now()).getHours());

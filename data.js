@@ -76,7 +76,23 @@ const curioData = {
     'cobra': 'Sentem o cheiro das coisas usando a língua bifurcada.',
     'tartaruga-tigre': 'Tem listras amarelas e adora nadar.',
     'jabuti': 'Vive muito! Alguns podem viver mais de 80 anos andando devagarinho pela mata.',
-    'cágado': 'Dobra o pescoço de lado para guardar a cabeça no casco!'
+    'cágado': 'Dobra o pescoço de lado para guardar a cabeça no casco!',
+    'mosca': 'As moscas usam seus pezinhos para sentir o gosto das coisas antes de comer!',
+    'pernilongo': 'Apenas os pernilongos fêmeas picam, pois precisam de nutrientes do sangue para seus ovinhos.',
+    'gafanhoto': 'Os gafanhotos têm os ouvidos localizados em suas barrigas e pulam distâncias incríveis!',
+    'lagarta': 'As lagartas comem folhas o dia todo para acumular energia e virarem lindas borboletas.',
+    'mariposa': 'As mariposas adoram a luz à noite e têm antenas peludinhas parecidas com pequenas penas.',
+    'opilião': 'Parece uma aranha com pernas gigantes, mas é totalmente inofensivo e não produz teia nem veneno!',
+    'piolho-de-cobra': 'Também chamado de embuá, ele come folhas secas e se enrola todo se você assustá-lo!',
+    'tatu-de-jardim': 'Ele respira por pequenas guelras e por isso precisa morar em lugares bem úmidos do jardim.',
+    'lesma': 'As lesmas não têm concha e produzem um muco escorregadio que as ajuda a andar sem se machucar.',
+    'minhoca': 'Elas têm cinco corações e respiram inteiramente pela pele úmida, cavando túneis embaixo da terra.',
+    'galinha': 'As galinhas conversam entre si e usam mais de 30 sons diferentes para se comunicar!',
+    'rato': 'Os ratos têm dentes super fortes que nunca param de crescer e por isso precisam roer coisas o dia todo.',
+    'betta': 'Os peixes Betta são muito corajosos e inteligentes, conseguindo reconhecer quem os alimenta todos os dias!',
+    'peixinho': 'Peixinhos de aquário gostam de dormir de olhos abertos porque não possuem pálpebras!',
+    'perereca': 'As pererecas têm ventosas grudentas nos dedos que as ajudam a escalar azulejos e paredes com facilidade!',
+    'caramujo': 'Ao contrário das lesmas, os caramujos têm uma concha que serve de casa e refúgio quando há perigo.'
 };
 
 const premiumData = {
@@ -113,7 +129,23 @@ const premiumData = {
     'teiú': { diet: 'Frutas, ovos, insetos e pequenos roedores.', habitat: 'Campos abertos e quintais no Brasil todo.', family: 'Teiidae', subspecies: 'Salvator merianae.', funFact: 'Durante o inverno, o teiú entra em um estado de quase hibernação dentro de sua toca subterrânea, onde seu coração bate bem devagarinho por até 4 meses sem comer nada!', role: 'Ajuda a plantar frutas dispersando sementes e consome restos orgânicos.', danger: '⚠️ Silvestre. Se acuado, pode morder ou bater o rabo forte.', status: '🟢 Pouco Preocupante' },
     'iguana': { diet: 'Folhas verdes, flores e frutos jovens.', habitat: 'Copas de árvores perto de lagos e rios nativos.', family: 'Iguanidae', subspecies: 'Iguana iguana.', funFact: 'A iguana possui um "terceiro olho" no topo da cabeça chamado olho parietal! Ele não enxerga imagens, mas detecta variações de luz para avisar se há predadores voando por cima.', role: 'Consumidor herbívoro nas copas das matas e alimento para aves de rapina.', danger: 'Garras e cauda fortes. Observe apenas à distância.', status: '🟢 Pouco Preocupante' },
     'cobra': { diet: 'Roedores, rãs, ovos e pequenos pássaros.', habitat: 'Florestas densas, gramados e corpos d\'água.', family: 'Boidae (Jiboias/Sucuris) / Viperidae (Jararacas/Cascavéis).', subspecies: 'Jiboia-constritora (Boa constrictor).', funFact: 'Algumas cobras, como a cascavel, possuem foscas loreais: furos entre os olhos e as narinas que funcionam como câmeras térmicas para "ver" o calor do corpo de presas no escuro!', role: 'Controladores indispensáveis de roedores, evitando pragas nos campos e cidades.', danger: '🚨 Algumas cobras têm veneno ativo. Afaste-se e chame um adulto!', status: '🟢 Pouco Preocupante' },
-    'tartaruga': { diet: 'Plantas aquáticas, peixes pequenos, algas e frutos.', habitat: 'Lagos, rios e terra firme (Jabutis).', family: 'Testudinidae (Jabutis) / Podocnemididae (Cágados).', subspecies: 'Jabuti-piranga (Chelonoidis carbonarius).', funFact: 'O casco do jabuti faz parte do seu próprio esqueleto, sendo formado por suas costelas e coluna vertebral fundidas. Eles sentem cócegas se você acariciar o casco!', role: 'Dispersa sementes de frutos caídos no chão da mata.', danger: 'Inofensivo. Respeite o casco protetor dele.', status: '🟢 Pouco Preocupante' }
+    'tartaruga': { diet: 'Plantas aquáticas, peixes pequenos, algas e frutos.', habitat: 'Lagos, rios e terra firme (Jabutis).', family: 'Testudinidae (Jabutis) / Podocnemididae (Cágados).', subspecies: 'Jabuti-piranga (Chelonoidis carbonarius).', funFact: 'O casco do jabuti faz parte do seu próprio esqueleto, sendo formado por suas costelas e coluna vertebral fundidas. Eles sentem cócegas se você acariciar o casco!', role: 'Dispersa sementes de frutos caídos no chão da mata.', danger: 'Inofensivo. Respeite o casco protetor dele.', status: '🟢 Pouco Preocupante' },
+    'mosca': { diet: 'Líquidos doces, restos de comida e frutas maduras.', habitat: 'Casas, quintais e florestas do mundo inteiro.', family: 'Muscidae', subspecies: 'Musca domestica.', funFact: 'As moscas usam seus pezinhos para sentir o sabor das coisas antes de comer!', role: 'Ajudam a reciclar a sujeira da natureza e são alimento de aves e sapos.', danger: '⚠️ Sujas! Mantenha a comida coberta para evitar bactérias.', status: '🟢 Pouco Preocupante' },
+    'pernilongo': { diet: 'Néctar de plantas (machos) e sangue (fêmeas).', habitat: 'Locais com água parada e proximidades de casas.', family: 'Culicidae', subspecies: 'Pernilongo-doméstico.', funFact: 'Somente as fêmeas picam, pois usam o sangue para dar energia para a maturação dos seus ovinhos.', role: 'Os machos polinizam flores e as larvas servem de alimento para peixes.', danger: '⚠️ Evite água parada! Podem transmitir doenças como a dengue.', status: '🟢 Pouco Preocupante' },
+    'gafanhoto': { diet: 'Folhas de grama, arbustos e vegetais.', habitat: 'Gramados, jardins e plantações abertas.', family: 'Acrididae', subspecies: 'Gafanhoto-verde.', funFact: 'Os gafanhotos têm os ouvidos localizados nas laterais da barriga, logo abaixo das asas!', role: 'Alimento muito importante para aves, lagartos e pequenos mamíferos.', danger: 'Inofensivos para humanos, mas comem muitas folhas do jardim.', status: '🟢 Pouco Preocupante' },
+    'lagarta': { diet: 'Folhas de plantas e árvores específicas.', habitat: 'Folhagens em jardins e florestas.', family: 'Lepidoptera (Fase Larval)', subspecies: 'Lagarta-da-couve / diversas.', funFact: 'Uma lagarta pode comer milhares de vezes o seu peso em folhas antes de se transformar em casulo.', role: 'Consumidora de plantas e polinizadora do futuro (quando virar borboleta).', danger: '⚠️ Atenção: Não toque em lagartas peludas ou coloridas, elas podem queimar a pele!', status: '🟢 Pouco Preocupante' },
+    'mariposa': { diet: 'Néctar de flores e frutas maduras.', habitat: 'Jardins e florestas, ativa principalmente à noite.', family: 'Lepidoptera', subspecies: 'Mariposa-bruxa / diversas.', funFact: 'As antenas peludinhas das mariposas funcionam como super narizes para farejar parceiros e flores no escuro.', role: 'Importantes polinizadoras noturnas de flores que só abrem à noite.', danger: 'Inofensivas! Não toque nas asas para não machucar o pó protetor delas.', status: '🟢 Pouco Preocupante' },
+    'opilião': { diet: 'Pequenos insetos mortos, fungos e restos vegetais.', habitat: 'Cantos úmidos de jardins, debaixo de troncos e vasos.', family: 'Cosmetidae / diversos', subspecies: 'Opilião-comum.', funFact: 'Parece muito com uma aranha de pernas longas, mas é um aracnídeo parente que não produz teia e não tem veneno!', role: 'Faxineiro de jardim que come insetos mortos e pequenos resíduos.', danger: 'Totalmente inofensivo e amigável!', status: '🟢 Pouco Preocupante' },
+    'piolho-de-cobra': { diet: 'Folhas secas, pedacinhos de madeira e vegetais moles.', habitat: 'Debaixo de vasos de plantas, pedras e terra úmida.', family: 'Julidae / Spirobolidae', subspecies: 'Embuá / Gongolo.', funFact: 'Quando está com medo, ele se enrola bem apertadinho como se fosse uma mola ou um caracol.', role: 'Ajuda a adubar a terra do jardim, quebrando folhas velhas em nutrientes.', danger: 'Totalmente inofensivo. Lave as mãos após pegá-lo.', status: '🟢 Pouco Preocupante' },
+    'tatu-de-jardim': { diet: 'Restos de folhas, plantas caídas e matéria orgânica úmida.', habitat: 'Ambientes úmidos e escuros, sob vasos de flores e pedras.', family: 'Armadillidiidae', subspecies: 'Tatu-bola-de-jardim.', funFact: 'Ele é na verdade um crustáceo terrestre (parente do caranguejo) e por isso respira por brânquias que precisam de umidade.', role: 'Ajuda a limpar o solo e a enriquecer a terra para as plantas.', danger: 'Totalmente inofensivo. Adora se enrolar em bolinha na sua mão!', status: '🟢 Pouco Preocupante' },
+    'lesma': { diet: 'Folhas tenras, talos e frutos caídos no chão.', habitat: 'Jardins, hortas e cantos escuros e úmidos.', family: 'Limacidae', subspecies: 'Lesma-cinza.', funFact: 'As lesmas soltam um muco brilhante e escorregadio que protege sua pele sensível contra pedras afiadas.', role: 'Consome restos vegetais, ajudando na reciclagem orgânica do jardim.', danger: 'Inofensiva, mas evite tocar diretamente. Lave sempre as mãos.', status: '🟢 Pouco Preocupante' },
+    'minhoca': { diet: 'Terra rica em folhas e resíduos de plantas em decomposição.', habitat: 'Solo úmido de jardins e hortas orgânicas.', family: 'Lumbricidae', subspecies: 'Minhoca-da-terra.', funFact: 'Elas não têm olhos, mas sua pele inteira sente a luz do sol para que saibam quando devem voltar para baixo da terra.', role: 'Fertiliza o solo produzindo húmus e abre túneis de ar que ajudam as plantas a crescer.', danger: 'Totalmente inofensiva e super amiga das plantas!', status: '🟢 Pouco Preocupante' },
+    'galinha': { diet: 'Milho, sementes, grama, formigas e minhocas.', habitat: 'Quintais de sítios e chácaras (aves domésticas).', family: 'Phasianidae', subspecies: 'Gallus gallus domesticus.', funFact: 'As galinhas têm uma ótima memória e conseguem reconhecer e lembrar do rosto de mais de 100 pessoas e outros animais diferentes!', role: 'Controla insetos como escorpiões no quintal e fornece ovos nutritivos.', danger: '⚠️ Domesticada, mas cuidado com bicadas se mexer nos ovos ou filhotes.', status: '🟢 Domesticado / Pouco Preocupante' },
+    'rato': { diet: 'Sementes, frutas, grãos e restos de alimentos humanos.', habitat: 'Tocas no solo, porões e áreas urbanas próximas ao lixo.', family: 'Muridae', subspecies: 'Rato-de-telhado / Camundongo.', funFact: 'Os dentes da frente dos ratos nunca param de crescer e eles precisam roer madeira para mantê-los curtos.', role: 'Servem de alimento para aves de rapina (gaviões, corujas) e cobras.', danger: '⚠️ Afaste-se! Ratos de rua podem transmitir doenças perigosas como a leptospirose.', status: '🟢 Pouco Preocupante' },
+    'betta': { diet: 'Pequenas larvas, mosquitos e ração para peixes.', habitat: 'Aquários domésticos (originários de pântanos da Ásia).', family: 'Osphronemidae', subspecies: 'Betta splendens.', funFact: 'O peixe Betta tem um órgão chamado labirinto, que permite que ele respire o ar da superfície fora da água!', role: 'Controlador de larvas de mosquito nos riachos nativos.', danger: 'Inofensivo para humanos, mas os machos brigam entre si.', status: '🟢 Domesticado / Pouco Preocupante' },
+    'peixinho': { diet: 'Algas pequenas, plantas aquáticas e ração comercial.', habitat: 'Aquários de água doce e lagos ornamentais.', family: 'Cyprinidae', subspecies: 'Peixinho-dourado (Kinguio).', funFact: 'Os peixinhos dourados têm uma memória muito melhor do que as pessoas pensam: lembram de coisas por meses!', role: 'Controlam o crescimento de algas em pequenos lagos.', danger: 'Totalmente inofensivo. Apenas observe nadar!', status: '🟢 Domesticado' },
+    'perereca': { diet: 'Pequenos mosquitos, moscas, baratas e grilos.', habitat: 'Paredes úmidas de banheiros, lavanderias e plantas do jardim.', family: 'Hylidae', subspecies: 'Perereca-doméstica.', funFact: 'Têm discos adesivos nas pontas dos dedos que funcionam como ventosas para escalar azulejos retos.', role: 'Ajuda a controlar insetos voadores indesejados ao redor da casa.', danger: 'Inofensiva, mas não toque para não danificar a pele sensível dela.', status: '🟢 Pouco Preocupante' },
+    'caramujo': { diet: 'Folhas macias, vegetais e algas aquáticas.', habitat: 'Solo úmido de jardins e lagos de água doce.', family: 'Ampullariidae / Lymnaeidae', subspecies: 'Caramujo-jardim.', funFact: 'Ao contrário das lesmas, os caramujos possuem uma concha em espiral resistente para se esconder.', role: 'Reciclador de plantas mortas e algas.', danger: '⚠️ Evite tocar em caramujos de jardim. Lave bem as mãos caso ocorra contato.', status: '🟢 Pouco Preocupante' }
 };
 
 function getPremiumData(animalName) {
@@ -159,6 +191,26 @@ function getPremiumData(animalName) {
             genRole = 'Grandes arquitetas e caçadoras que impedem o mundo de ser dominado por moscas!';
             genDanger = '🚨 Cuidado! Não toque em teias ou buracos escondidos. Algumas têm veneno ativo.';
             genFact = 'As aranhas produzem fios de teia que começam no formato líquido dentro delas e viram seda super resistente ao tocar o ar.';
+        } else if (cat === 'molusco') {
+            genRole = 'Ajudam a decompor folhas secas e servem de alimento para muitas aves e répteis!';
+            genDanger = 'Inofensivos! Mas lave sempre as mãos depois de tocar em caracóis ou lesmas.';
+            genFact = 'Os caracóis carregam sua própria concha nas costas e ela cresce juntinho com eles!';
+        } else if (cat === 'peixe') {
+            genRole = 'Mantêm a água limpa de lagos e rios, controlando algas e insetos aquáticos.';
+            genDanger = 'Apenas observe nadar! Alguns peixes têm espinhos afiados nas nadadeiras.';
+            genFact = 'Os peixes respiram debaixo d\'água usando brânquias (guelras) que filtram o oxigênio da água!';
+        } else if (cat === 'miriapode') {
+            genRole = 'Comem folhas secas e restos vegetais, ajudando a adubar a terra dos jardins!';
+            genDanger = 'A maioria é inofensiva. Mas cuidado com centopeias maiores que podem dar uma picadinha dolorosa!';
+            genFact = 'O piolho-de-cobra se enrola como uma espiral perfeita de proteção quando se sente ameaçado!';
+        } else if (cat === 'crustaceo') {
+            genRole = 'Ajudam a limpar o jardim comendo plantas mortas e oxigenando a terra.';
+            genDanger = 'Totalmente inofensivos! Podem ser observados bem de perto.';
+            genFact = 'O tatu-de-jardim é um crustáceo terrestre, parente dos caranguejos, e respira por brânquias úmidas!';
+        } else if (cat === 'anelideo') {
+            genRole = 'As engenheiras do solo! Escavam túneis que ajudam a água e o ar a entrarem na terra, fertilizando as plantas.';
+            genDanger = 'Totalmente inofensivas! São as melhores amigas da horta.';
+            genFact = 'As minhocas não têm olhos nem ouvidos! Elas sentem a luz e o movimento através da pele úmida.';
         } else {
             genFact = `O ${animalName} desempenha um papel ecológico fantástico e possui características únicas adaptadas ao seu ecossistema.`;
         }
@@ -197,21 +249,27 @@ const endlessTriviaBank = [
 
 // VALIDADOR BIOLÓGICO DE CATEGORIAS
 const categoryMap = {
-    'saúva': 'inseto', 'cortadeira': 'inseto', 'lava-pé': 'inseto', 'fantasma': 'inseto', 'formiga': 'inseto', 'jataí': 'inseto', 'arapuá': 'inseto', 'mamangava': 'inseto', 'abelha': 'inseto', 'marimbondo': 'inseto', 'borboleta': 'inseto', 'besouro': 'inseto', 'louva-a-deus': 'inseto', 'bicho-pau': 'inseto', 'barata': 'inseto', 'cupim': 'inseto', 'joaninha': 'inseto', 'grilo': 'inseto', 'lagarta': 'inseto', 'mosquito': 'inseto', 'centopeia': 'inseto', 'piolho-de-cobra': 'inseto',
+    'saúva': 'inseto', 'cortadeira': 'inseto', 'lava-pé': 'inseto', 'fantasma': 'inseto', 'formiga': 'inseto', 'jataí': 'inseto', 'arapuá': 'inseto', 'mamangava': 'inseto', 'abelha': 'inseto', 'marimbondo': 'inseto', 'borboleta': 'inseto', 'besouro': 'inseto', 'louva-a-deus': 'inseto', 'bicho-pau': 'inseto', 'barata': 'inseto', 'cupim': 'inseto', 'joaninha': 'inseto', 'grilo': 'inseto', 'lagarta': 'inseto', 'mosquito': 'inseto', 'pernilongo': 'inseto', 'mosca': 'inseto', 'gafanhoto': 'inseto', 'mariposa': 'inseto',
     
-    'bem-te-vi': 'ave', 'joão-de-barro': 'ave', 'sabiá': 'ave', 'beija-flor': 'ave', 'quero-quero': 'ave', 'pardal': 'ave', 'pombo': 'ave', 'rolinha': 'ave', 'tucano': 'ave', 'arara': 'ave', 'maritaca': 'ave', 'coruja': 'ave', 'carcará': 'ave', 'pássaro': 'ave', 'passarinho': 'ave',
+    'bem-te-vi': 'ave', 'joão-de-barro': 'ave', 'sabiá': 'ave', 'beija-flor': 'ave', 'quero-quero': 'ave', 'pardal': 'ave', 'pombo': 'ave', 'rolinha': 'ave', 'tucano': 'ave', 'arara': 'ave', 'maritaca': 'ave', 'coruja': 'ave', 'carcará': 'ave', 'galinha': 'ave', 'pássaro': 'ave', 'passarinho': 'ave',
     
-    'capivara': 'mamifero', 'sagui': 'mamifero', 'mico': 'mamifero', 'tatu': 'mamifero', 'preguiça': 'mamifero', 'tamanduá': 'mamifero', 'lobo': 'mamifero', 'cachorro': 'mamifero', 'gambá': 'mamifero', 'quati': 'mamifero', 'morcego': 'mamifero', 'rato': 'mamifero', 'macaco': 'mamifero',
+    'capivara': 'mamifero', 'sagui': 'mamifero', 'mico': 'mamifero', 'tatu': 'mamifero', 'preguiça': 'mamifero', 'tamanduá': 'mamifero', 'lobo': 'mamifero', 'cachorro': 'mamifero', 'gato': 'mamifero', 'onça': 'mamifero', 'jaguatirica': 'mamifero', 'leão': 'mamifero', 'indigo': 'mamifero', 'gambá': 'mamifero', 'quati': 'mamifero', 'morcego': 'mamifero', 'rato': 'mamifero', 'macaco': 'mamifero', 'coelho': 'mamifero',
     
-    'onça': 'felino', 'jaguatirica': 'felino', 'gato': 'felino', 'leão': 'felino', 'indigo': 'felino',
+    'caranguejeira': 'aracnideo', 'armadeira': 'aracnideo', 'aranha': 'aracnideo', 'escorpião': 'aracnideo', 'opilião': 'aracnideo',
     
-    'caranguejeira': 'aracnideo', 'armadeira': 'aracnideo', 'aranha': 'aracnideo', 'escorpião': 'aracnideo',
+    'centopeia': 'miriapode', 'piolho-de-cobra': 'miriapode',
+    
+    'tatu-de-jardim': 'crustaceo', 'caranguejo': 'crustaceo',
+    
+    'caracol': 'molusco', 'caramujo': 'molusco', 'lesma': 'molusco',
+    
+    'minhoca': 'anelideo',
     
     'sapo': 'anfibio', 'perereca': 'anfibio', 'rã': 'anfibio',
     
-    'lagartixa': 'reptil', 'teiú': 'reptil', 'iguana': 'reptil', 'jiboia': 'reptil', 'sucuri': 'reptil', 'cascavel': 'reptil', 'jararaca': 'reptil', 'coral': 'reptil', 'cobra': 'reptil', 'tartaruga': 'reptil', 'jabuti': 'reptil', 'cágado': 'reptil', 'jacaré': 'reptil',
+    'lagartixa': 'reptil', 'teiú': 'reptil', 'iguana': 'reptil', 'jiboia': 'reptil', 'sucuri': 'reptil', 'cascavel': 'reptil', 'jararaca': 'reptil', 'coral': 'reptil', 'cobra': 'reptil', 'tartaruga': 'reptil', 'jabuti': 'reptil', 'cágado': 'reptil', 'jacaré': 'reptil', 'cobrinha-de-jardim': 'reptil',
     
-    'caracol': 'inseto'
+    'peixe': 'peixe', 'betta': 'peixe', 'cascudo': 'peixe', 'tilápia': 'peixe', 'peixinho': 'peixe'
 };
 
 function getCorrectCategory(name) {
