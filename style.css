@@ -1768,25 +1768,49 @@ body.night-mode .text-on-white {
     body.on-vila-view #villageSideHud {
         display: flex !important;
     }
-    body.on-vila-view #nextMissionCountdown {
+    body.on-vila-view #villageWoodPanel {
         position: fixed !important;
-        left: 83% !important;
-        top: 75% !important;
+        left: 86.5% !important;
+        top: 78% !important;
         bottom: auto !important;
         right: auto !important;
         transform: translate(-50%, -50%) !important;
         z-index: 10000 !important;
+        width: 125px !important;
+        padding: 12px 10px !important;
+        background: url('wood_button.png') no-repeat center center / 100% 100% !important;
+        border: none !important;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
-    body.on-vila-view #btnObrasOpen {
-        position: fixed !important;
-        left: 83% !important;
-        top: 84% !important;
-        bottom: auto !important;
+    body.on-vila-view #villageWoodPanel #nextMissionCountdown,
+    body.on-vila-view #villageWoodPanel #btnObrasOpen {
+        position: relative !important;
+        left: auto !important;
+        top: auto !important;
         right: auto !important;
-        transform: translate(-50%, -50%) !important;
-        z-index: 10000 !important;
-        width: auto !important;
+        bottom: auto !important;
+        transform: none !important;
+        width: 100% !important;
+        height: auto !important;
+        padding: 6px 4px !important;
+        font-size: 8px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        white-space: nowrap !important;
         margin: 0 !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+    }
+    body.on-vila-view #villageWoodPanel #nextMissionCountdown {
+        border-radius: 9999px !important;
+    }
+    body.on-vila-view #villageWoodPanel #btnObrasOpen {
+        border-radius: 12px !important;
     }
     body.on-vila-view #villageEvolutionDrawer {
         max-width: 800px !important;
