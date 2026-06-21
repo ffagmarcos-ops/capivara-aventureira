@@ -390,6 +390,8 @@ let bgmTimer = null;
 let bgmStep = 0;
 let bgmMasterGain = null;
 let currentTrackName = null;
+let currentBgmAudio = null;
+
 
 const missionsPool = [
     { id: 'm1', l: 'Missão Diária', d: 'Faça 1 descoberta hoje', check: () => animals.some(a => a.timestamp === new Date().toLocaleDateString('pt-BR')), reward: 15 },
@@ -658,9 +660,9 @@ function changeBgm(trackName) {
         if (!audioUnlocked) return;
         initAudio(); if (!audioCtx) return;
         if (soundMode !== 'both') return;
-        if (currentTrackName === trackName && bgmTimer) return;
+        if (currentTrackName === trackName && (bgmTimer || currentBgmAudio)) return;
         
-        // Se houver música tocando, fazer fade-out suave antes de remover
+        // Se houver música procedural tocando, fazer fade-out suave antes de remover
         if (bgmMasterGain) {
             const oldGain = bgmMasterGain;
             try {
@@ -677,6 +679,26 @@ function changeBgm(trackName) {
             clearInterval(bgmTimer);
             bgmTimer = null;
         }
+
+        // Se houver música de arquivo tocando, fazer fade-out suave antes de pausar
+        if (currentBgmAudio) {
+            const audioToFade = currentBgmAudio;
+            currentBgmAudio = null;
+            try {
+                let vol = audioToFade.volume;
+                const fadeInterval = setInterval(() => {
+                    if (vol > 0.05) {
+                        vol -= 0.05;
+                        audioToFade.volume = vol;
+                    } else {
+                        clearInterval(fadeInterval);
+                        audioToFade.pause();
+                    }
+                }, 50);
+            } catch (e) {
+                audioToFade.pause();
+            }
+        }
         
         if (!trackName) {
             currentTrackName = null;
@@ -685,6 +707,17 @@ function changeBgm(trackName) {
         }
         
         currentTrackName = trackName;
+
+        // Se for trilha sonora em arquivo de áudio de alta qualidade
+        if (trackName === 'games' || trackName === 'adventure') {
+            const file = trackName === 'games' ? 'minigames_bgm.ogg' : 'adventure_bgm.ogg';
+            currentBgmAudio = new Audio(file);
+            currentBgmAudio.loop = true;
+            currentBgmAudio.volume = trackName === 'games' ? 0.3 : 0.25;
+            currentBgmAudio.play().catch(e => console.warn("Failed to play BGM file:", e));
+            return;
+        }
+        
         const spec = bgmTracksSpec[trackName];
         if (!spec) return;
         
@@ -776,6 +809,24 @@ function stopBgm() {
             }, 500);
         } catch(e) {}
         bgmMasterGain = null;
+    }
+    if (currentBgmAudio) {
+        const audioToFade = currentBgmAudio;
+        currentBgmAudio = null;
+        try {
+            let vol = audioToFade.volume;
+            const fadeInterval = setInterval(() => {
+                if (vol > 0.05) {
+                    vol -= 0.05;
+                    audioToFade.volume = vol;
+                } else {
+                    clearInterval(fadeInterval);
+                    audioToFade.pause();
+                }
+            }, 50);
+        } catch (e) {
+            audioToFade.pause();
+        }
     }
 }
 
