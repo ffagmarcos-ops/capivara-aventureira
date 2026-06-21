@@ -75,7 +75,8 @@ router.post('/auth/login', async (req, res, next) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        avatar: user.avatar
+        avatar: user.avatar,
+        role: user.role  // necessário para verificação de admin no painel
       }
     });
   } catch (error) {
