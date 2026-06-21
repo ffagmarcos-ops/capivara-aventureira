@@ -3213,12 +3213,19 @@ function getAnimalSuggestions(category) {
             { name: 'Barata', emoji: '🪳' },
             { name: 'Gafanhoto', emoji: '🦗' },
             { name: 'Lagarta', emoji: '🐛' },
-            { name: 'Mariposa', emoji: '🦋' }
+            { name: 'Mariposa', emoji: '🦋' },
+            { name: 'Besouro', emoji: '🪲' },
+            { name: 'Louva-a-deus', emoji: '🦗' },
+            { name: 'Bicho-pau', emoji: '🪵' },
+            { name: 'Vaga-lume', emoji: '✨' },
+            { name: 'Libélula', emoji: '🛸' }
         ],
         aracnideo: [
             { name: 'Aranha de parede', emoji: '🕷️' },
             { name: 'Aranha de jardim', emoji: '🕸️' },
-            { name: 'Opilião', emoji: '🕷️' }
+            { name: 'Opilião', emoji: '🕷️' },
+            { name: 'Caranguejeira', emoji: '🕷️' },
+            { name: 'Escorpião', emoji: '🦂' }
         ],
         miriapode: [
             { name: 'Piolho-de-cobra', emoji: '🐛' },
@@ -3243,7 +3250,12 @@ function getAnimalSuggestions(category) {
             { name: 'Rolinha', emoji: '🪶' },
             { name: 'Beija-flor', emoji: '🌸' },
             { name: 'Sabiá', emoji: '🐦' },
-            { name: 'Galinha', emoji: '🐔' }
+            { name: 'Galinha', emoji: '🐔' },
+            { name: 'Tucano', emoji: '🦚' },
+            { name: 'Arara', emoji: '🦜' },
+            { name: 'Maritaca', emoji: '🦜' },
+            { name: 'Coruja', emoji: '🦉' },
+            { name: 'Carcará', emoji: '🦅' }
         ],
         mamifero: [
             { name: 'Cachorro', emoji: '🐶' },
@@ -3251,13 +3263,26 @@ function getAnimalSuggestions(category) {
             { name: 'Rato de quintal', emoji: '🐭' },
             { name: 'Coelho', emoji: '🐰' },
             { name: 'Sagui', emoji: '🐒' },
-            { name: 'Capivara', emoji: '🦦' }
+            { name: 'Capivara', emoji: '🦦' },
+            { name: 'Tatu-bola', emoji: '🛡️' },
+            { name: 'Lobo-guará', emoji: '🦊' },
+            { name: 'Onça-pintada', emoji: '🐆' },
+            { name: 'Jaguatirica', emoji: '🐆' },
+            { name: 'Tamanduá-bandeira', emoji: '🐜' },
+            { name: 'Bicho-preguiça', emoji: '🦥' },
+            { name: 'Leão', emoji: '🦁' }
         ],
         reptil: [
             { name: 'Lagartixa', emoji: '🦎' },
             { name: 'Jabuti', emoji: '🐢' },
             { name: 'Teiú', emoji: '🦎' },
-            { name: 'Cobrinha-de-jardim', emoji: '🐍' }
+            { name: 'Cobrinha-de-jardim', emoji: '🐍' },
+            { name: 'Iguana', emoji: '🦎' },
+            { name: 'Jacaré', emoji: '🐊' },
+            { name: 'Cobra Cascavel', emoji: '🐍' },
+            { name: 'Cobra Jiboia', emoji: '🐍' },
+            { name: 'Cobra Jararaca', emoji: '🐍' },
+            { name: 'Coral', emoji: '🐍' }
         ],
         anfibio: [
             { name: 'Sapo-cururu', emoji: '🐸' },
@@ -3268,7 +3293,8 @@ function getAnimalSuggestions(category) {
             { name: 'Peixinho de Aquário', emoji: '🐟' },
             { name: 'Betta', emoji: '🐟' },
             { name: 'Cascudo', emoji: '🐟' },
-            { name: 'Tilápia', emoji: '🐟' }
+            { name: 'Tilápia', emoji: '🐟' },
+            { name: 'Piranha', emoji: '🐟' }
         ]
     };
     return suggestions[category] || [];
