@@ -99,6 +99,8 @@ A Eco-Vila conta com um plano de fundo dinâmico animado (`Trees_blowing_wind_ri
     Para evitar que o vídeo acelerado por hardware cubra os elementos da vila, a imagem de fallback estática utiliza `z-index: -2` e o contêiner de vídeo utiliza `z-index: -1`. Assim, todos os elementos e contêineres de jogo (como prédios em `z-10` e capivaras em `z-[12]`) aparecem por cima da animação.
 *   **Bypass de Range Requests no Service Worker**:
     Navegadores como Safari (iOS/macOS) e Chrome requerem range requests (HTTP 206 Partial Content) para renderizar mídias HTML5. Para evitar falhas no carregamento de áudios/vídeos a partir do cache do Service Worker, configuramos o `service-worker.js` para não interceptar requisições com cabeçalho `Range` ou com extensões `.mp4` e `.ogg`.
+*   **Indicadores de Produção Flutuantes (Floating Gain Indicators)**:
+    A cada 5 segundos, se a produção de sementes da vila for maior que zero e o jogador estiver visualizando a aba da Vila (`vilaView`), números dourados com o ícone da moeda de semente (`seed_coin.png`) sobem de forma animada (`@keyframes floatUpFade`) sobre a Horta de Capim (`farm`) e as Docas de Pesca (`docks`), indicando a produção passiva em tempo real. Os valores mostrados correspondem à taxa exata de contribuição de cada prédio por hora de acordo com seu nível e o bônus multiplicador do Centro da Vila.
 
 ---
 

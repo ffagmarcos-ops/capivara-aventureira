@@ -1438,6 +1438,37 @@ body.night-mode .text-on-white {
     background-color: #fca5a5; /* Margem vermelha do caderno */
 }
 
+/* Animação para números subindo sobre os prédios da Eco-Vila */
+@keyframes floatUpFade {
+    0% {
+        transform: translate(-50%, -50%) translateY(0);
+        opacity: 0;
+        scale: 0.5;
+    }
+    15% {
+        opacity: 1;
+        scale: 1.25;
+    }
+    100% {
+        transform: translate(-50%, -50%) translateY(-65px);
+        opacity: 0;
+        scale: 0.85;
+    }
+}
+
+.floating-gain {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    font-family: 'Outfit', 'Inter', sans-serif;
+    font-weight: 900;
+    font-size: 14px;
+    color: #fbbf24; /* dourado/amarelo */
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4), 0 0 8px rgba(251, 191, 36, 0.7);
+    pointer-events: none;
+    z-index: 99;
+    animation: floatUpFade 1.5s cubic-bezier(0.25, 1, 0.50, 1) forwards;
+}
+
 
 
 

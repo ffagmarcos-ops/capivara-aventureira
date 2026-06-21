@@ -2421,6 +2421,32 @@ function renderVillage() {
     updateAmbientSoundButton();
 }
 
+function spawnFloatingNumber(buildingKey, value) {
+    const visualEl = document.getElementById(`visual-${buildingKey}`);
+    if (!visualEl) return;
+    
+    const container = document.getElementById('villageVisualLayers');
+    if (!container) return;
+    
+    const floating = document.createElement('div');
+    floating.className = 'floating-gain';
+    
+    // Mostra o número com a imagem da moeda de semente
+    floating.innerHTML = `+${value} <img src="seed_coin.png" class="w-4.5 h-4.5 object-contain inline-block align-middle -mt-1 ml-0.5">`;
+    
+    const leftStr = visualEl.style.left;
+    const topStr = visualEl.style.top;
+    
+    floating.style.left = leftStr;
+    floating.style.top = topStr;
+    
+    container.appendChild(floating);
+    
+    setTimeout(() => {
+        floating.remove();
+    }, 1500);
+}
+
 // Live ticking interval
 setInterval(() => {
     const rate = getVillageProductionRate();
@@ -2498,6 +2524,21 @@ setInterval(() => {
         villageState.unclaimedSeeds = unclaimedSeedsAccumulated;
         villageState.lastClaimTime = Date.now();
         localStorage.setItem('capy_village_state', JSON.stringify(villageState));
+        
+        // Se a aba Vila estiver ativa no momento, mostra os números flutuantes subindo sobre as construções
+        const vilaView = document.getElementById('vilaView');
+        if (vilaView && !vilaView.classList.contains('hidden')) {
+            const multiplier = 1 + (villageState.buildings.townHall.level * villageState.buildings.townHall.baseBonus);
+            
+            if (villageState.buildings.farm && villageState.buildings.farm.level > 0 && !villageState.buildings.farm.underConstruction) {
+                const val = Math.round((villageState.buildings.farm.level * villageState.buildings.farm.baseBonus) * multiplier * 10) / 10;
+                spawnFloatingNumber('farm', val);
+            }
+            if (villageState.buildings.docks && villageState.buildings.docks.level > 0 && !villageState.buildings.docks.underConstruction) {
+                const val = Math.round((villageState.buildings.docks.level * villageState.buildings.docks.baseBonus) * multiplier * 10) / 10;
+                spawnFloatingNumber('docks', val);
+            }
+        }
     }
 }, 5000);
 
