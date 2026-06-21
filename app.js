@@ -2533,6 +2533,54 @@ function renderVillage() {
         `;
     }).join('');
     updateAmbientSoundButton();
+
+    // Renderiza a lista lateral compacta para o HUD (widescreen / landscape)
+    const sideHudList = document.getElementById('villageSideHudList');
+    if (sideHudList) {
+        sideHudList.innerHTML = Object.keys(villageState.buildings).map(key => {
+            const b = villageState.buildings[key];
+            let emoji = '🏡';
+            if (key === 'farm') emoji = '🥬';
+            else if (key === 'docks') emoji = '🎣';
+            else if (key === 'lab') emoji = '🔬';
+            else if (key === 'tower') emoji = '🔭';
+            
+            let bonusText = '';
+            if (key === 'townHall') {
+                bonusText = `+${b.level * 5}% Geral`;
+            } else if (key === 'farm') {
+                bonusText = `+${b.level * 1} capins/h`;
+            } else if (key === 'docks') {
+                bonusText = `+${b.level * 3} capins/h`;
+            } else if (key === 'lab') {
+                bonusText = `+${b.level * 10}% XP`;
+            } else if (key === 'tower') {
+                bonusText = `+${b.level * 5}% Raros`;
+            }
+
+            let statusText = '';
+            if (b.underConstruction) {
+                statusText = `<span class="text-purple-300 font-black animate-pulse text-[7.5px]">OBRA</span>`;
+            } else {
+                statusText = `<span class="text-amber-300 font-bold text-[8.5px]">Lvl ${b.level}</span>`;
+            }
+            
+            return `
+                <div class="flex items-center justify-between bg-white/5 border border-white/5 rounded-xl p-2 gap-1.5 hover:bg-white/10 transition-colors">
+                    <div class="flex items-center gap-1.5 min-w-0">
+                        <span class="text-sm flex-shrink-0">${emoji}</span>
+                        <div class="flex flex-col min-w-0">
+                            <span class="font-bold text-[8.5px] text-gray-200 leading-none truncate">${b.name}</span>
+                            <span class="text-[7px] text-gray-400 mt-0.5">${bonusText}</span>
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0 text-right">
+                        ${statusText}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
 }
 
 function spawnFloatingNumber(buildingKey, value) {

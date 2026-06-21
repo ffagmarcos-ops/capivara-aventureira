@@ -1707,15 +1707,102 @@ body.night-mode .text-on-white {
         width: 100% !important;
         height: 100% !important;
     }
+    body.on-vila-view #villageSideHud {
+        display: flex !important;
+    }
+    body.on-vila-view #nextMissionCountdown {
+        position: fixed !important;
+        bottom: 8px !important;
+        right: 8px !important;
+        z-index: 10000 !important;
+        transform: none !important;
+    }
     body.on-vila-view #villageEvolutionDrawer {
-        max-width: 450px !important;
-        max-height: 60vh !important;
+        max-width: 800px !important;
+        width: 90vw !important;
+        max-height: 85vh !important;
         left: 50% !important;
         right: auto !important;
         transform: translate(-50%, 100%) !important;
     }
     body.on-vila-view #villageEvolutionDrawer.open {
         transform: translate(-50%, 0) !important;
+    }
+    body.on-vila-view #villageGrid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
+    }
+    /* Compact cards for widescreen evolutions drawer */
+    body.on-vila-view .building-card {
+        padding: 0.75rem !important;
+        border-radius: 1.5rem !important;
+        gap: 8px !important;
+    }
+    body.on-vila-view .building-card .w-14, 
+    body.on-vila-view .building-card .w-10 {
+        width: 2.75rem !important;
+        height: 2.75rem !important;
+        font-size: 1.5rem !important;
+    }
+    body.on-vila-view .building-card p.brand-font {
+        font-size: 11px !important;
+    }
+    body.on-vila-view .building-card p.text-\[9px\] {
+        font-size: 8px !important;
+    }
+    body.on-vila-view .building-card button {
+        padding: 0.5rem 0.75rem !important;
+        font-size: 8.5px !important;
+    }
+
+    /* Side-by-side Layout for Character Minigames */
+    body.on-vila-view .mg-layout-with-char {
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-around !important;
+        gap: 16px !important;
+        height: 100% !important;
+        width: 100% !important;
+    }
+    body.on-vila-view .mg-char-showcase {
+        width: 100px !important;
+        height: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    body.on-vila-view .mg-horta-grid,
+    body.on-vila-view .mg-chest-grid,
+    body.on-vila-view .mg-lab-grid,
+    body.on-vila-view .mg-bio-grid {
+        flex: 1 !important;
+    }
+
+    /* Compact Modals for Character Minigames and Dialogues */
+    body.on-vila-view #npcMissionModal > div,
+    body.on-vila-view #npcMinigameModal > div,
+    body.on-vila-view #npcRewardModal > div {
+        max-width: 580px !important;
+        min-height: auto !important;
+        max-height: 92vh !important;
+        padding: 1.25rem !important;
+        border-radius: 2rem !important;
+        gap: 12px !important;
+    }
+    body.on-vila-view #npcMissionModal .w-24.h-24 {
+        width: 4.5rem !important;
+        height: 4.5rem !important;
+    }
+    body.on-vila-view #npcMissionModal p {
+        font-size: 11px !important;
+    }
+    body.on-vila-view #npcMissionModal button,
+    body.on-vila-view #npcMinigameModal button,
+    body.on-vila-view #npcRewardModal button {
+        padding-top: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
+        font-size: 10.5px !important;
     }
 }
 
