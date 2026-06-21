@@ -1688,6 +1688,64 @@ body.night-mode .text-on-white {
     }
 }
 
+/* Custom Collapsible Side HUD classes */
+#villageSideHud {
+    position: absolute;
+    left: 0;
+    top: 60px;
+    bottom: 60px;
+    width: 215px; /* 180px menu + 35px button */
+    z-index: 100;
+    display: none;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateX(-180px); /* collapsed by default */
+}
+
+#villageSideHud.open {
+    transform: translateX(0); /* expanded */
+}
+
+#villageSideHud .side-hud-menu {
+    width: 180px;
+    height: 100%;
+    background: rgba(28, 10, 1, 0.92);
+    backdrop-filter: blur(8px);
+    border-right: 1px solid rgba(251, 191, 36, 0.3);
+    border-top: 1px solid rgba(251, 191, 36, 0.3);
+    border-bottom: 1px solid rgba(251, 191, 36, 0.3);
+    border-top-right-radius: 24px;
+    border-bottom-right-radius: 24px;
+    padding: 12px;
+    color: #fff;
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+}
+
+#villageSideHud .side-hud-btn {
+    width: 35px;
+    height: 80px;
+    background: #1c0a01;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    border-right: 1px solid rgba(251, 191, 36, 0.3);
+    border-top: 1px solid rgba(251, 191, 36, 0.3);
+    border-bottom: 1px solid rgba(251, 191, 36, 0.3);
+    color: #fbbf24;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: 900;
+    font-size: 7.5px;
+    letter-spacing: 0.1em;
+    gap: 4px;
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.2);
+}
+
 @media (orientation: landscape) {
     body.on-vila-view header {
         display: none !important;
@@ -1773,10 +1831,11 @@ body.night-mode .text-on-white {
         justify-content: center !important;
     }
     body.on-vila-view .mg-horta-grid,
-    body.on-vila-view .mg-chest-grid,
-    body.on-vila-view .mg-lab-grid,
-    body.on-vila-view .mg-bio-grid {
+    body.on-vila-view .mg-chest-container,
+    body.on-vila-view .mg-lab-container,
+    body.on-vila-view .mg-bio-container {
         flex: 1 !important;
+        max-width: none !important;
     }
 
     /* Compact Modals for Character Minigames and Dialogues */
@@ -1803,6 +1862,20 @@ body.night-mode .text-on-white {
         padding-top: 0.75rem !important;
         padding-bottom: 0.75rem !important;
         font-size: 10.5px !important;
+    }
+
+    /* Make clouds much smaller and fly near the background mountains in landscape */
+    body.on-vila-view .cloud-1 {
+        width: 7% !important;
+        top: 12% !important;
+    }
+    body.on-vila-view .cloud-2 {
+        width: 10% !important;
+        top: 18% !important;
+    }
+    body.on-vila-view .cloud-3 {
+        width: 6% !important;
+        top: 15% !important;
     }
 }
 

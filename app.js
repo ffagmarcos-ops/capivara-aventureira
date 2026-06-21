@@ -6233,3 +6233,16 @@ function addMainMenuButtonToHeader() {
     const right = header.querySelector('.flex.items-center.gap-2');
     if (right) right.prepend(btn);
 }
+
+function toggleSideHud() {
+    const hud = document.getElementById('villageSideHud');
+    const icon = document.getElementById('sideHudIcon');
+    if (!hud || !icon) return;
+    hud.classList.toggle('open');
+    if (hud.classList.contains('open')) {
+        icon.className = 'fas fa-chevron-left text-xs';
+    } else {
+        icon.className = 'fas fa-chevron-right text-xs';
+    }
+    playSound('click');
+}
