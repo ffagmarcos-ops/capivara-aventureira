@@ -1374,6 +1374,71 @@ body.night-mode .text-on-white {
     100% { transform: rotate(4deg); }
 }
 
+/* --- TELA DE CAPTURA E BIOSCANNER --- */
+.camera-flash {
+    position: absolute;
+    inset: 0;
+    background: #ffffff;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 50;
+}
+.camera-flash.active {
+    animation: flashEffect 0.35s ease-out forwards;
+}
+@keyframes flashEffect {
+    0% { opacity: 1; }
+    40% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.scanner-laser {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(to right, transparent, #10b981, #34d399, #10b981, transparent);
+    box-shadow: 0 0 10px #10b981, 0 0 20px #34d399;
+    z-index: 20;
+    pointer-events: none;
+}
+.scanner-laser.active {
+    animation: scannerScan 2.0s ease-in-out infinite alternate;
+}
+@keyframes scannerScan {
+    0% { top: 0%; }
+    100% { top: 100%; }
+}
+
+.scanner-radar {
+    border: 3px dashed rgba(16, 185, 129, 0.35);
+    border-top-color: #10b981;
+    animation: radarRotate 4s linear infinite;
+}
+@keyframes radarRotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Ficha estilo caderno científico pautado */
+.notebook-card {
+    background-color: #fefcf0;
+    background-image: linear-gradient(#e2e8f0 1px, transparent 1px);
+    background-size: 100% 24px;
+    line-height: 24px;
+    position: relative;
+}
+.notebook-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 28px;
+    width: 2px;
+    background-color: #fca5a5; /* Margem vermelha do caderno */
+}
+
+
 
 
 

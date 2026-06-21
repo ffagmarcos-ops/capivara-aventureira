@@ -995,6 +995,40 @@ function playSound(type) {
             osc.start(now);
             lfo.stop(now + 0.36);
             osc.stop(now + 0.36);
+        } else if (type === 'shutter') {
+            // White noise burst for camera shutter click
+            const bufferSize = audioCtx.sampleRate * 0.1; // 100ms
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = buffer;
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.value = 1000;
+            const gain = audioCtx.createGain();
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+            noise.start(now);
+            noise.stop(now + 0.1);
+        } else if (type === 'scan_beep') {
+            // Short sci-fi scanner beep (800Hz -> 1400Hz)
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, now);
+            osc.frequency.exponentialRampToValueAtTime(1400, now + 0.08);
+            gain.gain.setValueAtTime(0.04, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.09);
         }
     } catch (e) {}
 }
@@ -2878,41 +2912,68 @@ function closePrivacy() { playSound('click'); document.getElementById('privacyMo
 function confirmDeleteData() { playSound('click'); document.getElementById('settingsModal').classList.add('hidden'); openParentalGate('delete'); }
 function toggleSafetyGuide() { playSound('click'); document.getElementById('safetyGuide').classList.toggle('hidden'); }
 
+let currentFacingMode = 'environment';
 let cameraStream = null;
 
 async function startCamera() {
     const video = document.getElementById('cameraVideo');
     const placeholder = document.getElementById('cameraPlaceholder');
-    const previewContainer = document.getElementById('photoPreviewContainer');
+    const hud = document.getElementById('viewfinderHUD');
     const controls = document.getElementById('cameraControls');
-    const btnCapture = document.getElementById('btnCapturePhoto');
-    const btnRetake = document.getElementById('btnRetakePhoto');
-
-    // Reset preview
-    previewContainer.classList.add('hidden');
-    btnRetake.classList.add('hidden');
-    btnCapture.classList.remove('hidden');
 
     try {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             throw new Error("Câmera não suportada neste navegador.");
         }
         
-        // Request video stream preferred environment camera (back camera)
-        cameraStream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } },
-            audio: false
-        });
-        
+        stopCamera();
+
+        // Sequential constraints list to handle different hardware configurations
+        const preferred = currentFacingMode;
+        const alternative = currentFacingMode === 'environment' ? 'user' : 'environment';
+
+        const constraintsList = [
+            { video: { facingMode: preferred, width: { ideal: 640 }, height: { ideal: 480 } }, audio: false },
+            { video: { facingMode: preferred }, audio: false },
+            { video: { facingMode: alternative }, audio: false },
+            { video: true, audio: false }
+        ];
+
+        let stream = null;
+        let lastError = null;
+
+        for (const constraints of constraintsList) {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                if (stream) break;
+            } catch (err) {
+                lastError = err;
+            }
+        }
+
+        if (!stream) {
+            throw lastError || new Error("Não foi possível acessar a câmera.");
+        }
+
+        cameraStream = stream;
         video.srcObject = cameraStream;
+        video.muted = true; // Essential for autoplay on iOS/Safari
+        
         video.classList.remove('hidden');
         placeholder.classList.add('hidden');
+        hud.classList.remove('hidden');
         controls.classList.remove('hidden');
+        
+        try {
+            await video.play();
+        } catch (playErr) {
+            console.warn("Autoplay falhou, tentando tocar programaticamente...", playErr);
+        }
+
         playSound('success');
     } catch (err) {
         console.error("Erro ao abrir a câmera: ", err);
-        showToast("Câmera indisponível. Use a galeria!", "⚠️");
-        // Trigger standard file selector
+        showToast("Câmera indisponível. Escolha da galeria!", "⚠️");
         document.getElementById('photoInput').click();
     }
 }
@@ -2927,38 +2988,81 @@ function stopCamera() {
         video.srcObject = null;
         video.classList.add('hidden');
     }
+    const hud = document.getElementById('viewfinderHUD');
+    if (hud) hud.classList.add('hidden');
+}
+
+function toggleCameraMode() {
+    playSound('click');
+    currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+    startCamera();
 }
 
 function capturePhoto() {
-    playSound('success');
+    playSound('shutter');
+    
+    // Trigger quick flash animation
+    const flash = document.getElementById('cameraFlash');
+    flash.classList.add('active');
+    setTimeout(() => flash.classList.remove('active'), 400);
+
     const video = document.getElementById('cameraVideo');
     const canvas = document.createElement('canvas');
     
-    const width = video.videoWidth || 640;
-    const height = video.videoHeight || 480;
+    let w = video.videoWidth || 640;
+    let h = video.videoHeight || 480;
     
-    canvas.width = width;
-    canvas.height = height;
+    // Resize photo to max 500px to save localStorage space and prevent large payload errors
+    const maxDim = 500;
+    if (w > h) {
+        if (w > maxDim) {
+            h = Math.round(h * (maxDim / w));
+            w = maxDim;
+        }
+    } else {
+        if (h > maxDim) {
+            w = Math.round(w * (maxDim / h));
+            h = maxDim;
+        }
+    }
+    
+    canvas.width = w;
+    canvas.height = h;
     const ctx = canvas.getContext('2d');
     
-    ctx.drawImage(video, 0, 0, width, height);
+    // Mirror the image horizontally if using front camera
+    if (currentFacingMode === 'user') {
+        ctx.translate(w, 0);
+        ctx.scale(-1, 1);
+    }
     
-    currentPhoto = canvas.toDataURL('image/jpeg', 0.8);
+    ctx.drawImage(video, 0, 0, w, h);
+    ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset scale
     
-    const previewImg = document.getElementById('photoPreviewImg');
-    previewImg.src = currentPhoto;
+    currentPhoto = canvas.toDataURL('image/jpeg', 0.75);
     
-    document.getElementById('photoPreviewContainer').classList.remove('hidden');
-    document.getElementById('btnCapturePhoto').classList.add('hidden');
-    document.getElementById('btnRetakePhoto').classList.remove('hidden');
+    // Set photos for previews
+    document.getElementById('scanPreviewImg').src = currentPhoto;
+    
+    // Need to set photo for both photoPreviewImg elements in HTML (in card and main preview)
+    document.querySelectorAll('#photoPreviewImg').forEach(img => {
+        img.src = currentPhoto;
+    });
     
     stopCamera();
+
+    // Transition to Scanning Section
+    document.getElementById('captureCameraSection').classList.add('hidden');
+    document.getElementById('captureScanSection').classList.remove('hidden');
+    
+    startScanningSequence();
 }
 
 function retakePhoto() {
     playSound('click');
     currentPhoto = null;
-    document.getElementById('photoPreviewContainer').classList.add('hidden');
+    document.getElementById('captureFormSection').classList.add('hidden');
+    document.getElementById('captureCameraSection').classList.remove('hidden');
     startCamera();
 }
 
@@ -2969,6 +3073,9 @@ function openCaptureForm() {
         document.getElementById('cameraWarningModal').style.display = 'flex';
     } else {
         document.getElementById('captureModal').classList.remove('hidden'); 
+        document.getElementById('captureCameraSection').classList.remove('hidden');
+        document.getElementById('captureScanSection').classList.add('hidden');
+        document.getElementById('captureFormSection').classList.add('hidden');
         startCamera();
     }
 }
@@ -2978,30 +3085,37 @@ function acceptCamera() {
     scheduleGameStateSync();
     document.getElementById('cameraWarningModal').classList.add('hidden'); document.getElementById('cameraWarningModal').style.display = 'none';
     document.getElementById('captureModal').classList.remove('hidden');
+    document.getElementById('captureCameraSection').classList.remove('hidden');
+    document.getElementById('captureScanSection').classList.add('hidden');
+    document.getElementById('captureFormSection').classList.add('hidden');
     startCamera();
 }
 
-function cancelCamera() { playSound('click'); document.getElementById('cameraWarningModal').classList.add('hidden'); document.getElementById('cameraWarningModal').style.display = 'none'; }
+function cancelCamera() { 
+    playSound('click'); 
+    document.getElementById('cameraWarningModal').classList.add('hidden'); 
+    document.getElementById('cameraWarningModal').style.display = 'none'; 
+}
 
 function closeCaptureForm() { 
     playSound('click'); 
     stopCamera();
     document.getElementById('captureModal').classList.add('hidden'); 
     currentPhoto = null; 
+    selectedCategory = '';
+    selectedLocation = '';
     document.getElementById('animalName').value = ''; 
     document.getElementById('animalDescription').value = ''; 
+    document.getElementById('safetyCheck').checked = false;
     document.querySelectorAll('.select-pill').forEach(p => p.classList.remove('active')); 
     
+    document.getElementById('biologicalFichaCard').classList.add('hidden');
+    document.getElementById('suggestionsWrapper').classList.add('hidden');
+    
     // Reset camera UI
-    document.getElementById('photoPreviewContainer').classList.add('hidden');
     document.getElementById('cameraVideo').classList.add('hidden');
     document.getElementById('cameraPlaceholder').classList.remove('hidden');
     document.getElementById('cameraControls').classList.add('hidden');
-}
-
-function selectOption(type, val, el) {
-    playSound('click'); el.parentElement.querySelectorAll('.select-pill').forEach(p => p.classList.remove('active')); el.classList.add('active');
-    if (type === 'category') selectedCategory = val; if (type === 'location') selectedLocation = val;
 }
 
 function previewImage(input) {
@@ -3014,25 +3128,279 @@ function previewImage(input) {
             img.onload = () => {
                 const canvas = document.createElement('canvas');
                 let w = img.width, h = img.height;
-                if (w > h) { if (w > 600) { h *= 600 / w; w = 600; } } 
-                else { if (h > 600) { w *= 600 / h; h = 600; } }
+                const maxDim = 500;
+                if (w > h) { if (w > maxDim) { h *= maxDim / w; w = maxDim; } } 
+                else { if (h > maxDim) { w *= maxDim / h; h = maxDim; } }
                 canvas.width = w; canvas.height = h;
                 canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                currentPhoto = canvas.toDataURL('image/jpeg', 0.8);
+                currentPhoto = canvas.toDataURL('image/jpeg', 0.75);
                 
-                document.getElementById('photoPreviewImg').src = currentPhoto;
-                document.getElementById('photoPreviewContainer').classList.remove('hidden');
-                document.getElementById('cameraPlaceholder').classList.add('hidden');
-                document.getElementById('cameraVideo').classList.add('hidden');
+                document.getElementById('scanPreviewImg').src = currentPhoto;
+                document.querySelectorAll('#photoPreviewImg').forEach(imgEl => {
+                    imgEl.src = currentPhoto;
+                });
                 
-                document.getElementById('cameraControls').classList.remove('hidden');
-                document.getElementById('btnCapturePhoto').classList.add('hidden');
-                document.getElementById('btnRetakePhoto').classList.remove('hidden');
+                // Switch to scanning screen
+                document.getElementById('captureCameraSection').classList.add('hidden');
+                document.getElementById('captureScanSection').classList.remove('hidden');
+                startScanningSequence();
             };
             img.src = e.target.result;
         };
         reader.readAsDataURL(input.files[0]);
     }
+}
+
+function startScanningSequence() {
+    const progress = document.getElementById('scanProgressBar');
+    const statusText = document.getElementById('scanStatusText');
+    const laser = document.getElementById('scannerLaser');
+    
+    progress.style.width = '0%';
+    statusText.innerText = '🔍 Iniciando bio-scanner...';
+    laser.classList.add('active');
+    
+    let count = 0;
+    
+    // Periodically play scanner beeps
+    const beepInterval = setInterval(() => {
+        playSound('scan_beep');
+    }, 450);
+
+    const updateInterval = setInterval(() => {
+        count += 20;
+        progress.style.width = count + '%';
+        
+        if (count === 20) {
+            statusText.innerText = '📡 Mapeando cores e texturas...';
+        } else if (count === 40) {
+            statusText.innerText = '🍃 Buscando na base da fauna brasileira...';
+        } else if (count === 60) {
+            statusText.innerText = '🧬 Cruzando dados de pegadas...';
+        } else if (count === 80) {
+            statusText.innerText = '🔬 Autenticando registro biológico...';
+        } else if (count === 100) {
+            clearInterval(updateInterval);
+            clearInterval(beepInterval);
+            laser.classList.remove('active');
+            playSound('success');
+            
+            // Finish scan, show form
+            setTimeout(() => {
+                document.getElementById('captureScanSection').classList.add('hidden');
+                document.getElementById('captureFormSection').classList.remove('hidden');
+                
+                // Select default category to trigger suggestions
+                const firstPill = document.querySelector('#categorySelection .select-pill');
+                if (firstPill) {
+                    firstPill.click();
+                }
+            }, 500);
+        }
+    }, 500);
+}
+
+function getAnimalSuggestions(category) {
+    const suggestions = {
+        inseto: [
+            { name: 'Joaninha', emoji: '🐞' },
+            { name: 'Abelha', emoji: '🐝' },
+            { name: 'Borboleta', emoji: '🦋' },
+            { name: 'Saúva', emoji: '🐜' }
+        ],
+        ave: [
+            { name: 'Tucano', emoji: '🦚' },
+            { name: 'Bem-te-vi', emoji: '🐤' },
+            { name: 'Beija-flor', emoji: '🌸' },
+            { name: 'Quero-quero', emoji: '🌾' }
+        ],
+        mamifero: [
+            { name: 'Capivara', emoji: '🦦' },
+            { name: 'Sagui', emoji: '🐒' },
+            { name: 'Tatu-bola', emoji: '🛡️' },
+            { name: 'Lobo-guará', emoji: '🦊' }
+        ],
+        felino: [
+            { name: 'Onça-pintada', emoji: '🐆' },
+            { name: 'Jaguatirica', emoji: '🐱' },
+            { name: 'Gato', emoji: '🐈' }
+        ],
+        reptil: [
+            { name: 'Lagartixa', emoji: '🦎' },
+            { name: 'Teiú', emoji: '🦎' },
+            { name: 'Jabuti', emoji: '🐢' },
+            { name: 'Cobra', emoji: '🐍' }
+        ],
+        anfibio: [
+            { name: 'Sapo-cururu', emoji: '🐸' },
+            { name: 'Rã', emoji: '🐸' },
+            { name: 'Perereca', emoji: '🐸' }
+        ],
+        aracnideo: [
+            { name: 'Aranha', emoji: '🕷️' },
+            { name: 'Escorpião', emoji: '🦂' }
+        ]
+    };
+    return suggestions[category] || [];
+}
+
+function selectCategoryWithSuggestions(category, element) {
+    playSound('click');
+    selectedCategory = category;
+    
+    // Style pills
+    element.parentElement.querySelectorAll('.select-pill').forEach(p => p.classList.remove('active'));
+    element.classList.add('active');
+    
+    // Render suggestions
+    const suggestionsGrid = document.getElementById('animalSuggestionsGrid');
+    const suggestions = getAnimalSuggestions(category);
+    
+    if (suggestions.length > 0) {
+        document.getElementById('suggestionsWrapper').classList.remove('hidden');
+        suggestionsGrid.innerHTML = suggestions.map(s => {
+            return `
+                <div onclick="selectSuggestedAnimal('${s.name}')" class="bg-white border border-gray-200 hover:bg-green-50 hover:border-green-300 p-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all btn-bounce text-green-955 cursor-pointer">
+                    <span class="text-base">${s.emoji}</span>
+                    <span>${s.name}</span>
+                </div>
+            `;
+        }).join('');
+    } else {
+        document.getElementById('suggestionsWrapper').classList.add('hidden');
+    }
+}
+
+function selectSuggestedAnimal(name) {
+    playSound('click');
+    document.getElementById('animalName').value = name;
+    updateBiologicalCard(name);
+}
+
+function handleNameInput(value) {
+    updateBiologicalCard(value);
+}
+
+function extractScientificName(subspecies) {
+    if (!subspecies) return 'Classificação Neotropical';
+    const match = subspecies.match(/\(([^)]+)\)/);
+    if (match) {
+        return match[1];
+    }
+    return subspecies.replace(/\.$/, '');
+}
+
+function updateBiologicalCard(name) {
+    const card = document.getElementById('biologicalFichaCard');
+    if (!name || name.trim() === '') {
+        card.classList.add('hidden');
+        return;
+    }
+    
+    card.classList.remove('hidden');
+    
+    const animalNameElement = document.getElementById('cardAnimalName');
+    const scientificNameElement = document.getElementById('cardScientificName');
+    const rarityBadge = document.getElementById('cardRarityBadge');
+    const statusBadge = document.getElementById('cardStatusBadge');
+    const statusLabel = document.getElementById('cardStatusLabel');
+    const statusExplanation = document.getElementById('cardStatusExplanation');
+    const roleText = document.getElementById('cardRoleText');
+    const dietHabitatText = document.getElementById('cardDietHabitatText');
+    const funFactText = document.getElementById('cardFunFactText');
+    
+    animalNameElement.innerText = name;
+    
+    const key = name.toLowerCase().trim();
+    // Try to find in curioData and premiumData
+    const matchingCurioKey = Object.keys(curioData).find(k => key.includes(k) || k.includes(key));
+    const data = getPremiumData(name);
+    
+    // Scientific name
+    let sciName = 'Classificação Neotropical';
+    if (data && data.subspecies) {
+        sciName = extractScientificName(data.subspecies);
+    }
+    scientificNameElement.innerHTML = `<i>${sciName}</i>`;
+    
+    // Rarity (simulated based on name hash or random, but let's make it fixed per name so it feels realistic!)
+    let rarity = 'comum';
+    let hash = 0;
+    for (let i = 0; i < key.length; i++) hash += key.charCodeAt(i);
+    const mod = hash % 10;
+    if (mod === 0) rarity = 'mitico';
+    else if (mod <= 2) rarity = 'brilhante';
+    
+    rarityBadge.innerText = rarity.toUpperCase();
+    rarityBadge.className = `font-black text-[8px] px-2 py-0.5 rounded-full uppercase tracking-wider text-white ${
+        rarity === 'mitico' ? 'bg-purple-600 animate-pulse' : (rarity === 'brilhante' ? 'bg-amber-500' : 'bg-green-600')
+    }`;
+    
+    // Status conservation
+    const statusStr = data.status || '🟢 Pouco Preocupante';
+    statusLabel.innerText = statusStr;
+    
+    let badgeColorClass = 'bg-green-600';
+    let explanationText = 'Este animalzinho está seguro na natureza! Vamos continuar protegendo seu lar!';
+    
+    if (statusStr.includes('🔴') || statusStr.toLowerCase().includes('perigo') || statusStr.toLowerCase().includes('ameaçada')) {
+        badgeColorClass = 'bg-red-600';
+        explanationText = 'Perigo de Extinção: Ele corre risco de desaparecer! Precisamos proteger suas florestas e rios.';
+    } else if (statusStr.includes('🟡') || statusStr.toLowerCase().includes('vulnerável') || statusStr.toLowerCase().includes('atenção') || statusStr.toLowerCase().includes('ameaçado')) {
+        badgeColorClass = 'bg-orange-500';
+        explanationText = 'Vulnerável: A população dele está diminuindo. Precisamos evitar poluição e preservar!';
+    }
+    
+    statusBadge.className = `inline-flex items-center gap-1.5 text-[9px] font-black uppercase text-white px-2.5 py-1 rounded-full shadow-sm ${badgeColorClass}`;
+    statusExplanation.innerText = explanationText;
+    
+    // Role
+    roleText.innerText = data.role || 'Desempenha um papel ecológico incrível em seu ecossistema.';
+    
+    // Diet & Habitat
+    const diet = data.diet || 'Alimentação nativa adaptada.';
+    const habitat = data.habitat || 'Ecossistema local do Brasil.';
+    dietHabitatText.innerText = `${diet} / Vive em: ${habitat}`;
+    
+    // Fun fact
+    let fact = matchingCurioKey ? curioData[matchingCurioKey] : data.funFact;
+    if (!fact) {
+        fact = 'Uma espécie incrível e cheia de segredos da nossa fauna!';
+    }
+    funFactText.innerText = `"${fact}"`;
+}
+
+function selectLocationOption(val, element) {
+    playSound('click');
+    selectedLocation = val;
+    element.parentElement.querySelectorAll('.select-pill').forEach(p => p.classList.remove('active'));
+    element.classList.add('active');
+}
+
+async function saveDiscoveryWithValidation() {
+    const name = document.getElementById('animalName').value;
+    const desc = document.getElementById('animalDescription').value;
+    const safetyCheck = document.getElementById('safetyCheck').checked;
+    
+    if (!name) {
+        playSound('alert');
+        return showToast("Qual é o nome do animal?", "⚠️");
+    }
+    if (!selectedCategory) {
+        playSound('alert');
+        return showToast("Selecione uma classe biológica!", "⚠️");
+    }
+    if (!selectedLocation) {
+        playSound('alert');
+        return showToast("Onde você encontrou ele?", "⚠️");
+    }
+    if (currentPhoto && !safetyCheck) {
+        playSound('alert');
+        return showToast("Confirme as regras de segurança!", "🛡️");
+    }
+    
+    // Call standard finalized save method
+    await saveDiscovery();
 }
 
 let pendingDiscovery = null;
