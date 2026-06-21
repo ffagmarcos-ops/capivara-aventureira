@@ -1721,60 +1721,57 @@ if (!localStorage.getItem('capy_next_mission_time')) {
 const villagePaths = [
     // Rota 1: Prefeitura ➔ Ponte ➔ Docas (Atravessa a ponte!)
     [
-        { x: 48, y: 26 }, // Prefeitura
-        { x: 48, y: 44 }, // Desce na margem esquerda
-        { x: 58, y: 54 }, // Entrada esquerda da ponte
-        { x: 66, y: 52 }, // No meio da ponte
-        { x: 72, y: 50 }, // Entrada direita da ponte
-        { x: 78, y: 53 }  // Docas
+        { x: 48, y: 36 }, // Prefeitura
+        { x: 60, y: 48 }, // Entrada da ponte
+        { x: 55, y: 60 }, // Cruzando a ponte
+        { x: 43, y: 81 }  // Docas
     ],
     // Rota 2: Horta ➔ Ponte ➔ Prefeitura (Conecta Horta à ponte e depois sobe para Prefeitura)
     [
-        { x: 22, y: 50 }, // Horta
-        { x: 38, y: 53 }, // Caminho inferior esquerdo
-        { x: 58, y: 54 }, // Entrada esquerda da ponte
-        { x: 48, y: 44 }, // Sobe na margem esquerda
-        { x: 48, y: 26 }  // Prefeitura
+        { x: 15, y: 49 }, // Horta
+        { x: 35, y: 52 }, // Margem esquerda
+        { x: 60, y: 48 }, // Ponte
+        { x: 48, y: 36 }  // Prefeitura
     ],
-    // Rota 3: Docas ➔ Laboratório ➔ Torre (Fica inteiramente na margem direita, sem cruzar o rio)
+    // Rota 3: Docas ➔ Laboratório ➔ Torre (Inteiramente na margem direita/inferior)
     [
-        { x: 78, y: 53 }, // Docas
-        { x: 74, y: 44 }, // Margem direita subindo
-        { x: 68, y: 36 }, // Laboratório
-        { x: 74, y: 30 }, // Subindo em direção à Torre
-        { x: 80, y: 25 }  // Torre
+        { x: 43, y: 81 }, // Docas
+        { x: 68, y: 75 }, // Subindo a margem
+        { x: 83, y: 62 }, // Laboratório
+        { x: 85, y: 45 }, // Trilha da Torre
+        { x: 87, y: 29 }  // Torre
     ],
     // Rota 4: Ponte (Aventureira se movimenta apenas na ponte e arredores)
     [
-        { x: 53, y: 55 }, // Margem esquerda da ponte
-        { x: 58, y: 54 }, // Entrada esquerda da ponte
-        { x: 66, y: 52 }, // No meio da ponte
-        { x: 72, y: 50 }, // Entrada direita da ponte
-        { x: 77, y: 49 }  // Margem direita da ponte
+        { x: 50, y: 52 }, 
+        { x: 55, y: 50 }, 
+        { x: 60, y: 48 }, 
+        { x: 65, y: 50 }, 
+        { x: 70, y: 52 }
     ],
     // Rota 5: Fazenda (Fazendeira caminha apenas perto da horta)
     [
-        { x: 18, y: 48 }, // Entrada esquerda da horta
-        { x: 22, y: 50 }, // Caminho interno
-        { x: 26, y: 47 }  // Saída direita da horta
+        { x: 12, y: 46 }, 
+        { x: 15, y: 49 }, 
+        { x: 18, y: 52 }
     ],
     // Rota 6: Docas (Pescadora Animada caminha apenas no píer)
     [
-        { x: 78, y: 53 }, // No píer das docas
-        { x: 82, y: 56 }, // Ponta do píer
-        { x: 85, y: 52 }  // Beira da água direita
+        { x: 38, y: 79 }, 
+        { x: 43, y: 81 }, 
+        { x: 48, y: 83 }
     ],
     // Rota 7: Laboratório (Cientista caminha apenas perto do lab)
     [
-        { x: 68, y: 36 }, // Entrada do laboratório
-        { x: 65, y: 39 }, // Margem inferior do laboratório
-        { x: 72, y: 33 }  // Subindo a trilha
+        { x: 78, y: 60 }, 
+        { x: 83, y: 62 }, 
+        { x: 88, y: 64 }
     ],
     // Rota 8: Floresta (Bióloga caminha na área florestal do topo esquerdo)
     [
-        { x: 30, y: 30 }, // Entre as árvores
-        { x: 35, y: 35 }, // Caminho da mata
-        { x: 42, y: 33 }  // Limite da floresta
+        { x: 25, y: 25 }, 
+        { x: 32, y: 28 }, 
+        { x: 40, y: 24 }
     ]
 ];
 
@@ -2225,14 +2222,14 @@ function updateMapTransform() {
     
     if (parentWidth <= 0 || parentHeight <= 0) return;
     
-    // Calcula o tamanho da área ativa da vila mantendo o aspect ratio padrão de 9:16
+    // Calcula o tamanho da área ativa da vila mantendo o aspect ratio padrão de 16:9
     let w, h;
-    if (parentWidth / parentHeight < 9 / 16) {
-        h = parentHeight;
-        w = h * (9 / 16);
-    } else {
+    if (parentWidth / parentHeight < 16 / 9) {
         w = parentWidth;
-        h = w * (16 / 9);
+        h = w * (9 / 16);
+    } else {
+        h = parentHeight;
+        w = h * (16 / 9);
     }
     
     container.style.width = `${w}px`;
@@ -2872,6 +2869,7 @@ function showView(view, playClick = true) {
     window.scrollTo(0, 0);
     
     if (view === 'vila') {
+        document.body.classList.add('on-vila-view');
         startVillageAmbient();
         startVillageNPCs();
         const bgVideo = document.getElementById('villageBgVideo');
@@ -2880,6 +2878,7 @@ function showView(view, playClick = true) {
         }
         setTimeout(updateMapTransform, 50);
     } else {
+        document.body.classList.remove('on-vila-view');
         stopVillageAmbient();
         stopVillageNPCs();
         closeVillageDrawer();
@@ -5785,6 +5784,7 @@ if ('serviceWorker' in navigator) window.addEventListener('load', () => navigato
 // =============================================================================
 
 function openMainMenu() {
+    document.body.classList.remove('on-vila-view');
     const menu = document.getElementById('mainMenuScreen');
     if (!menu) return;
     // Atualiza dados do usuário
@@ -5818,6 +5818,12 @@ function closeMainMenu(targetView) {
     playSound('click');
     if (targetView) {
         setTimeout(() => showView(targetView), 200);
+    } else {
+        const vilaView = document.getElementById('vilaView');
+        if (vilaView && !vilaView.classList.contains('hidden')) {
+            document.body.classList.add('on-vila-view');
+            setTimeout(updateMapTransform, 50);
+        }
     }
 }
 

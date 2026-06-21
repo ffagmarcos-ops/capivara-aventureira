@@ -1670,6 +1670,55 @@ body.night-mode .text-on-white {
     transform: translateY(100%) !important;
 }
 
+/* Rotação e Estilos Imersivos da Eco-Vila */
+.animate-bounce-subtle {
+    animation: bounce-subtle 2s infinite ease-in-out;
+}
+
+#landscapePrompt {
+    display: none !important;
+}
+
+@media (orientation: portrait) {
+    body.on-vila-view #landscapePrompt {
+        display: flex !important;
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+    }
+}
+
+@media (orientation: landscape) {
+    body.on-vila-view header {
+        display: none !important;
+    }
+    body.on-vila-view nav {
+        display: none !important;
+    }
+    body.on-vila-view #vilaView {
+        position: fixed !important;
+        inset: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        margin: 0 !important;
+        z-index: 40 !important;
+    }
+    body.on-vila-view #villageMapContainer {
+        width: 100% !important;
+        height: 100% !important;
+    }
+    body.on-vila-view #villageEvolutionDrawer {
+        max-width: 450px !important;
+        max-height: 60vh !important;
+        left: 50% !important;
+        right: auto !important;
+        transform: translate(-50%, 100%) !important;
+    }
+    body.on-vila-view #villageEvolutionDrawer.open {
+        transform: translate(-50%, 0) !important;
+    }
+}
+
 
 
 
