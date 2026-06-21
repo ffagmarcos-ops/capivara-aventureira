@@ -2431,8 +2431,8 @@ function spawnFloatingNumber(buildingKey, value) {
     const floating = document.createElement('div');
     floating.className = 'floating-gain';
     
-    // Mostra o número com a imagem da moeda de semente
-    floating.innerHTML = `+${value} <img src="seed_coin.png" class="w-4.5 h-4.5 object-contain inline-block align-middle -mt-1 ml-0.5">`;
+    // Mostra o número com a imagem da moeda de semente (redimensionada proporcionalmente)
+    floating.innerHTML = `+${value} <img src="seed_coin.png" style="width: 12px; height: 12px; object-fit: contain; display: inline-block; vertical-align: middle; margin-top: -2px; margin-left: 2px;">`;
     
     const leftStr = visualEl.style.left;
     const topStr = visualEl.style.top;
