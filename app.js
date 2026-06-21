@@ -679,7 +679,11 @@ function changeBgm(trackName) {
         
         if (trackName === 'adventure') {
             desiredSrc = './musicas/Capybara Quest Rush.mp3';
-        } else if (trackName === 'menu' || trackName === 'loading' || trackName === 'home' || isSplashVisible || isMainMenuVisible || isAuthVisible || noUser) {
+        } else if (trackName === 'menu' || trackName === 'loading' || trackName === 'home') {
+            desiredSrc = './musicas/Capybara Village.mp3';
+        } else if (trackName === 'vila' || trackName === 'lab' || trackName === 'games' || trackName === 'album' || trackName === 'badges' || trackName === 'wardrobe') {
+            desiredSrc = './musicas/Sunlit Capybara Square.mp3';
+        } else if (isSplashVisible || isMainMenuVisible || isAuthVisible || noUser) {
             desiredSrc = './musicas/Capybara Village.mp3';
         } else {
             desiredSrc = './musicas/Sunlit Capybara Square.mp3';
@@ -5874,6 +5878,7 @@ function closeMainMenu(targetView) {
             document.body.classList.add('on-vila-view');
             setTimeout(updateMapTransform, 50);
         }
+        changeBgm(getActiveView());
     }
 }
 

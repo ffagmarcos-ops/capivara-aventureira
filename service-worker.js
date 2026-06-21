@@ -1,4 +1,4 @@
-const CACHE_NAME = 'capivara-v71';
+const CACHE_NAME = 'capivara-v72';
 const ASSETS = [
   './',
   './index.html',
@@ -171,7 +171,7 @@ self.addEventListener('fetch', event => {
   // uma resposta padrão 200 completa, a reprodução de tags <video> e <audio> falha imediatamente.
   // Ignoramos a interceptação para permitir que essas requisições cheguem diretamente ao backend Express, 
   // que suporta range requests (HTTP 206 Partial Content) nativamente.
-  if (request.headers.get('range') || url.pathname.endsWith('.mp4') || url.pathname.endsWith('.ogg')) {
+  if (request.headers.get('range') || url.pathname.endsWith('.mp4') || url.pathname.endsWith('.ogg') || url.pathname.endsWith('.mp3')) {
     return;
   }
 
