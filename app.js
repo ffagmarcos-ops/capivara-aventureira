@@ -3419,7 +3419,40 @@ function updateBadges() {
         { n: 'Lenda Viva', desc: 'Encontrou 1 Mítico', i: '🌌', u: mc >= 1, p: `${Math.min(mc, 1)}/1` },
         { n: 'Detetive do Lar', desc: 'Encontrou 3 no quintal', i: '🏠', u: qc >= 3, p: `${Math.min(qc, 3)}/3` },
         { n: 'Biólogo de Ouro', desc: 'Aventuras por 7 dias', i: '🔥', u: currentStreak >= 7, p: `${Math.min(currentStreak, 7)}/7` },
-        { n: 'Guarda-Roupa Cheio', desc: 'Adquiriu todos os itens!', i: '🛍️', u: pAcc >= aAcc, p: `${Math.min(pAcc, aAcc)}/${aAcc}` }
+        { n: 'Guarda-Roupa Cheio', desc: 'Adquiriu todos os itens!', i: '🛍️', u: pAcc >= aAcc, p: `${Math.min(pAcc, aAcc)}/${aAcc}` },
+        
+        // Novas Conquistas
+        { n: 'Lenda da Floresta', desc: 'Registrou 50 animais', i: '🌳', u: animals.length >= 50, p: `${Math.min(animals.length, 50)}/50` },
+        { n: 'Entomologista', desc: 'Catalogou 5 insetos', i: '🦋', u: stats.inseto >= 5, p: `${Math.min(stats.inseto, 5)}/5` },
+        { n: 'Ornitólogo', desc: 'Catalogou 5 aves', i: '🦅', u: stats.ave >= 5, p: `${Math.min(stats.ave, 5)}/5` },
+        { n: 'Mastozoólogo', desc: 'Catalogou 5 mamíferos', i: '🦊', u: stats.mamifero >= 5, p: `${Math.min(stats.mamifero, 5)}/5` },
+        { n: 'Herpetólogo', desc: 'Catalogou 3 répteis', i: '🐍', u: stats.reptil >= 3, p: `${Math.min(stats.reptil, 3)}/3` },
+        { n: 'Domador de Dragões', desc: 'Catalogou 5 répteis', i: '🐲', u: stats.reptil >= 5, p: `${Math.min(stats.reptil, 5)}/5` },
+        { n: 'Explorador Doméstico', desc: 'Encontrou 5 no quintal', i: '🏡', u: qc >= 5, p: `${Math.min(qc, 5)}/5` },
+        { n: 'Guardião do Parque', desc: 'Encontrou 5 no parque', i: '🏞️', u: pc >= 5, p: `${Math.min(pc, 5)}/5` },
+        { n: 'Estudioso da Escola', desc: 'Encontrou 5 na escola', i: '🏫', u: ec >= 5, p: `${Math.min(ec, 5)}/5` },
+        { n: 'Olhos de Águia', desc: 'Catalogou 5 Brilhantes', i: '⭐', u: sc >= 5, p: `${Math.min(sc, 5)}/5` },
+        { n: 'Buscador de Mitos', desc: 'Encontrou 2 Míticos', i: '🔮', u: mc >= 2, p: `${Math.min(mc, 2)}/2` },
+        { n: 'Sussurrador Místico', desc: 'Encontrou 3 Míticos', i: '🧬', u: mc >= 3, p: `${Math.min(mc, 3)}/3` },
+        { n: 'Mapeador da Noite', desc: 'Encontrou 5 à noite', i: '🦇', u: night >= 5, p: `${Math.min(night, 5)}/5` },
+        { n: 'Madrugador', desc: 'Encontrou 3 de manhã', i: '🌅', u: morn >= 3, p: `${Math.min(morn, 3)}/3` },
+        { n: 'Fotógrafo Pro', desc: 'Tirou fotos de 10 animais', i: '🖼️', u: photo >= 10, p: `${Math.min(photo, 10)}/10` },
+        { n: 'Diretor de Cinema', desc: 'Tirou fotos de 20 animais', i: '🎬', u: photo >= 20, p: `${Math.min(photo, 20)}/20` },
+        { n: 'Estilo Básico', desc: 'Adquiriu 5 acessórios', i: '👓', u: pAcc >= 5, p: `${Math.min(pAcc, 5)}/5` },
+        { n: 'Colecionador de Moda', desc: 'Adquiriu 10 acessórios', i: '🎩', u: pAcc >= 10, p: `${Math.min(pAcc, 10)}/10` },
+        { n: 'Fashionista da Vila', desc: 'Adquiriu 15 acessórios', i: '👑', u: pAcc >= 15, p: `${Math.min(pAcc, 15)}/15` },
+        { n: 'Guardião Aprendiz', desc: 'Chegou ao nível 5', i: '🛡️', u: level >= 5, p: `${Math.min(level, 5)}/5` },
+        { n: 'Guardião de Elite', desc: 'Chegou ao nível 10', i: '⚔️', u: level >= 10, p: `${Math.min(level, 10)}/10` },
+        { n: 'Protetor Supremo', desc: 'Chegou ao nível 20', i: '⚡', u: level >= 20, p: `${Math.min(level, 20)}/20` },
+        { n: 'Compromisso Verde', desc: 'Aventuras por 3 dias seguidos', i: '☘️', u: currentStreak >= 3, p: `${Math.min(currentStreak, 3)}/3` },
+        { n: 'Capivara de Ferro', desc: 'Aventuras por 15 dias seguidos', i: '⛓️', u: currentStreak >= 15, p: `${Math.min(currentStreak, 15)}/15` },
+        { n: 'Mente Aguçada', desc: 'Nível 3 no Jogo da Memória', i: '🧠', u: currentMemoryLevel >= 3, p: `${Math.min(currentMemoryLevel, 3)}/3` },
+        { n: 'Memória Fotográfica', desc: 'Nível 5 no Jogo da Memória', i: '🧩', u: currentMemoryLevel >= 5, p: `${Math.min(currentMemoryLevel, 5)}/5` },
+        { n: 'Líder da Comunidade', desc: 'Centro da Vila no nível 3', i: '🏛️', u: Boolean(villageState.buildings && villageState.buildings.townHall && villageState.buildings.townHall.level >= 3), p: `${Math.min((villageState.buildings && villageState.buildings.townHall) ? villageState.buildings.townHall.level : 1, 3)}/3` },
+        { n: 'Prefeito Honorário', desc: 'Centro da Vila no nível 5', i: '🗳️', u: Boolean(villageState.buildings && villageState.buildings.townHall && villageState.buildings.townHall.level >= 5), p: `${Math.min((villageState.buildings && villageState.buildings.townHall) ? villageState.buildings.townHall.level : 1, 5)}/5` },
+        { n: 'Vila Próspera', desc: 'Todas construções nível 3', i: '🏗️', u: Boolean(villageState.buildings && Object.values(villageState.buildings).every(bu => bu.level >= 3)), p: `${Math.min(villageState.buildings ? Math.min(...Object.values(villageState.buildings).map(bu => bu.level)) : 0, 3)}/3` },
+        { n: 'Obra-Prima', desc: 'Uma construção no nível 10', i: '🏆', u: Boolean(villageState.buildings && Object.values(villageState.buildings).some(bu => bu.level >= 10)), p: (villageState.buildings && Object.values(villageState.buildings).some(bu => bu.level >= 10)) ? '1/1' : '0/1' },
+        { n: 'Magnata do Capim', desc: 'Acumulou 500 capins', i: '💰', u: seedCoins >= 500, p: `${Math.min(seedCoins, 500)}/500` }
     ];
     document.getElementById('badgesGrid').innerHTML = b.map(x => `<div class="bg-white p-4 rounded-[2.5rem] border-2 transition-all duration-300 ${x.u ? 'border-amber-400 bg-amber-50/30 shadow-md' : 'border-gray-100 opacity-60'} flex flex-col items-center gap-1 text-center"><div class="text-4xl filter ${x.u ? '' : 'grayscale'} mb-1">${x.i}</div><p class="text-[10px] font-black uppercase text-green-950">${x.n}</p><p class="text-[8px] text-gray-400 font-bold leading-tight">${x.desc}</p><div class="mt-2 text-[8px] font-black px-2 py-0.5 rounded-full ${x.u ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-gray-500'}">${x.u ? 'CONQUISTADO! 🎉' : x.p}</div></div>`).join('');
 }
