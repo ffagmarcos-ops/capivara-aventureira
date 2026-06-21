@@ -32,6 +32,13 @@ O projeto está organizado no formato SPA (Single Page Application) estático, c
     *   Validação dos mini-jogos (Silhueta, Jogo da Memória, Quiz Sem Fim).
     *   Lógica da câmera local e persistência em `localStorage`.
     *   Sincronização em tempo real com a API Node backend.
+    *   Sistema de conquistas (`updateBadges`) com 93 troféus e rastreamento de estatísticas via `capy_ach_stats`.
+*   **`admin.html`**: Painel Administrativo com 5 abas:
+    *   **Assets Visuais** — Gerencia e substitui imagens do jogo (prédios, equipamentos, personagens, minijogos, UI).
+    *   **Estatísticas & Usuários** — Tabela de usuários com edição de cargo, capins, XP e streak.
+    *   **Música & Sons (BGM)** — Editor de sintetizador procedural por tela.
+    *   **Personagens (NPCs)** — Gerenciador de capivaras passeantes animadas.
+    *   **Conquistas** *(NOVO)* — Mural completo das 93 conquistas com filtro por categoria e busca textual.
 *   **`data.js`**: Banco de dados científico da fauna brasileira. Contém:
     *   `curioData`: Frases rápidas para curiosidades básicas de descobertas.
     *   `premiumData`: Dicionário completo de fichas zoológicas detalhadas baseadas na Wikipédia (Dieta, Habitat, Família, Espécie, Papel Ecológico, Conservação e Dicas de Segurança).
@@ -112,3 +119,72 @@ Adicionamos um sistema de missões dinâmico e interativo no mapa da Eco-Vila:
 *   **Melhorias do Modo Noturno (Contraste)**: Adicionamos regras CSS que convertem caixas e balões translúcidos (`bg-white/90` e `bg-green-50/70`) e campos de entrada de texto e números (`bg-gray-50`) em tons perfeitamente escuros e contrastantes com texto branco para evitar texto claro sobre fundo claro durante a noite.
 *   **Escolha de Recompensa Ecológica**: Ao vencer um minijogo, abre-se o modal de recompensa (`#npcRewardModal`) onde o usuário pode optar por receber **+35 Capins** OU **Acelerar Obras** (reduzindo 15 minutos de tempo restante de todas as construções ativas). O botão de aceleração de obras fica desativado caso nenhuma construção esteja em andamento na vila.
 
+---
+
+## 🏆 8. Sistema de Conquistas — Mural de Troféus (93 conquistas)
+
+O Mural de Troféus (`updateBadges()` em `app.js`) foi expandido em três lotes, totalizando **93 conquistas** organizadas em 5 categorias:
+
+### Categorias e Contagem
+| Categoria | Ícone | Conquistas | Exemplos |
+|-----------|-------|-----------|---------|
+| **Fauna & Coleção** | 🦎 | ~35 | Explorador, Lenda da Floresta, Entomologista... |
+| **Vila & Construção** | 🏘️ | ~20 | Primeira Pedra, Fazenda Industrial, Utopia Ecológica... |
+| **Minijogos NPC** | 🎮 | ~15 | Ajudante da Vila, Ceifador Lendário, Pescador Lendário... |
+| **Arcade & Games** | 🕹️ | ~18 | Bate-Capy Supremo, Sábio da Fauna, Gênio Neotropical... |
+| **Economia** | 💰 | ~5 | Guarda-Roupa Cheio, Cofre da Economia, Fashionista... |
+
+### Sistema de Rastreamento de Estatísticas (`capy_ach_stats`)
+Todas as conquistas dos Lotes 2 e 3 dependem de contadores persistidos na chave `capy_ach_stats` no `localStorage`. As funções `getAchStats()` e `updateAchStat(key, value, mode)` gerenciam este estado:
+
+| Chave de Stat | O que rastreia | Atualizado em |
+|--------------|---------------|--------------|
+| `villageUpgrades` | Total de upgrades de prédios | `upgradeBuilding()`, `accelerateConstruction()` |
+| `missionsWon` | Vitórias em missões de NPC | `endMinigame()` |
+| `hortaWins` | Vitórias na Colheita | `endMinigame()` (type = farmer) |
+| `pescaWins` | Vitórias na Pesca | `endMinigame()` (type = fisherman) |
+| `pocaoWins` | Vitórias nas Poções | `endMinigame()` (type = scientist) |
+| `faunaWins` | Vitórias na Fauna | `endMinigame()` (type = biologist) |
+| `bauWins` | Vitórias no Baú | `endMinigame()` (outros) |
+| `wacTotalHits` | Hits totais no Bate-Capy | `wacHitHandler()` |
+| `wacPlays` | Partidas de Bate-Capy | `wacEndGame()` |
+| `wacMaxHits` | Recorde de hits por partida | `wacEndGame()` (modo max) |
+| `silhouetteCorrect` | Silhuetas adivinhadas | `guessSilhouette()` |
+| `quizCorrect` | Quizzes sem fim acertados | `answerEndlessQuiz()` |
+| `quizzesDailyAnswered` | Quizzes diários respondidos | `answerQuiz()` |
+| `memoryPlays` | Partidas do Jogo da Memória | `checkMemoryMatch()` |
+| `memoryMaxLevel` | Nível máximo atingido na Memória | `checkMemoryMatch()` (modo max) |
+| `memoryResets` | Resets no Jogo da Memória | `checkMemoryMatch()` |
+| `seedsTotalSpent` | Capins gastos acumulados | `buyAccessory()`, `upgradeBuilding()`, `accelerateConstruction()`, `buyMysteryBox()`, `answerEndlessQuiz()` |
+| `seedsTotalEarned` | Capins ganhos acumulados | `claimMissionReward()`, `buyMysteryBox()` (ganho) |
+
+### Estrutura no App.js
+```javascript
+// Retorna o objeto de stats persistido ou um objeto vazio padrão
+function getAchStats() { ... }
+
+// Incrementa (add) ou maximiza (max) uma stat
+function updateAchStat(key, val, mode = 'add') { ... }
+
+// Calcula e renderiza todos os 93 cards de conquista
+function updateBadges() { ... }
+```
+
+---
+
+## 🖥️ 9. Painel Administrativo — Aba de Conquistas (NOVA)
+
+A nova aba **🏆 Conquistas** em `admin.html` oferece auditoria visual completa do mural de troféus:
+
+*   **Grid responsivo** com cards para cada uma das 93 conquistas (1 a 4 colunas dependendo da tela).
+*   **Filtro por categoria**: Todas | 🦎 Fauna | 🏘️ Vila | 🎮 Minijogos | 🕹️ Arcade | 💰 Economia.
+*   **Busca textual em tempo real** por nome ou descrição da conquista.
+*   **Cards informativos** com: ícone emoji, número sequencial `#01`–`#93`, nome, descrição do critério, badge colorido por categoria e barra de progresso decorativa.
+*   **Painel de métricas** na parte superior com contagem de conquistas por categoria.
+*   **Constante `ACHIEVEMENTS_CATALOG`** no script do admin espelha o array `b` do `app.js` — ao adicionar novas conquistas no jogo, refletir o espelho aqui também.
+
+### Melhorias de Filtro de Assets
+A aba de Assets agora suporta uma quinta categoria de filtro:
+*   **Minijogos (`eco_*`)** — filtra todos os assets de minijogos dos NPCs: `eco_veggie_carrot.png`, `eco_veggie_potato.png`, `eco_veggie_eggplant.png`, `eco_veggie_tomato.png`, `eco_fishing_bobber.png`, `eco_fishing_fish.png`, `eco_lab_flask.png`, `eco_chest_open.png`, `eco_mission_badge.png`.
+*   Assets `eco_*` recebem a etiqueta **Minijogo** em roxo violeta nos cards da grade.
+*   O card de estatísticas da aba Assets agora exibe a contagem de arquivos `eco_*` em vez de Spritesheets.

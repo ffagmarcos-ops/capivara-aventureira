@@ -1139,6 +1139,7 @@ function guessSilhouette(guess, btn) {
         btn.classList.replace('text-blue-900', 'text-white');
         seedCoins += 15; guardianXP += 10;
         localStorage.setItem('capy_seeds', seedCoins); localStorage.setItem('capy_xpPlay', guardianXP);
+        updateAchStat('silhouetteCorrect', 1);
         scheduleGameStateSync();
         showToast("Acertou! +15 capins!", "seed_coin.png"); renderApp(); createConfetti();
         setTimeout(loadSilhouetteGame, 2500);
@@ -1236,6 +1237,8 @@ function checkMemoryMatch() {
             guardianXP += spec.rewardXP;
             localStorage.setItem('capy_seeds', seedCoins); 
             localStorage.setItem('capy_xpPlay', guardianXP);
+            updateAchStat('memoryPlays', 1);
+            updateAchStat('memoryMaxLevel', currentMemoryLevel, 'max');
             scheduleGameStateSync();
             createConfetti();
 
@@ -1253,6 +1256,7 @@ function checkMemoryMatch() {
                 const bonusSeeds = 100;
                 seedCoins += bonusSeeds;
                 localStorage.setItem('capy_seeds', seedCoins);
+                updateAchStat('memoryResets', 1);
                 
                 showToast(`Parabéns! Você zerou o Jogo da Memória! +100 capins de bônus! 🏆`, "seed_coin.png");
                 
@@ -1297,6 +1301,7 @@ function answerQuiz(selected, correct) {
         playSound('success'); seedCoins += 15; guardianXP += 20;
         localStorage.setItem('capy_seeds', seedCoins); localStorage.setItem('capy_xpPlay', guardianXP);
         quizDoneDate = new Date().toDateString(); localStorage.setItem('capy_quiz_done', quizDoneDate);
+        updateAchStat('quizzesDailyAnswered', 1);
         scheduleGameStateSync();
         document.getElementById('quizContainer').innerHTML = `<div class="text-center py-4 bg-green-100 rounded-3xl p-4 border border-green-300 animate-bounce"><span class="text-3xl">🎉 ACERTOU!</span><p class="text-xs text-green-800 font-bold mt-2">+15 <img src="seed_coin.png" class="w-3.5 h-3.5 object-contain inline-block -mt-0.5"> Capins e 20 XP!</p></div>`;
         showToast("Resposta Certa!", "🎯"); renderApp();
@@ -1453,6 +1458,7 @@ async function buyAccessory(id, price) {
         if (!ownedAccessories.includes(id)) ownedAccessories.push(id);
         localStorage.setItem('capy_seeds', seedCoins);
         localStorage.setItem('capy_owned_acc', JSON.stringify(ownedAccessories));
+        updateAchStat('seedsTotalSpent', price);
         scheduleGameStateSync();
 
         if (authToken) await syncAccessoriesFromApi();
@@ -1639,6 +1645,7 @@ function upgradeBuilding(key) {
         playSound('click');
         seedCoins -= cost;
         localStorage.setItem('capy_seeds', seedCoins);
+        updateAchStat('seedsTotalSpent', cost);
         
         // Inicia construção
         b.underConstruction = true;
@@ -1678,6 +1685,8 @@ function accelerateConstruction(key) {
         b.constructionEnd = null;
         
         localStorage.setItem('capy_seeds', seedCoins);
+        updateAchStat('seedsTotalSpent', cost);
+        updateAchStat('villageUpgrades', 1);
         villageState.lastClaimTime = Date.now();
         villageState.unclaimedSeeds = unclaimedSeedsAccumulated;
         localStorage.setItem('capy_village_state', JSON.stringify(villageState));
@@ -2570,6 +2579,7 @@ setInterval(() => {
                 b.level += 1;
                 b.constructionStart = null;
                 b.constructionEnd = null;
+                updateAchStat('villageUpgrades', 1);
                 playSound('levelup');
                 showToast(`Construção concluída: ${b.name} evoluído para Lvl ${b.level}! 🛠️`, "🎉");
                 needsRender = true;
@@ -3333,6 +3343,7 @@ function answerEndlessQuiz(selected, correct, btn) {
     if (selected === correct) {
         playSound('coin'); seedCoins += 5; guardianXP += 5;
         localStorage.setItem('capy_seeds', seedCoins); localStorage.setItem('capy_xpPlay', guardianXP);
+        updateAchStat('quizCorrect', 1);
         scheduleGameStateSync();
         btn.classList.replace('bg-white', 'bg-green-500'); btn.classList.replace('text-orange-800', 'text-white');
         showToast("+5 Capins!", "💡"); renderApp();
@@ -3347,6 +3358,7 @@ function buyMysteryBox() {
     playSound('click');
     if (seedCoins >= 75) {
         seedCoins -= 75; localStorage.setItem('capy_seeds', seedCoins); renderApp();
+        updateAchStat('seedsTotalSpent', 75);
         scheduleGameStateSync();
         const modal = document.getElementById('closetModal').querySelector('.bg-white');
         modal.classList.add('box-shake');
@@ -3363,6 +3375,7 @@ function buyMysteryBox() {
                     rewardMsg = `Você tirou: ${won.label}!`; icon = won.emoji; playSound('levelup');
                 } else {
                     seedCoins += 150; rewardMsg = "Baú de Ouro! +150 capins"; icon = "seed_coin.png"; playSound('coin');
+                    updateAchStat('seedsTotalEarned', 150);
                 }
             } else if (rand < 0.45) {
                 // 30% chance XP
@@ -3371,6 +3384,7 @@ function buyMysteryBox() {
             } else {
                 // 55% chance refund small
                 seedCoins += 25; rewardMsg = "Capim perdido. +25 capins"; icon = "seed_coin.png"; playSound('coin');
+                updateAchStat('seedsTotalEarned', 25);
             }
             localStorage.setItem('capy_seeds', seedCoins);
             scheduleGameStateSync();
@@ -3398,6 +3412,56 @@ function updateStats() {
     }
 }
 
+function getAchStats() {
+    let s = localStorage.getItem('capy_ach_stats');
+    if (!s) {
+        const initial = {
+            wacPlays: 0,
+            wacMaxHits: 0,
+            wacTotalHits: 0,
+            quizCorrect: 0,
+            silhouetteCorrect: 0,
+            memoryPlays: 0,
+            memoryMaxLevel: 1,
+            missionsWon: 0,
+            hortaWins: 0,
+            pescaWins: 0,
+            pocaoWins: 0,
+            faunaWins: 0,
+            bauWins: 0,
+            villageUpgrades: 0,
+            seedsTotalEarned: 0,
+            seedsTotalSpent: 0,
+            quizzesDailyAnswered: 0
+        };
+        localStorage.setItem('capy_ach_stats', JSON.stringify(initial));
+        return initial;
+    }
+    try {
+        const parsed = JSON.parse(s);
+        const defaults = {
+            wacPlays: 0, wacMaxHits: 0, wacTotalHits: 0, quizCorrect: 0, silhouetteCorrect: 0,
+            memoryPlays: 0, memoryMaxLevel: 1, missionsWon: 0, hortaWins: 0, pescaWins: 0,
+            pocaoWins: 0, faunaWins: 0, bauWins: 0, villageUpgrades: 0, seedsTotalEarned: 0,
+            seedsTotalSpent: 0, quizzesDailyAnswered: 0
+        };
+        return { ...defaults, ...parsed };
+    } catch(e) {
+        return {};
+    }
+}
+function updateAchStat(key, val, mode = 'add') {
+    const stats = getAchStats();
+    if (mode === 'add') {
+        stats[key] = (stats[key] || 0) + val;
+    } else if (mode === 'max') {
+        stats[key] = Math.max(stats[key] || 0, val);
+    } else if (mode === 'set') {
+        stats[key] = val;
+    }
+    localStorage.setItem('capy_ach_stats', JSON.stringify(stats));
+}
+
 function updateBadges() {
     const stats = { inseto: 0, ave: 0, mamifero: 0, reptil: 0 }; animals.forEach(a => { if (stats[a.category] !== undefined) stats[a.category]++; });
     const qc = animals.filter(a => a.location === 'quintal').length; const pc = animals.filter(a => a.location === 'parque').length; const ec = animals.filter(a => a.location === 'escola').length;
@@ -3406,6 +3470,8 @@ function updateBadges() {
     const morn = hours.filter(h => h >= 5 && h < 9).length; const night = hours.filter(h => h >= 18 || h < 5).length;
     const photo = animals.filter(a => a.photo).length; const bio = stats.inseto > 0 && stats.ave > 0 && stats.mamifero > 0 ? 1 : 0;
     const pAcc = ownedAccessories.length; const aAcc = accessories.length;
+    const achStats = getAchStats();
+    const totBldLvl = villageState.buildings ? Object.values(villageState.buildings).reduce((acc, curr) => acc + curr.level, 0) : 0;
 
     const b = [
         { n: 'Explorador', desc: 'Registrou 1 animal', i: '🌱', u: animals.length >= 1, p: `${Math.min(animals.length, 1)}/1` },
@@ -3421,7 +3487,7 @@ function updateBadges() {
         { n: 'Biólogo de Ouro', desc: 'Aventuras por 7 dias', i: '🔥', u: currentStreak >= 7, p: `${Math.min(currentStreak, 7)}/7` },
         { n: 'Guarda-Roupa Cheio', desc: 'Adquiriu todos os itens!', i: '🛍️', u: pAcc >= aAcc, p: `${Math.min(pAcc, aAcc)}/${aAcc}` },
         
-        // Novas Conquistas
+        // Novas Conquistas (Lote 1)
         { n: 'Lenda da Floresta', desc: 'Registrou 50 animais', i: '🌳', u: animals.length >= 50, p: `${Math.min(animals.length, 50)}/50` },
         { n: 'Entomologista', desc: 'Catalogou 5 insetos', i: '🦋', u: stats.inseto >= 5, p: `${Math.min(stats.inseto, 5)}/5` },
         { n: 'Ornitólogo', desc: 'Catalogou 5 aves', i: '🦅', u: stats.ave >= 5, p: `${Math.min(stats.ave, 5)}/5` },
@@ -3452,7 +3518,61 @@ function updateBadges() {
         { n: 'Prefeito Honorário', desc: 'Centro da Vila no nível 5', i: '🗳️', u: Boolean(villageState.buildings && villageState.buildings.townHall && villageState.buildings.townHall.level >= 5), p: `${Math.min((villageState.buildings && villageState.buildings.townHall) ? villageState.buildings.townHall.level : 1, 5)}/5` },
         { n: 'Vila Próspera', desc: 'Todas construções nível 3', i: '🏗️', u: Boolean(villageState.buildings && Object.values(villageState.buildings).every(bu => bu.level >= 3)), p: `${Math.min(villageState.buildings ? Math.min(...Object.values(villageState.buildings).map(bu => bu.level)) : 0, 3)}/3` },
         { n: 'Obra-Prima', desc: 'Uma construção no nível 10', i: '🏆', u: Boolean(villageState.buildings && Object.values(villageState.buildings).some(bu => bu.level >= 10)), p: (villageState.buildings && Object.values(villageState.buildings).some(bu => bu.level >= 10)) ? '1/1' : '0/1' },
-        { n: 'Magnata do Capim', desc: 'Acumulou 500 capins', i: '💰', u: seedCoins >= 500, p: `${Math.min(seedCoins, 500)}/500` }
+        { n: 'Magnata do Capim', desc: 'Acumulou 500 capins', i: '💰', u: seedCoins >= 500, p: `${Math.min(seedCoins, 500)}/500` },
+
+        // Novas Conquistas da Vila, Minijogos e Arcade (Lote 2 - 50 Conquistas)
+        { n: 'Primeira Pedra', desc: 'Evoluiu 1 prédio da vila', i: '🪨', u: achStats.villageUpgrades >= 1, p: `${Math.min(achStats.villageUpgrades, 1)}/1` },
+        { n: 'Arquiteto da Vila', desc: 'Evoluiu prédios 5 vezes', i: '📐', u: achStats.villageUpgrades >= 5, p: `${Math.min(achStats.villageUpgrades, 5)}/5` },
+        { n: 'Mestre Construtor', desc: 'Evoluiu prédios 20 vezes', i: '🏗️', u: achStats.villageUpgrades >= 20, p: `${Math.min(achStats.villageUpgrades, 20)}/20` },
+        { n: 'Produtor Iniciante', desc: 'Horta de Capim Nível 5', i: '🌾', u: Boolean(villageState.buildings && villageState.buildings.farm && villageState.buildings.farm.level >= 5), p: `${Math.min((villageState.buildings && villageState.buildings.farm) ? villageState.buildings.farm.level : 0, 5)}/5` },
+        { n: 'Fazenda Industrial', desc: 'Horta de Capim Nível 10', i: '🚜', u: Boolean(villageState.buildings && villageState.buildings.farm && villageState.buildings.farm.level >= 10), p: `${Math.min((villageState.buildings && villageState.buildings.farm) ? villageState.buildings.farm.level : 0, 10)}/10` },
+        { n: 'Porto Comercial', desc: 'Doca de Pesca Nível 5', i: '⚓', u: Boolean(villageState.buildings && villageState.buildings.docks && villageState.buildings.docks.level >= 5), p: `${Math.min((villageState.buildings && villageState.buildings.docks) ? villageState.buildings.docks.level : 0, 5)}/5` },
+        { n: 'Grande Doca', desc: 'Doca de Pesca Nível 10', i: '🚢', u: Boolean(villageState.buildings && villageState.buildings.docks && villageState.buildings.docks.level >= 10), p: `${Math.min((villageState.buildings && villageState.buildings.docks) ? villageState.buildings.docks.level : 0, 10)}/10` },
+        { n: 'Centro de Pesquisas', desc: 'Laboratório Nível 5', i: '🔬', u: Boolean(villageState.buildings && villageState.buildings.lab && villageState.buildings.lab.level >= 5), p: `${Math.min((villageState.buildings && villageState.buildings.lab) ? villageState.buildings.lab.level : 0, 5)}/5` },
+        { n: 'Super Computador', desc: 'Laboratório Nível 10', i: '🧬', u: Boolean(villageState.buildings && villageState.buildings.lab && villageState.buildings.lab.level >= 10), p: `${Math.min((villageState.buildings && villageState.buildings.lab) ? villageState.buildings.lab.level : 0, 10)}/10` },
+        { n: 'Vigia Aprimorada', desc: 'Torre de Vigia Nível 5', i: '🔭', u: Boolean(villageState.buildings && villageState.buildings.tower && villageState.buildings.tower.level >= 5), p: `${Math.min((villageState.buildings && villageState.buildings.tower) ? villageState.buildings.tower.level : 0, 5)}/5` },
+        { n: 'Farol do Horizonte', desc: 'Torre de Vigia Nível 10', i: '📡', u: Boolean(villageState.buildings && villageState.buildings.tower && villageState.buildings.tower.level >= 10), p: `${Math.min((villageState.buildings && villageState.buildings.tower) ? villageState.buildings.tower.level : 0, 10)}/10` },
+        { n: 'Vila dos Sonhos', desc: 'Nível total de prédios >= 15', i: '🏡', u: totBldLvl >= 15, p: `${Math.min(totBldLvl, 15)}/15` },
+        { n: 'Metrópole Capivara', desc: 'Nível total de prédios >= 35', i: '🏙️', u: totBldLvl >= 35, p: `${Math.min(totBldLvl, 35)}/35` },
+        { n: 'Utopia Ecológica', desc: 'Todos os prédios no nível 10', i: '🌈', u: Boolean(villageState.buildings && Object.values(villageState.buildings).every(bu => bu.level >= 10)), p: `${Math.min(villageState.buildings ? Math.min(...Object.values(villageState.buildings).map(bu => bu.level)) : 0, 10)}/10` },
+        { n: 'Engenheiro Chefe', desc: 'Nível total de prédios >= 25', i: '🔧', u: totBldLvl >= 25, p: `${Math.min(totBldLvl, 25)}/25` },
+        
+        { n: 'Ajudante da Vila', desc: 'Completou 5 tarefas de NPC', i: '🤝', u: achStats.missionsWon >= 5, p: `${Math.min(achStats.missionsWon, 5)}/5` },
+        { n: 'Herói Local', desc: 'Completou 15 tarefas de NPC', i: '🏅', u: achStats.missionsWon >= 15, p: `${Math.min(achStats.missionsWon, 15)}/15` },
+        { n: 'Lenda da Vila', desc: 'Completou 50 tarefas de NPC', i: '🌟', u: achStats.missionsWon >= 50, p: `${Math.min(achStats.missionsWon, 50)}/50` },
+        { n: 'Dedos de Cenoura', desc: 'Venceu Colheita 5 vezes', i: '🥕', u: achStats.hortaWins >= 5, p: `${Math.min(achStats.hortaWins, 5)}/5` },
+        { n: 'Ceifador Lendário', desc: 'Venceu Colheita 15 vezes', i: '🌾', u: achStats.hortaWins >= 15, p: `${Math.min(achStats.hortaWins, 15)}/15` },
+        { n: 'Primeira Fisgada', desc: 'Venceu Pesca 5 vezes', i: '🎣', u: achStats.pescaWins >= 5, p: `${Math.min(achStats.pescaWins, 5)}/5` },
+        { n: 'Pescador Lendário', desc: 'Venceu Pesca 15 vezes', i: '🐟', u: achStats.pescaWins >= 15, p: `${Math.min(achStats.pescaWins, 15)}/15` },
+        { n: 'Alquimista Aprendiz', desc: 'Venceu Poções 5 vezes', i: '🧪', u: achStats.pocaoWins >= 5, p: `${Math.min(achStats.pocaoWins, 5)}/5` },
+        { n: 'Mestre das Misturas', desc: 'Venceu Poções 15 vezes', i: '🧙', u: achStats.pocaoWins >= 15, p: `${Math.min(achStats.pocaoWins, 15)}/15` },
+        { n: 'Amigo dos Animais', desc: 'Venceu Fauna 5 vezes', i: '🐾', u: achStats.faunaWins >= 5, p: `${Math.min(achStats.faunaWins, 5)}/5` },
+        { n: 'Protetor da Fauna', desc: 'Venceu Fauna 15 vezes', i: '🦁', u: achStats.faunaWins >= 15, p: `${Math.min(achStats.faunaWins, 15)}/15` },
+        { n: 'Caçador de Relíquias', desc: 'Venceu Baú 5 vezes', i: '📦', u: achStats.bauWins >= 5, p: `${Math.min(achStats.bauWins, 5)}/5` },
+        { n: 'Saqueador de Tumbas', desc: 'Venceu Baú 15 vezes', i: '🏺', u: achStats.bauWins >= 15, p: `${Math.min(achStats.bauWins, 15)}/15` },
+        { n: 'Recompensa Dupla', desc: 'Gastou 500 capins no total', i: '🎁', u: achStats.seedsTotalSpent >= 500, p: `${Math.min(achStats.seedsTotalSpent, 500)}/500` },
+        { n: 'Cofre da Economia', desc: 'Gastou 1500 capins no total', i: '💎', u: achStats.seedsTotalSpent >= 1500, p: `${Math.min(achStats.seedsTotalSpent, 1500)}/1500` },
+        
+        { n: 'Batedor Iniciante', desc: 'Acertou 50 em Bate-Capy', i: '🔨', u: achStats.wacTotalHits >= 50, p: `${Math.min(achStats.wacTotalHits, 50)}/50` },
+        { n: 'Martelo de Ouro', desc: 'Acertou 200 em Bate-Capy', i: '⚡', u: achStats.wacTotalHits >= 200, p: `${Math.min(achStats.wacTotalHits, 200)}/200` },
+        { n: 'Mestre do Bate-Capy', desc: 'Acertou 500 em Bate-Capy', i: '👑', u: achStats.wacTotalHits >= 500, p: `${Math.min(achStats.wacTotalHits, 500)}/500` },
+        { n: 'Bate-Capy Bronze', desc: 'Nível 3 em Bate-Capy', i: '🦫', u: wacCurrentLevel >= 3, p: `${Math.min(wacCurrentLevel, 3)}/3` },
+        { n: 'Bate-Capy Ouro', desc: 'Nível 7 em Bate-Capy', i: '🌟', u: wacCurrentLevel >= 7, p: `${Math.min(wacCurrentLevel, 7)}/7` },
+        { n: 'Bate-Capy Supremo', desc: 'Nível 10 em Bate-Capy', i: '🔥', u: wacCurrentLevel >= 10, p: `${Math.min(wacCurrentLevel, 10)}/10` },
+        { n: 'Pontuação Recorde', desc: '15 acertos em Bate-Capy', i: '🏅', u: achStats.wacMaxHits >= 15, p: `${Math.min(achStats.wacMaxHits, 15)}/15` },
+        { n: 'Bate-Capy Campeão', desc: '25 acertos em Bate-Capy', i: '👑', u: achStats.wacMaxHits >= 25, p: `${Math.min(achStats.wacMaxHits, 25)}/25` },
+        { n: 'Bate-Capy Insuperável', desc: '35 acertos em Bate-Capy', i: '💥', u: achStats.wacMaxHits >= 35, p: `${Math.min(achStats.wacMaxHits, 35)}/35` },
+        { n: 'Detetive das Sombras', desc: 'Adivinhou 5 silhuetas', i: '👤', u: achStats.silhouetteCorrect >= 5, p: `${Math.min(achStats.silhouetteCorrect, 5)}/5` },
+        { n: 'Mestre das Sombras', desc: 'Adivinhou 15 silhuetas', i: '👁️', u: achStats.silhouetteCorrect >= 15, p: `${Math.min(achStats.silhouetteCorrect, 15)}/15` },
+        { n: 'Sábio da Fauna', desc: 'Adivinhou 40 silhuetas', i: '🔍', u: achStats.silhouetteCorrect >= 40, p: `${Math.min(achStats.silhouetteCorrect, 40)}/40` },
+        { n: 'Estudante de Trivia', desc: 'Acertou 5 quizzes sem fim', i: '📚', u: achStats.quizCorrect >= 5, p: `${Math.min(achStats.quizCorrect, 5)}/5` },
+        { n: 'Enciclopédia Ambulante', desc: 'Acertou 20 quizzes sem fim', i: '📖', u: achStats.quizCorrect >= 20, p: `${Math.min(achStats.quizCorrect, 20)}/20` },
+        { n: 'Gênio Neotropical', desc: 'Acertou 50 quizzes sem fim', i: '🎓', u: achStats.quizCorrect >= 50, p: `${Math.min(achStats.quizCorrect, 50)}/50` },
+        { n: 'Memória de Elefante', desc: 'Memória Nível 2 superado', i: '🐘', u: achStats.memoryMaxLevel >= 2, p: `${Math.min(achStats.memoryMaxLevel, 2)}/2` },
+        { n: 'Mente Brilhante', desc: 'Memória Nível 4 superado', i: '💡', u: achStats.memoryMaxLevel >= 4, p: `${Math.min(achStats.memoryMaxLevel, 4)}/4` },
+        { n: 'Zeradouro de Memória', desc: 'Memória Nível 5 superado', i: '🧩', u: achStats.memoryMaxLevel >= 5, p: `${Math.min(achStats.memoryMaxLevel, 5)}/5` },
+        { n: 'Maratonista do Arcade', desc: 'Jogou fliperama 15 vezes', i: '🎮', u: (achStats.wacPlays + achStats.memoryPlays) >= 15, p: `${Math.min(achStats.wacPlays + achStats.memoryPlays, 15)}/15` },
+        { n: 'Viciado em Fliperama', desc: 'Jogou fliperama 50 vezes', i: '🕹️', u: (achStats.wacPlays + achStats.memoryPlays) >= 50, p: `${Math.min(achStats.wacPlays + achStats.memoryPlays, 50)}/50` }
     ];
     document.getElementById('badgesGrid').innerHTML = b.map(x => `<div class="bg-white p-4 rounded-[2.5rem] border-2 transition-all duration-300 ${x.u ? 'border-amber-400 bg-amber-50/30 shadow-md' : 'border-gray-100 opacity-60'} flex flex-col items-center gap-1 text-center"><div class="text-4xl filter ${x.u ? '' : 'grayscale'} mb-1">${x.i}</div><p class="text-[10px] font-black uppercase text-green-950">${x.n}</p><p class="text-[8px] text-gray-400 font-bold leading-tight">${x.desc}</p><div class="mt-2 text-[8px] font-black px-2 py-0.5 rounded-full ${x.u ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-gray-500'}">${x.u ? 'CONQUISTADO! 🎉' : x.p}</div></div>`).join('');
 }
@@ -3919,6 +4039,7 @@ function wacWhack(idx) {
     hole.classList.add('hit');
 
     wacScore++;
+    updateAchStat('wacTotalHits', 1);
     const scoreEl = document.getElementById('wacScore');
     if (scoreEl) scoreEl.textContent = wacScore;
 
@@ -3944,6 +4065,8 @@ function wacEndGame() {
     clearTimeout(wacSpawnTimeout);
     wacHoleTimeouts.forEach(t => clearTimeout(t));
     wacHoleTimeouts = [];
+    updateAchStat('wacPlays', 1);
+    updateAchStat('wacMaxHits', wacScore, 'max');
 
     // Clean up all holes
     const s = wacSpec();
@@ -4151,8 +4274,10 @@ function closeNpcMissionModal() {
     stopModalSpriteAnimation();
 }
 
+let currentMinigameType = '';
 function startNpcMinigame(npc) {
     minigameActive = true;
+    currentMinigameType = npc.color;
     document.getElementById('minigameArenaArea').innerHTML = '';
     document.getElementById('npcMinigameModal').classList.remove('hidden');
     changeBgm('adventure');
@@ -4211,6 +4336,12 @@ function endMinigame(success) {
     
     if (success) {
         playSound('success');
+        updateAchStat('missionsWon', 1);
+        if (currentMinigameType === 'farmer') updateAchStat('hortaWins', 1);
+        else if (currentMinigameType === 'fisherman') updateAchStat('pescaWins', 1);
+        else if (currentMinigameType === 'scientist') updateAchStat('pocaoWins', 1);
+        else if (currentMinigameType === 'biologist') updateAchStat('faunaWins', 1);
+        else updateAchStat('bauWins', 1);
         showToast("Você ajudou com sucesso! Escolha sua recompensa.", "🎉");
         openRewardModal();
     } else {
@@ -4252,6 +4383,7 @@ function claimMissionReward(type) {
         playSound('coin');
         seedCoins += 35;
         localStorage.setItem('capy_seeds', seedCoins);
+        updateAchStat('seedsTotalEarned', 35);
         showToast("Você recebeu +35 Capins! 💰", "🎉");
     } else if (type === 'speedup') {
         let speededUp = false;
@@ -4270,6 +4402,7 @@ function claimMissionReward(type) {
             playSound('coin');
             seedCoins += 35;
             localStorage.setItem('capy_seeds', seedCoins);
+            updateAchStat('seedsTotalEarned', 35);
             showToast("Nenhuma obra em andamento. +35 Capins concedidos! 💰", "🎉");
         }
     }

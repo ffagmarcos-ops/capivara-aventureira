@@ -67,7 +67,7 @@
                 </div>
                 <div>
                     <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white">PAINEL ADMINISTRATIVO</h1>
-                    <p class="text-xs sm:text-sm text-emerald-400/80 font-medium">Controle total de usuários, música procedural, NPCs e assets do jogo</p>
+                    <p class="text-xs sm:text-sm text-emerald-400/80 font-medium">Controle total de usuários, música procedural, NPCs, assets e conquistas do jogo</p>
                 </div>
             </div>
             
@@ -77,6 +77,10 @@
         </header>
 
         <!-- Main Navigation Tabs -->
+        <!-- ═══════════════════════════════════════════════════════════
+             NAVEGAÇÃO PRINCIPAL — 5 abas: Assets, Usuários, BGM, NPCs, Conquistas
+             switchMainTab() alterna entre as seções e atualiza o painel de stats
+        ═══════════════════════════════════════════════════════════ -->
         <div class="flex flex-wrap gap-2 p-1.5 bg-slate-950/60 border border-white/5 rounded-3xl self-start">
             <button onclick="switchMainTab('assets')" id="main-tab-assets" class="px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all bg-emerald-600 text-white shadow-lg shadow-emerald-950/20">
                 <i class="fa-solid fa-folder-open mr-2"></i> Assets Visuais
@@ -89,6 +93,10 @@
             </button>
             <button onclick="switchMainTab('npcs')" id="main-tab-npcs" class="px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white hover:bg-white/5">
                 <i class="fa-solid fa-person-walking mr-2"></i> Personagens (NPCs)
+            </button>
+            <!-- Nova aba: Mural de Conquistas (adicionada junto com as 50 novas conquistas) -->
+            <button onclick="switchMainTab('conquistas')" id="main-tab-conquistas" class="px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white hover:bg-white/5">
+                <i class="fa-solid fa-trophy mr-2"></i> Conquistas
             </button>
         </div>
 
@@ -106,11 +114,17 @@
                            class="w-full bg-slate-950/60 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all">
                 </div>
                 
+                <!-- Sub-filtros de categoria de assets:
+                     buildings = bld_*   |  accessories = acc_*
+                     characters = NPCs/mascotes  |  minigames = eco_* (novos)
+                     ui = tudo mais (fundos, vila, baú, etc.) -->
                 <div class="flex overflow-x-auto gap-1.5 p-1 bg-slate-950/50 rounded-2xl border border-white/5 self-start md:self-auto shrink-0">
                     <button onclick="switchAssetTab('all')" id="tab-all" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all bg-emerald-600 text-white shadow-sm">Todos</button>
                     <button onclick="switchAssetTab('buildings')" id="tab-buildings" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white">Prédios</button>
                     <button onclick="switchAssetTab('accessories')" id="tab-accessories" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white">Equipamentos</button>
                     <button onclick="switchAssetTab('characters')" id="tab-characters" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white">Personagens</button>
+                    <!-- Minijogos: eco_veggie_*, eco_fishing_*, eco_lab_flask, eco_chest_*, eco_mission_badge -->
+                    <button onclick="switchAssetTab('minigames')" id="tab-minigames" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white">Minijogos</button>
                     <button onclick="switchAssetTab('ui')" id="tab-ui" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white">Gerais / UI</button>
                 </div>
             </div>
@@ -393,6 +407,49 @@
             </div>
         </div>
 
+        <!-- ═══════════════════════════════════════════════════════════
+             SEÇÃO 5: MURAL DE CONQUISTAS (NOVA)
+             Exibe todas as 93 conquistas do jogo (43 originais + 50 novas).
+             As conquistas são agrupadas por categoria para facilitar auditoria.
+             Cada card mostra: ícone, nome, descrição, categoria e status.
+        ═══════════════════════════════════════════════════════════ -->
+        <div id="section-conquistas" class="main-section glass-panel rounded-3xl p-6 sm:p-8 shadow-2xl hidden space-y-8">
+
+            <!-- Barra de busca + filtro de categoria -->
+            <div class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+                <div class="relative flex-1">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="ach-search-input" oninput="filterAchievements()"
+                           placeholder="Pesquisar conquistas por nome ou descrição..."
+                           class="w-full bg-slate-950/60 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-all">
+                </div>
+                <!-- Filtros de categoria de conquista -->
+                <div class="flex overflow-x-auto gap-1.5 p-1 bg-slate-950/50 rounded-2xl border border-white/5 self-start md:self-auto shrink-0">
+                    <button onclick="filterAchByCategory('all')" id="ach-cat-all" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wide transition-all bg-amber-600 text-white shadow-sm">Todas</button>
+                    <button onclick="filterAchByCategory('fauna')" id="ach-cat-fauna" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white">🦎 Fauna</button>
+                    <button onclick="filterAchByCategory('vila')" id="ach-cat-vila" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white">🏘️ Vila</button>
+                    <button onclick="filterAchByCategory('minijogos')" id="ach-cat-minijogos" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white">🎮 Minijogos</button>
+                    <button onclick="filterAchByCategory('arcade')" id="ach-cat-arcade" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white">🕹️ Arcade</button>
+                    <button onclick="filterAchByCategory('economia')" id="ach-cat-economia" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white">💰 Economia</button>
+                </div>
+            </div>
+
+            <!-- Loader enquanto popula o grid -->
+            <div id="loader-conquistas" class="flex flex-col items-center justify-center py-16 space-y-4">
+                <i class="fa-solid fa-spinner animate-spin text-4xl text-amber-400"></i>
+                <p class="text-sm text-slate-400">Carregando mural de conquistas...</p>
+            </div>
+
+            <!-- Grid de conquistas - populado via renderAchievementsGrid() -->
+            <div id="conquistas-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 hidden"></div>
+
+            <!-- Empty state -->
+            <div id="empty-state-conquistas" class="hidden text-center py-20 space-y-4">
+                <i class="fa-solid fa-trophy text-5xl text-slate-600"></i>
+                <h3 class="text-lg font-bold text-slate-400">Nenhuma conquista encontrada</h3>
+            </div>
+        </div>
+
     </div>
 
     <!-- Modals -->
@@ -613,37 +670,42 @@
             }
         }
 
-        // Stats Render
+        // ─────────────────────────────────────────────────────────────────────
+        // PAINEL DE ESTATÍSTICAS: renderizado ao mudar de aba principal.
+        // Cada aba tem seu próprio conjunto de 4 cards de métricas.
+        // ─────────────────────────────────────────────────────────────────────
         function updateDashboardStats() {
             const panel = document.getElementById('stats-panel');
             panel.innerHTML = '';
 
             if (activeMainTab === 'assets') {
-                const buildingsCount = allFiles.filter(f => f.path.includes('bld_')).length;
-                const accCount = allFiles.filter(f => f.path.includes('acc_')).length;
-                const charactersCount = allFiles.filter(f => 
-                    f.path.includes('capy_npc_') || 
-                    f.path.includes('capybara_adventurer') || 
-                    f.path.includes('avatar') || 
+                // Contagem de assets por prefixo de arquivo
+                const buildingsCount  = allFiles.filter(f => f.path.includes('bld_')).length;
+                const accCount        = allFiles.filter(f => f.path.includes('acc_')).length;
+                const minigameCount   = allFiles.filter(f => f.path.includes('eco_')).length; // novos assets de minijogos
+                const charactersCount = allFiles.filter(f =>
+                    f.path.includes('capy_npc_') ||
+                    f.path.includes('capybara_adventurer') ||
+                    f.path.includes('avatar') ||
                     f.path.includes('mascot')
                 ).length;
-                
+
                 panel.innerHTML = `
                     <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
                         <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Total de Assets</span>
                         <span class="text-3xl font-black text-white mt-2">${allFiles.length}</span>
                     </div>
                     <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
-                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Prédios</span>
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Prédios (bld_)</span>
                         <span class="text-3xl font-black text-emerald-400 mt-2">${buildingsCount}</span>
                     </div>
                     <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
-                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Equipamentos</span>
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Equipamentos (acc_)</span>
                         <span class="text-3xl font-black text-teal-400 mt-2">${accCount}</span>
                     </div>
                     <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
-                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Spritesheets</span>
-                        <span class="text-3xl font-black text-amber-400 mt-2">${charactersCount}</span>
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Minijogos (eco_)</span>
+                        <span class="text-3xl font-black text-amber-400 mt-2">${minigameCount} 🎮</span>
                     </div>
                 `;
             } else if (activeMainTab === 'users') {
@@ -690,8 +752,9 @@
                     </div>
                 `;
             } else if (activeMainTab === 'npcs') {
+                // Stats dos NPCs: calculados a partir do array npcConfigs (API /api/npc/config)
                 const totalSpeed = npcConfigs.reduce((s, n) => s + n.speed, 0);
-                const avgSpeed = npcConfigs.length ? (totalSpeed / npcConfigs.length).toFixed(2) : 0;
+                const avgSpeed   = npcConfigs.length ? (totalSpeed / npcConfigs.length).toFixed(2) : 0;
                 panel.innerHTML = `
                     <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
                         <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">NPCs Ativos</span>
@@ -710,18 +773,48 @@
                         <span class="text-3xl font-black text-amber-400 mt-2">Diagonal Atl.</span>
                     </div>
                 `;
+            } else if (activeMainTab === 'conquistas') {
+                // Stats do mural: usa o array ACHIEVEMENTS_CATALOG definido abaixo
+                const totalAch   = ACHIEVEMENTS_CATALOG.length;
+                const vilaAch    = ACHIEVEMENTS_CATALOG.filter(a => a.cat === 'vila').length;
+                const arcadeAch  = ACHIEVEMENTS_CATALOG.filter(a => a.cat === 'arcade').length;
+                const faunaAch   = ACHIEVEMENTS_CATALOG.filter(a => a.cat === 'fauna').length;
+                panel.innerHTML = `
+                    <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Total de Conquistas</span>
+                        <span class="text-3xl font-black text-white mt-2">${totalAch} 🏆</span>
+                    </div>
+                    <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Fauna & Coleção</span>
+                        <span class="text-3xl font-black text-emerald-400 mt-2">${faunaAch} 🦎</span>
+                    </div>
+                    <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Vila & Construção</span>
+                        <span class="text-3xl font-black text-teal-400 mt-2">${vilaAch} 🏘️</span>
+                    </div>
+                    <div class="p-5 glass-panel rounded-2xl flex flex-col justify-between">
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Arcade & Minijogos</span>
+                        <span class="text-3xl font-black text-amber-400 mt-2">${arcadeAch} 🕹️</span>
+                    </div>
+                `;
             }
         }
 
-        // Switch main sections
+        // ─────────────────────────────────────────────────────────────────────
+        // SWITCH MAIN TAB — alterna seções e botões de navegação.
+        // Incluir 'conquistas' no array de tabs para que o highlight funcione.
+        // Ao entrar na aba de conquistas, inicializa o grid uma única vez.
+        // ─────────────────────────────────────────────────────────────────────
         function switchMainTab(sectionId) {
             activeMainTab = sectionId;
             document.querySelectorAll('.main-section').forEach(s => s.classList.add('hidden'));
             document.getElementById(`section-${sectionId}`).classList.remove('hidden');
 
-            const tabs = ['assets', 'users', 'bgm', 'npcs'];
+            // Array atualizado com a nova aba 'conquistas'
+            const tabs = ['assets', 'users', 'bgm', 'npcs', 'conquistas'];
             tabs.forEach(t => {
                 const btn = document.getElementById(`main-tab-${t}`);
+                if (!btn) return; // guard para tabs opcionais
                 if (t === sectionId) {
                     btn.className = "px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all bg-emerald-600 text-white shadow-lg shadow-emerald-950/20";
                 } else {
@@ -729,15 +822,30 @@
                 }
             });
 
+            // Ao abrir a aba de conquistas pela primeira vez, renderiza o grid
+            if (sectionId === 'conquistas') {
+                renderAchievementsGrid();
+            }
+
             updateDashboardStats();
         }
 
-        // SECTION 1: ASSETS SCRIPTS
+        // ─────────────────────────────────────────────────────────────────────
+        // SEÇÃO 1: ASSETS — sub-filtros por categoria de arquivo.
+        // Categorias suportadas:
+        //   all        → todos os arquivos de imagem
+        //   buildings  → bld_*  (prédios da vila, nível 1–10)
+        //   accessories→ acc_*  (roupas/acessórios da capivara)
+        //   characters → capy_npc_*, capybara_adventurer, avatar, mascot
+        //   minigames  → eco_*  (novos assets de minijogos dos NPCs)
+        //   ui         → tudo o que não se encaixa nas categorias acima
+        // ─────────────────────────────────────────────────────────────────────
         function switchAssetTab(tab) {
             currentTab = tab;
-            const tabs = ['all', 'buildings', 'accessories', 'characters', 'ui'];
+            const tabs = ['all', 'buildings', 'accessories', 'characters', 'minigames', 'ui'];
             tabs.forEach(t => {
                 const btn = document.getElementById(`tab-${t}`);
+                if (!btn) return;
                 if (t === tab) {
                     btn.className = "px-4 py-2 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all bg-emerald-600 text-white shadow-sm";
                 } else {
@@ -747,26 +855,35 @@
             applyFilterAndSearch();
         }
 
+        // Aplica filtro de categoria + texto de busca à lista de assets.
+        // Atualizado para incluir a nova categoria 'minigames' (eco_*).
         function applyFilterAndSearch() {
             const query = document.getElementById('search-input').value.toLowerCase().trim();
             filteredFiles = allFiles.filter(file => {
+                // Ignora arquivos de metadados JSON (atlas de animação)
                 if (file.path.endsWith('.json')) return false;
 
-                if (currentTab === 'buildings' && !file.path.includes('bld_')) return false;
-                if (currentTab === 'accessories' && !file.path.includes('acc_')) return false;
-                if (currentTab === 'characters' && !(
-                    file.path.includes('capy_npc_') || 
-                    file.path.includes('capybara_adventurer') || 
-                    file.path.includes('avatar') || 
+                // Filtros de categoria
+                if (currentTab === 'buildings'  && !file.path.includes('bld_'))  return false;
+                if (currentTab === 'accessories' && !file.path.includes('acc_'))  return false;
+                // Minijogos: assets que começam com eco_ (veggie, fish, lab, chest, mission)
+                if (currentTab === 'minigames'   && !file.path.includes('eco_'))  return false;
+                if (currentTab === 'characters'  && !(
+                    file.path.includes('capy_npc_') ||
+                    file.path.includes('capybara_adventurer') ||
+                    file.path.includes('avatar') ||
                     file.path.includes('mascot')
                 )) return false;
+                // UI = todos exceto as categorias nomeadas acima
                 if (currentTab === 'ui' && (
-                    file.path.includes('bld_') || 
-                    file.path.includes('acc_') || 
-                    file.path.includes('capy_npc_') || 
+                    file.path.includes('bld_') ||
+                    file.path.includes('acc_') ||
+                    file.path.includes('eco_') ||
+                    file.path.includes('capy_npc_') ||
                     file.path.includes('capybara_adventurer')
                 )) return false;
 
+                // Busca textual por nome ou caminho completo
                 if (query) {
                     return file.path.toLowerCase().includes(query) || file.name.toLowerCase().includes(query);
                 }
@@ -795,6 +912,7 @@
                 card.className = "glass-card rounded-2xl p-4 flex flex-col justify-between space-y-4";
                 const sizeKb = (file.sizeBytes / 1024).toFixed(1);
                 
+                // Etiqueta visual por categoria de asset
                 let tagText = "Geral";
                 let tagClass = "bg-slate-500/20 text-slate-400";
                 if (file.path.includes('bld_')) {
@@ -803,6 +921,10 @@
                 } else if (file.path.includes('acc_')) {
                     tagText = "Equipamento";
                     tagClass = "bg-teal-500/20 text-teal-400";
+                } else if (file.path.includes('eco_')) {
+                    // Assets novos de minijogos dos NPCs (eco_veggie_*, eco_fishing_*, etc.)
+                    tagText = "Minijogo";
+                    tagClass = "bg-violet-500/20 text-violet-400";
                 } else if (file.path.includes('capy_npc_') || file.path.includes('capybara_adventurer')) {
                     tagText = "NPC";
                     tagClass = "bg-amber-500/20 text-amber-400";
@@ -1379,6 +1501,234 @@
             }
         }
 
+        // ═══════════════════════════════════════════════════════════════════
+        // SEÇÃO 5: CONQUISTAS — Catálogo completo + lógica de renderização
+        //
+        // ACHIEVEMENTS_CATALOG: espelho do array `b` em updateBadges() no app.js.
+        // Cada conquista tem:
+        //   n    → nome exibido
+        //   desc → descrição do critério de desbloqueio
+        //   i    → emoji/ícone
+        //   cat  → categoria para filtro (fauna | vila | minijogos | arcade | economia)
+        //
+        // IMPORTANTE: ao adicionar novas conquistas no app.js, reflita aqui também.
+        // ═══════════════════════════════════════════════════════════════════
+        const ACHIEVEMENTS_CATALOG = [
+            // ── CONQUISTAS ORIGINAIS (Fauna & Coleção) ──
+            { n:'Explorador',            desc:'Registrou 1 animal',                      i:'🌱', cat:'fauna' },
+            { n:'Super Biólogo',         desc:'Registrou 10 animais',                    i:'🎓', cat:'fauna' },
+            { n:'Mestre Lendário',       desc:'Registrou 25 animais',                    i:'🦖', cat:'fauna' },
+            { n:'Rei dos Insetos',       desc:'Catalogou 3 insetos',                     i:'🐞', cat:'fauna' },
+            { n:'Paparazzi',             desc:'Tirou fotos de 5 animais',                i:'📸', cat:'fauna' },
+            { n:'Detetive da Noite',     desc:'Explorou à noite (18h–5h)',               i:'🦉', cat:'fauna' },
+            { n:'Mestre dos Segredos',   desc:'Liberou 3 fatos premium',                 i:'📖', cat:'fauna' },
+            { n:'Sortudo!',              desc:'3 animais Brilhantes',                    i:'✨', cat:'fauna' },
+            { n:'Lenda Viva',            desc:'Encontrou 1 Mítico',                      i:'🌌', cat:'fauna' },
+            { n:'Detetive do Lar',       desc:'Encontrou 3 no quintal',                  i:'🏠', cat:'fauna' },
+            { n:'Biólogo de Ouro',       desc:'Aventuras por 7 dias',                    i:'🔥', cat:'fauna' },
+            { n:'Guarda-Roupa Cheio',    desc:'Adquiriu todos os itens!',                i:'🛍️', cat:'economia' },
+            // ── LOTE 1: 30 CONQUISTAS NOVAS (fauna expandida + níveis) ──
+            { n:'Lenda da Floresta',     desc:'Registrou 50 animais',                    i:'🌳', cat:'fauna' },
+            { n:'Entomologista',         desc:'Catalogou 5 insetos',                     i:'🦋', cat:'fauna' },
+            { n:'Ornitólogo',            desc:'Catalogou 5 aves',                        i:'🦅', cat:'fauna' },
+            { n:'Mastozoólogo',          desc:'Catalogou 5 mamíferos',                   i:'🦊', cat:'fauna' },
+            { n:'Herpetólogo',           desc:'Catalogou 3 répteis',                     i:'🐍', cat:'fauna' },
+            { n:'Domador de Dragões',    desc:'Catalogou 5 répteis',                     i:'🐲', cat:'fauna' },
+            { n:'Explorador Doméstico',  desc:'Encontrou 5 no quintal',                  i:'🏡', cat:'fauna' },
+            { n:'Guardião do Parque',    desc:'Encontrou 5 no parque',                   i:'🏞️', cat:'fauna' },
+            { n:'Estudioso da Escola',   desc:'Encontrou 5 na escola',                   i:'🏫', cat:'fauna' },
+            { n:'Olhos de Águia',        desc:'Catalogou 5 Brilhantes',                  i:'⭐', cat:'fauna' },
+            { n:'Buscador de Mitos',     desc:'Encontrou 2 Míticos',                     i:'🔮', cat:'fauna' },
+            { n:'Sussurrador Místico',   desc:'Encontrou 3 Míticos',                     i:'🧬', cat:'fauna' },
+            { n:'Mapeador da Noite',     desc:'Encontrou 5 à noite',                     i:'🦇', cat:'fauna' },
+            { n:'Madrugador',            desc:'Encontrou 3 de manhã',                    i:'🌅', cat:'fauna' },
+            { n:'Fotógrafo Pro',         desc:'Tirou fotos de 10 animais',               i:'🖼️', cat:'fauna' },
+            { n:'Diretor de Cinema',     desc:'Tirou fotos de 20 animais',               i:'🎬', cat:'fauna' },
+            { n:'Estilo Básico',         desc:'Adquiriu 5 acessórios',                   i:'👓', cat:'economia' },
+            { n:'Colecionador de Moda',  desc:'Adquiriu 10 acessórios',                  i:'🎩', cat:'economia' },
+            { n:'Fashionista da Vila',   desc:'Adquiriu 15 acessórios',                  i:'👑', cat:'economia' },
+            { n:'Guardião Aprendiz',     desc:'Chegou ao nível 5',                       i:'🛡️', cat:'fauna' },
+            { n:'Guardião de Elite',     desc:'Chegou ao nível 10',                      i:'⚔️', cat:'fauna' },
+            { n:'Protetor Supremo',      desc:'Chegou ao nível 20',                      i:'⚡', cat:'fauna' },
+            { n:'Compromisso Verde',     desc:'Aventuras por 3 dias seguidos',           i:'☘️', cat:'fauna' },
+            { n:'Capivara de Ferro',     desc:'Aventuras por 15 dias seguidos',          i:'⛓️', cat:'fauna' },
+            { n:'Mente Aguçada',         desc:'Nível 3 no Jogo da Memória',              i:'🧠', cat:'arcade' },
+            { n:'Memória Fotográfica',   desc:'Nível 5 no Jogo da Memória',              i:'🧩', cat:'arcade' },
+            { n:'Líder da Comunidade',   desc:'Centro da Vila no nível 3',               i:'🏛️', cat:'vila' },
+            { n:'Prefeito Honorário',    desc:'Centro da Vila no nível 5',               i:'🗳️', cat:'vila' },
+            { n:'Vila Próspera',         desc:'Todas construções nível 3',               i:'🏗️', cat:'vila' },
+            { n:'Obra-Prima',            desc:'Uma construção no nível 10',              i:'🏆', cat:'vila' },
+            { n:'Magnata do Capim',      desc:'Acumulou 500 capins',                     i:'💰', cat:'economia' },
+            // ── LOTE 2: 50 NOVAS CONQUISTAS (Vila, Minijogos NPC e Arcade) ──
+            { n:'Primeira Pedra',        desc:'Evoluiu 1 prédio da vila',                i:'🪨', cat:'vila' },
+            { n:'Arquiteto da Vila',     desc:'Evoluiu prédios 5 vezes',                 i:'📐', cat:'vila' },
+            { n:'Mestre Construtor',     desc:'Evoluiu prédios 20 vezes',                i:'🏗️', cat:'vila' },
+            { n:'Produtor Iniciante',    desc:'Horta de Capim Nível 5',                  i:'🌾', cat:'vila' },
+            { n:'Fazenda Industrial',    desc:'Horta de Capim Nível 10',                 i:'🚜', cat:'vila' },
+            { n:'Porto Comercial',       desc:'Doca de Pesca Nível 5',                   i:'⚓', cat:'vila' },
+            { n:'Grande Doca',           desc:'Doca de Pesca Nível 10',                  i:'🚢', cat:'vila' },
+            { n:'Centro de Pesquisas',   desc:'Laboratório Nível 5',                     i:'🔬', cat:'vila' },
+            { n:'Super Computador',      desc:'Laboratório Nível 10',                    i:'🧬', cat:'vila' },
+            { n:'Vigia Aprimorada',      desc:'Torre de Vigia Nível 5',                  i:'🔭', cat:'vila' },
+            { n:'Farol do Horizonte',    desc:'Torre de Vigia Nível 10',                 i:'📡', cat:'vila' },
+            { n:'Vila dos Sonhos',       desc:'Nível total de prédios >= 15',            i:'🏡', cat:'vila' },
+            { n:'Metrópole Capivara',    desc:'Nível total de prédios >= 35',            i:'🏙️', cat:'vila' },
+            { n:'Utopia Ecológica',      desc:'Todos os prédios no nível 10',            i:'🌈', cat:'vila' },
+            { n:'Engenheiro Chefe',      desc:'Nível total de prédios >= 25',            i:'🔧', cat:'vila' },
+            { n:'Ajudante da Vila',      desc:'Completou 5 tarefas de NPC',              i:'🤝', cat:'minijogos' },
+            { n:'Herói Local',           desc:'Completou 15 tarefas de NPC',             i:'🏅', cat:'minijogos' },
+            { n:'Lenda da Vila',         desc:'Completou 50 tarefas de NPC',             i:'🌟', cat:'minijogos' },
+            { n:'Dedos de Cenoura',      desc:'Venceu Colheita 5 vezes',                 i:'🥕', cat:'minijogos' },
+            { n:'Ceifador Lendário',     desc:'Venceu Colheita 15 vezes',                i:'🌾', cat:'minijogos' },
+            { n:'Primeira Fisgada',      desc:'Venceu Pesca 5 vezes',                    i:'🎣', cat:'minijogos' },
+            { n:'Pescador Lendário',     desc:'Venceu Pesca 15 vezes',                   i:'🐟', cat:'minijogos' },
+            { n:'Alquimista Aprendiz',   desc:'Venceu Poções 5 vezes',                   i:'🧪', cat:'minijogos' },
+            { n:'Mestre das Misturas',   desc:'Venceu Poções 15 vezes',                  i:'🧙', cat:'minijogos' },
+            { n:'Amigo dos Animais',     desc:'Venceu Fauna 5 vezes',                    i:'🐾', cat:'minijogos' },
+            { n:'Protetor da Fauna',     desc:'Venceu Fauna 15 vezes',                   i:'🦁', cat:'minijogos' },
+            { n:'Caçador de Relíquias',  desc:'Venceu Baú 5 vezes',                      i:'📦', cat:'minijogos' },
+            { n:'Saqueador de Tumbas',   desc:'Venceu Baú 15 vezes',                     i:'🏺', cat:'minijogos' },
+            { n:'Recompensa Dupla',      desc:'Gastou 500 capins no total',              i:'🎁', cat:'economia' },
+            { n:'Cofre da Economia',     desc:'Gastou 1500 capins no total',             i:'💎', cat:'economia' },
+            { n:'Batedor Iniciante',     desc:'Acertou 50 em Bate-Capy',                 i:'🔨', cat:'arcade' },
+            { n:'Martelo de Ouro',       desc:'Acertou 200 em Bate-Capy',                i:'⚡', cat:'arcade' },
+            { n:'Mestre do Bate-Capy',   desc:'Acertou 500 em Bate-Capy',                i:'👑', cat:'arcade' },
+            { n:'Bate-Capy Bronze',      desc:'Nível 3 em Bate-Capy',                    i:'🦫', cat:'arcade' },
+            { n:'Bate-Capy Ouro',        desc:'Nível 7 em Bate-Capy',                    i:'🌟', cat:'arcade' },
+            { n:'Bate-Capy Supremo',     desc:'Nível 10 em Bate-Capy',                   i:'🔥', cat:'arcade' },
+            { n:'Pontuação Recorde',     desc:'15 acertos em Bate-Capy',                 i:'🏅', cat:'arcade' },
+            { n:'Bate-Capy Campeão',     desc:'25 acertos em Bate-Capy',                 i:'👑', cat:'arcade' },
+            { n:'Bate-Capy Insuperável', desc:'35 acertos em Bate-Capy',                 i:'💥', cat:'arcade' },
+            { n:'Detetive das Sombras',  desc:'Adivinhou 5 silhuetas',                   i:'👤', cat:'arcade' },
+            { n:'Mestre das Sombras',    desc:'Adivinhou 15 silhuetas',                  i:'👁️', cat:'arcade' },
+            { n:'Sábio da Fauna',        desc:'Adivinhou 40 silhuetas',                  i:'🔍', cat:'arcade' },
+            { n:'Estudante de Trivia',   desc:'Acertou 5 quizzes sem fim',               i:'📚', cat:'arcade' },
+            { n:'Enciclopédia Ambulante',desc:'Acertou 20 quizzes sem fim',              i:'📖', cat:'arcade' },
+            { n:'Gênio Neotropical',     desc:'Acertou 50 quizzes sem fim',              i:'🎓', cat:'arcade' },
+            { n:'Memória de Elefante',   desc:'Memória Nível 2 superado',                i:'🐘', cat:'arcade' },
+            { n:'Mente Brilhante',       desc:'Memória Nível 4 superado',                i:'💡', cat:'arcade' },
+            { n:'Zeradouro de Memória',  desc:'Memória Nível 5 superado',                i:'🧩', cat:'arcade' },
+            { n:'Maratonista do Arcade', desc:'Jogou fliperama 15 vezes',                i:'🎮', cat:'arcade' },
+            { n:'Viciado em Fliperama',  desc:'Jogou fliperama 50 vezes',                i:'🕹️', cat:'arcade' },
+        ];
+
+        // Variável de estado para o filtro de categoria e busca no mural
+        let currentAchCategory = 'all';
+        let achievementsRendered = false; // flag para evitar re-renderização desnecessária
+
+        // ─────────────────────────────────────────────────────────────────────
+        // filterAchByCategory: muda a categoria ativa e ativa highlight no botão
+        // ─────────────────────────────────────────────────────────────────────
+        function filterAchByCategory(cat) {
+            currentAchCategory = cat;
+
+            // Atualiza estado visual dos botões de categoria
+            ['all','fauna','vila','minijogos','arcade','economia'].forEach(c => {
+                const btn = document.getElementById(`ach-cat-${c}`);
+                if (!btn) return;
+                if (c === cat) {
+                    btn.className = "px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wide transition-all bg-amber-600 text-white shadow-sm";
+                } else {
+                    btn.className = "px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wide transition-all text-slate-400 hover:text-white";
+                }
+            });
+
+            renderAchievementsGrid();
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // filterAchievements: busca textual em tempo real (oninput no campo de busca)
+        // ─────────────────────────────────────────────────────────────────────
+        function filterAchievements() {
+            renderAchievementsGrid();
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // renderAchievementsGrid: filtra o catálogo e monta os cards HTML.
+        // Cada card exibe: ícone, nome, descrição, badge de categoria e número.
+        // ─────────────────────────────────────────────────────────────────────
+        function renderAchievementsGrid() {
+            const grid      = document.getElementById('conquistas-grid');
+            const loader    = document.getElementById('loader-conquistas');
+            const emptyState= document.getElementById('empty-state-conquistas');
+            const query     = (document.getElementById('ach-search-input')?.value || '').toLowerCase().trim();
+
+            // Oculta o loader na primeira renderização
+            loader.classList.add('hidden');
+
+            // Filtra por categoria e busca textual
+            const filtered = ACHIEVEMENTS_CATALOG.filter(a => {
+                const matchesCat   = currentAchCategory === 'all' || a.cat === currentAchCategory;
+                const matchesQuery = !query || a.n.toLowerCase().includes(query) || a.desc.toLowerCase().includes(query);
+                return matchesCat && matchesQuery;
+            });
+
+            grid.innerHTML = '';
+
+            if (filtered.length === 0) {
+                grid.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            grid.classList.remove('hidden');
+
+            // Mapeamento de categoria → cor e label
+            const catMeta = {
+                fauna:     { color: 'emerald', label: '🦎 Fauna' },
+                vila:      { color: 'teal',    label: '🏘️ Vila' },
+                minijogos: { color: 'violet',  label: '🎮 Minijogos' },
+                arcade:    { color: 'amber',   label: '🕹️ Arcade' },
+                economia:  { color: 'rose',    label: '💰 Economia' },
+            };
+
+            filtered.forEach((ach, idx) => {
+                const meta  = catMeta[ach.cat] || { color: 'slate', label: ach.cat };
+                const card  = document.createElement('div');
+                // Número sequencial dentro do catálogo completo (base 1)
+                const globalIdx = ACHIEVEMENTS_CATALOG.indexOf(ach) + 1;
+
+                card.className = 'glass-card rounded-2xl p-5 flex flex-col gap-3 group';
+                card.innerHTML = `
+                    <!-- Linha do topo: ícone + número -->
+                    <div class="flex items-start justify-between">
+                        <div class="w-14 h-14 rounded-2xl bg-slate-950/60 border border-white/5
+                                    flex items-center justify-center text-3xl
+                                    group-hover:scale-110 transition-transform duration-300">
+                            ${ach.i}
+                        </div>
+                        <span class="text-[10px] font-black text-slate-600 font-mono">#${String(globalIdx).padStart(2,'0')}</span>
+                    </div>
+
+                    <!-- Nome e descrição -->
+                    <div class="flex-1">
+                        <h4 class="font-black text-sm text-white leading-tight">${ach.n}</h4>
+                        <p class="text-[11px] text-slate-400 mt-0.5 leading-snug">${ach.desc}</p>
+                    </div>
+
+                    <!-- Badge de categoria -->
+                    <div class="flex items-center justify-between">
+                        <span class="text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full
+                                     bg-${meta.color}-500/15 text-${meta.color}-400 border border-${meta.color}-500/20">
+                            ${meta.label}
+                        </span>
+                        <!-- Indicador visual de índice na barra de progresso decorativa -->
+                        <div class="h-1 w-12 rounded-full bg-slate-800 overflow-hidden">
+                            <div class="h-full rounded-full bg-gradient-to-r from-${meta.color}-500 to-${meta.color}-300"
+                                 style="width: ${Math.round((globalIdx / ACHIEVEMENTS_CATALOG.length) * 100)}%"></div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            achievementsRendered = true;
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // TOAST NOTIFICATIONS — usado em toda a interface do painel
+        // ─────────────────────────────────────────────────────────────────────
         // Toast notifications system
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
