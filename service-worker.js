@@ -1,4 +1,4 @@
-const CACHE_NAME = 'capivara-v50';
+const CACHE_NAME = 'capivara-v51';
 const ASSETS = [
   './',
   './index.html',
@@ -12,8 +12,7 @@ const ASSETS = [
   './eco_veggie_tomato.png',
   './eco_lab_flask.png',
   './eco_chest_open.png',
-  './minigames_bgm.ogg',
-  './adventure_bgm.ogg',
+  './musicas/Sunlit Capybara Square.mp3',
   './Trees_blowing_wind_river_birds_202606201621.mp4',
   './capybara_adventurer/atlas.webp',
   './capybara_adventurer/atlas.json',

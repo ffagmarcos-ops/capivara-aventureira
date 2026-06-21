@@ -658,175 +658,29 @@ const bgmTracksSpec = {
 function changeBgm(trackName) {
     try {
         if (!audioUnlocked) return;
-        initAudio(); if (!audioCtx) return;
         if (soundMode !== 'both') return;
-        if (currentTrackName === trackName && (bgmTimer || currentBgmAudio)) return;
         
-        // Se houver música procedural tocando, fazer fade-out suave antes de remover
-        if (bgmMasterGain) {
-            const oldGain = bgmMasterGain;
-            try {
-                const now = audioCtx.currentTime;
-                oldGain.gain.setValueAtTime(oldGain.gain.value, now);
-                oldGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-                setTimeout(() => {
-                    try { oldGain.disconnect(); } catch (e) {}
-                }, 500);
-            } catch (e) {}
-        }
-        
-        if (bgmTimer) {
-            clearInterval(bgmTimer);
-            bgmTimer = null;
-        }
-
-        // Se houver música de arquivo tocando, fazer fade-out suave antes de pausar
-        if (currentBgmAudio) {
-            const audioToFade = currentBgmAudio;
-            currentBgmAudio = null;
-            try {
-                let vol = audioToFade.volume;
-                const fadeInterval = setInterval(() => {
-                    if (vol > 0.05) {
-                        vol -= 0.05;
-                        audioToFade.volume = vol;
-                    } else {
-                        clearInterval(fadeInterval);
-                        audioToFade.pause();
-                    }
-                }, 50);
-            } catch (e) {
-                audioToFade.pause();
-            }
-        }
-        
-        if (!trackName) {
-            currentTrackName = null;
-            bgmMasterGain = null;
+        // Se a música ambiente já estiver tocando, simplesmente mantém tocando sem interromper
+        if (currentBgmAudio && !currentBgmAudio.paused) {
             return;
         }
         
-        currentTrackName = trackName;
-
-        // Se for trilha sonora em arquivo de áudio de alta qualidade
-        if (trackName === 'games' || trackName === 'adventure') {
-            const file = trackName === 'games' ? 'minigames_bgm.ogg' : 'adventure_bgm.ogg';
-            currentBgmAudio = new Audio(file);
+        // Se ainda não foi criada, inicializa apontando para a nova música do zoológico/praça
+        if (!currentBgmAudio) {
+            currentBgmAudio = new Audio('./musicas/Sunlit Capybara Square.mp3');
             currentBgmAudio.loop = true;
-            currentBgmAudio.volume = trackName === 'games' ? 0.3 : 0.25;
-            currentBgmAudio.play().catch(e => console.warn("Failed to play BGM file:", e));
-            return;
+            currentBgmAudio.volume = 0.3;
         }
         
-        const spec = bgmTracksSpec[trackName];
-        if (!spec) return;
-        
-        bgmStep = 0;
-        let nextNoteTime = audioCtx.currentTime;
-        
-        bgmMasterGain = audioCtx.createGain();
-        bgmMasterGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
-        bgmMasterGain.gain.linearRampToValueAtTime(spec.masterVol || 0.2, audioCtx.currentTime + 0.2);
-        bgmMasterGain.connect(audioCtx.destination);
-        
-        function playNote(freq, type, duration, vol, delay = 0) {
-            if (!audioCtx || !bgmMasterGain) return;
-            const now = audioCtx.currentTime;
-            
-            const osc = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            
-            osc.type = type;
-            osc.frequency.setValueAtTime(freq, now + delay);
-            
-            gainNode.gain.setValueAtTime(0, now + delay);
-            gainNode.gain.linearRampToValueAtTime(vol, now + delay + 0.02);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, now + delay + duration);
-            
-            osc.connect(gainNode);
-            gainNode.connect(bgmMasterGain);
-            
-            osc.start(now + delay);
-            osc.stop(now + delay + duration);
-        }
-        
-        function tick() {
-            if (!audioCtx || !bgmMasterGain) return;
-            const now = audioCtx.currentTime;
-            while (nextNoteTime < now + 0.1) {
-                const step = bgmStep % 16;
-                const chordIdx = Math.floor((bgmStep / 16) % 4);
-                
-                // 1. Baixo
-                if (step === 0) {
-                    playNote(spec.bassNotes[chordIdx], spec.bassOsc, 3.0, spec.bassVol, nextNoteTime - now);
-                }
-                
-                // 2. Acorde arpejado
-                if (step % 4 === 0) {
-                    const notes = spec.chordTones[chordIdx];
-                    const note = notes[Math.floor(Math.random() * notes.length)];
-                    playNote(note, spec.chordOsc, 1.5, spec.chordVol, nextNoteTime - now);
-                }
-                
-                // 3. Melodia aleatória nos passos ímpares
-                if (step % 2 !== 0 && Math.random() < spec.melodyChance) {
-                    const note = spec.melodyScale[Math.floor(Math.random() * spec.melodyScale.length)];
-                    playNote(note, spec.melodyOsc, 0.45, spec.melodyVol, nextNoteTime - now);
-                    
-                    if (spec.hasDelay) {
-                        playNote(note, spec.melodyOsc, 0.35, spec.melodyVol * 0.3, nextNoteTime - now + spec.stepTime);
-                    }
-                }
-                
-                bgmStep++;
-                nextNoteTime += spec.stepTime;
-            }
-        }
-        
-        bgmTimer = setInterval(tick, 50);
+        currentBgmAudio.play().catch(e => console.warn("Erro ao iniciar BGM:", e));
     } catch (e) {
-        console.error("Erro na música procedural:", e);
+        console.error("Erro no controle de BGM:", e);
     }
 }
 
 function stopBgm() {
-    if (bgmTimer) {
-        clearInterval(bgmTimer);
-        bgmTimer = null;
-    }
-    currentTrackName = null;
-    if (bgmMasterGain) {
-        try {
-            const now = audioCtx.currentTime;
-            bgmMasterGain.gain.setValueAtTime(bgmMasterGain.gain.value, now);
-            bgmMasterGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-            const oldGain = bgmMasterGain;
-            setTimeout(() => {
-                try {
-                    oldGain.disconnect();
-                } catch(e){}
-            }, 500);
-        } catch(e) {}
-        bgmMasterGain = null;
-    }
     if (currentBgmAudio) {
-        const audioToFade = currentBgmAudio;
-        currentBgmAudio = null;
-        try {
-            let vol = audioToFade.volume;
-            const fadeInterval = setInterval(() => {
-                if (vol > 0.05) {
-                    vol -= 0.05;
-                    audioToFade.volume = vol;
-                } else {
-                    clearInterval(fadeInterval);
-                    audioToFade.pause();
-                }
-            }, 50);
-        } catch (e) {
-            audioToFade.pause();
-        }
+        currentBgmAudio.pause();
     }
 }
 
