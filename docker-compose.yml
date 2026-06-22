@@ -78,11 +78,21 @@ services:
     environment:
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-30mariafn@}
       DB_NAME: ${DB_NAME:-capivara}
-    volumes:
-      - ./scripts/mariadb-bootstrap.sh:/bootstrap/mariadb-bootstrap.sh:ro
     entrypoint:
       - /bin/sh
-      - /bootstrap/mariadb-bootstrap.sh
+      - -ec
+    command: |
+      until mariadb-admin ping -h 127.0.0.1 -uroot -p"$$MARIADB_ROOT_PASSWORD" --silent; do
+        sleep 2
+      done
+
+      printf '%s\n' \
+        "CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY '$$MARIADB_ROOT_PASSWORD';" \
+        "ALTER USER 'root'@'%' IDENTIFIED BY '$$MARIADB_ROOT_PASSWORD';" \
+        "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;" \
+        "FLUSH PRIVILEGES;" \
+        "CREATE DATABASE IF NOT EXISTS \`$$DB_NAME\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" \
+      | mariadb -h 127.0.0.1 -uroot -p"$$MARIADB_ROOT_PASSWORD"
 
   capivara_phpmyadmin:
     image: phpmyadmin:5-apache
