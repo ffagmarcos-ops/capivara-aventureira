@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+
+until mariadb-admin ping -h 127.0.0.1 -uroot -p"$MARIADB_ROOT_PASSWORD" --silent; do
+  sleep 2
+done
+
+mariadb -h 127.0.0.1 -uroot -p"$MARIADB_ROOT_PASSWORD" <<SQL
+CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY '$MARIADB_ROOT_PASSWORD';
+ALTER USER 'root'@'%' IDENTIFIED BY '$MARIADB_ROOT_PASSWORD';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+CREATE DATABASE IF NOT EXISTS \`$DB_NAME\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+SQL
