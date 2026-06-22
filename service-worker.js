@@ -1,4 +1,4 @@
-const CACHE_NAME = 'capivara-v72';
+const CACHE_NAME = 'capivara-v78';
 const ASSETS = [
   './',
   './index.html',
@@ -127,9 +127,20 @@ const ASSETS = [
   './bld_lab_lvl4.png',
   './bld_lab_lvl5.png',
   './bld_lab_lvl6.png',
+  './bld_lab_lvl7.png',
+  './bld_lab_lvl8.png',
+  './bld_lab_lvl9.png',
+  './bld_lab_lvl10.png',
   './bld_tower_lvl1.png',
   './bld_tower_lvl2.png',
   './bld_tower_lvl3.png',
+  './bld_tower_lvl4.png',
+  './bld_tower_lvl5.png',
+  './bld_tower_lvl6.png',
+  './bld_tower_lvl7.png',
+  './bld_tower_lvl8.png',
+  './bld_tower_lvl9.png',
+  './bld_tower_lvl10.png',
   './village_stream.ogg',
   './village_birds.ogg'
 ];

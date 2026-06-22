@@ -43,7 +43,7 @@ O projeto está organizado no formato SPA (Single Page Application) estático, c
     *   `curioData`: Frases rápidas para curiosidades básicas de descobertas.
     *   `premiumData`: Dicionário completo de fichas zoológicas detalhadas baseadas na Wikipédia (Dieta, Habitat, Família, Espécie, Papel Ecológico, Conservação e Dicas de Segurança).
     *   `endlessTriviaBank`: Perguntas e alternativas para o quiz infinito.
-*   **`service-worker.js`**: Gerenciador de cache offline PWA (versão `capivara-v5`).
+*   **`service-worker.js`**: Gerenciador de cache offline PWA (versão `capivara-v78`).
 *   **`manifest.json`**: Manifesto web para instalação do app na tela inicial do celular como um aplicativo nativo.
 *   **`privacy.html`**: Termos de privacidade para leitura obrigatória dos pais.
 
@@ -98,7 +98,7 @@ A Eco-Vila conta com um plano de fundo dinâmico animado (`cenario 1.mp4`) no lu
 *   **Contexto de Empilhamento e z-index Negativo**:
     Para evitar que o vídeo acelerado por hardware cubra os elementos da vila, a imagem de fallback estática utiliza `z-index: -2` e o contêiner de vídeo utiliza `z-index: -1`. Assim, todos os elementos e contêineres de jogo (como prédios em `z-10` e capivaras em `z-[12]`) aparecem por cima da animação.
 *   **Bypass de Range Requests no Service Worker**:
-    Navegadores como Safari (iOS/macOS) e Chrome requerem range requests (HTTP 206 Partial Content) para renderizar mídias HTML5. Para evitar falhas no carregamento de áudios/vídeos a partir do cache do Service Worker, configuramos o `service-worker.js` para não interceptar requisições com cabeçalho `Range` ou com extensões `.mp4` e `.ogg`.
+    Navegadores como Safari (iOS/macOS) e Chrome requerem range requests (HTTP 206 Partial Content) para renderizar mídias HTML5. Para evitar falhas no carregamento de áudios/vídeos a partir do cache do Service Worker, configuramos o `service-worker.js` para não interceptar requisições com cabeçalho `Range` ou com extensões `.mp4`, `.ogg` e `.mp3`.
 *   **Indicadores de Produção Flutuantes (Floating Gain Indicators)**:
     A cada 5 segundos, se a produção de sementes da vila for maior que zero e o jogador estiver visualizando a aba da Vila (`vilaView`), números dourados com o ícone da moeda de semente (`seed_coin.png`) sobem de forma animada (`@keyframes floatUpFade`) sobre a Horta de Capim (`farm`) e as Docas de Pesca (`docks`), indicando a produção passiva em tempo real. Os valores mostrados correspondem à taxa exata de contribuição de cada prédio por hora de acordo com seu nível e o bônus multiplicador do Centro da Vila.
 
@@ -200,3 +200,17 @@ Implementamos suporte a edições retroativas no Diário de Campo para que o exp
 *   **Lápis de Edição ✏️**: Cada cartão no grid de descobertas possui um botão com ícone de lápis. Clicar nele carrega os dados originais no modal de captura, abrindo-o diretamente na seção de formulário e contornando a câmera e scanner.
 *   **Controle Dinâmico de Ação**: O modal altera o texto do botão principal para **"ATUALIZAR DIÁRIO! 💾"** e adota o estilo âmbar de edição. O fluxo de salvamento aciona a função `updateDiscovery` que revalida a categoria biológica do animal, atualiza os dados em `localStorage` e envia uma requisição `PUT` para a API (caso autenticado).
 *   **Diário de Experiência**: Inclui o campo **"Conte como foi o dia que você encontrou o animal"**, estimulando relatos ricos e pessoais. O diário renderiza essas histórias em caixas personalizadas estilizadas como folhas de caderno, aproximando o jogo da vivência real de um pesquisador.
+
+---
+
+## 🏗️ 11. Sistema de Evolução de Prédios e Assets de Nível (Lvl 1-10)
+
+Todas as 5 construções da Eco-Vila possuem ilustrações de evolução customizadas do nível 1 ao nível 10, no mesmo estilo isométrico 2D cartoon integrado com as capivaras:
+
+*   **Centro da Vila (`townHall`)**: Níveis 1 a 10 (`bld_townHall_lvl1.png` a `bld_townHall_lvl10.png`).
+*   **Horta de Capim (`farm`)**: Níveis 1 a 10 (`bld_farm_lvl1.png` a `bld_farm_lvl10.png`).
+*   **Doca de Pesca (`docks`)**: Níveis 1 a 10 (`bld_docks_lvl1.png` a `bld_docks_lvl10.png`).
+*   **Laboratório Ecológico (`lab`)**: Níveis 1 a 10 (`bld_lab_lvl1.png` a `bld_lab_lvl10.png`).
+*   **Torre de Vigia (`tower`)**: Níveis 1 a 10 (`bld_tower_lvl1.png` a `bld_tower_lvl10.png`).
+
+As imagens geradas foram processadas para remover o fundo branco original, tornando o fundo transparente (`RGBA`) para integração visual direta sobre o vídeo dinâmico da vila. A lógica de exibição está mapeada em `app.js` através da constante `maxAvailableLvl`, garantindo o correto carregamento do sprite correspondente ao nível de evolução atual do prédio.

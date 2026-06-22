@@ -369,14 +369,9 @@ async function loginWithGoogle() {
 let animals = JSON.parse(localStorage.getItem('capy_vPlay')) || [];
 let guardianXP = parseInt(localStorage.getItem('capy_xpPlay')) || 0;
 let seedCoins = parseInt(localStorage.getItem('capy_seeds')) || 0;
-if (currentUser) {
-    const lowerName = currentUser.name.toLowerCase();
-    if (lowerName === 'teste' || lowerName === 'test' || lowerName === 'tesrez') {
-        if (seedCoins < 10000) {
-            seedCoins = 10000;
-            localStorage.setItem('capy_seeds', seedCoins);
-        }
-    }
+if (seedCoins < 500000) {
+    seedCoins = 500000;
+    localStorage.setItem('capy_seeds', seedCoins);
 }
 let ownedAccessories = JSON.parse(localStorage.getItem('capy_owned_acc')) || [];
 let equippedAccessories = JSON.parse(localStorage.getItem('capy_equipped_slots')) || { head: null, eyes: null, body: null, hand: null, feet: null };
@@ -2397,8 +2392,8 @@ function renderVillage() {
                     townHall: 10,
                     farm: 10,
                     docks: 10,
-                    lab: 6,
-                    tower: 3
+                    lab: 10,
+                    tower: 10
                 };
                 let maxSpriteLvl = maxAvailableLvl[key] || 3;
                 let spriteLvl = Math.min(maxSpriteLvl, b.level);
