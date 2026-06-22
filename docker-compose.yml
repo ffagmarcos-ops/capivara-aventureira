@@ -13,11 +13,13 @@ services:
       PORT: 3000
       JWT_SECRET: ${JWT_SECRET:-troque-esta-chave-em-producao}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      INITDB_CREATE_DATABASE: ${INITDB_CREATE_DATABASE:-true}
+      INITDB_ALTER: ${INITDB_ALTER:-true}
       DB_HOST: capivara_db
       DB_PORT: 3306
       DB_NAME: ${DB_NAME:-capivara}
-      DB_USER: ${DB_USER:-capivara_user}
-      DB_PASSWORD: ${DB_PASSWORD:-troque-esta-senha}
+      DB_USER: ${DB_USER:-root}
+      DB_PASSWORD: ${DB_PASSWORD:-30mariafn@}
       CORS_ORIGINS: ${CORS_ORIGINS:-https://capivara.aporttec.com}
     networks:
       - traefik
@@ -31,8 +33,14 @@ services:
     labels:
       traefik.enable: "true"
       traefik.http.routers.capivara.rule: "Host(`capivara.aporttec.com`)"
-      traefik.http.routers.capivara.entrypoints: "websecure"
-      traefik.http.routers.capivara.tls.certresolver: "myresolver"
+      traefik.http.routers.capivara.entrypoints: "web,websecure"
+      traefik.http.routers.capivara.middlewares: "capivara-https-redirect"
+      traefik.http.middlewares.capivara-https-redirect.redirectscheme.scheme: "https"
+      traefik.http.middlewares.capivara-https-redirect.redirectscheme.permanent: "true"
+      traefik.http.routers.capivara-secure.rule: "Host(`capivara.aporttec.com`)"
+      traefik.http.routers.capivara-secure.entrypoints: "websecure"
+      traefik.http.routers.capivara-secure.tls: "true"
+      traefik.http.routers.capivara-secure.tls.certresolver: "myresolver"
       traefik.http.services.capivara.loadbalancer.server.port: "3000"
       traefik.docker.network: traefik
 
@@ -40,13 +48,10 @@ services:
     image: mariadb:11.4
     container_name: capivara_db
     restart: always
-    ports:
-      - "3306:3306"
     environment:
-      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-troque-root-password}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-30mariafn@}
       MARIADB_DATABASE: ${DB_NAME:-capivara}
-      MARIADB_USER: ${DB_USER:-capivara_user}
-      MARIADB_PASSWORD: ${DB_PASSWORD:-troque-esta-senha}
+      MARIADB_ROOT_HOST: ${DB_ROOT_HOST:-%}
     volumes:
       - capivara_db_data:/var/lib/mysql
     command:
@@ -56,11 +61,11 @@ services:
     networks:
       - capivara_internal
     healthcheck:
-      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-uroot", "-p${DB_ROOT_PASSWORD:-troque-root-password}"]
+      test: ["CMD-SHELL", "mariadb-admin ping -h localhost -uroot -p\"$${MARIADB_ROOT_PASSWORD}\" || exit 1"]
       interval: 10s
       timeout: 5s
-      retries: 12
-      start_period: 40s
+      retries: 20
+      start_period: 60s
 
   capivara_phpmyadmin:
     image: phpmyadmin:5-apache
@@ -81,14 +86,21 @@ services:
     labels:
       traefik.enable: "true"
       traefik.http.routers.capivara-pma.rule: "Host(`phpmyadmin.capivara.aporttec.com`)"
-      traefik.http.routers.capivara-pma.entrypoints: "websecure"
-      traefik.http.routers.capivara-pma.tls.certresolver: "myresolver"
+      traefik.http.routers.capivara-pma.entrypoints: "web,websecure"
+      traefik.http.routers.capivara-pma.middlewares: "capivara-pma-https-redirect"
+      traefik.http.middlewares.capivara-pma-https-redirect.redirectscheme.scheme: "https"
+      traefik.http.middlewares.capivara-pma-https-redirect.redirectscheme.permanent: "true"
+      traefik.http.routers.capivara-pma-secure.rule: "Host(`phpmyadmin.capivara.aporttec.com`)"
+      traefik.http.routers.capivara-pma-secure.entrypoints: "websecure"
+      traefik.http.routers.capivara-pma-secure.tls: "true"
+      traefik.http.routers.capivara-pma-secure.tls.certresolver: "myresolver"
       traefik.http.services.capivara-pma.loadbalancer.server.port: "80"
       traefik.docker.network: traefik
 
 networks:
   traefik:
     external: true
+    name: traefik
   capivara_internal:
     driver: bridge
 
