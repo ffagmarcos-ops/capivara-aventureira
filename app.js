@@ -2428,10 +2428,10 @@ function renderVillage() {
             let imgSrc = '';
             if (b.underConstruction) {
                 visualEl.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 626 462"/>';
-                visualEl.style.backgroundImage = "url('bld_scaffolding.png')";
+                visualEl.style.backgroundImage = "url('bld_scaffolding.png?v=84')";
                 visualEl.style.backgroundRepeat = "no-repeat";
                 visualEl.style.backgroundSize = "600% 600%";
-                visualEl.style.transition = "transform 300ms";
+                visualEl.style.transitionProperty = "transform";
             } else {
                 // Dicionário com o nível máximo de arte disponível para cada prédio
                 const maxAvailableLvl = {
@@ -2445,27 +2445,27 @@ function renderVillage() {
                 let spriteLvl = Math.min(maxSpriteLvl, b.level);
                 if (spriteLvl === 0) {
                     visualEl.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 626 462"/>';
-                    visualEl.style.backgroundImage = "url('bld_scaffolding.png')";
+                    visualEl.style.backgroundImage = "url('bld_scaffolding.png?v=84')";
                     visualEl.style.backgroundRepeat = "no-repeat";
                     visualEl.style.backgroundSize = "600% 600%";
-                    visualEl.style.transition = "transform 300ms";
+                    visualEl.style.transitionProperty = "transform";
                 } else if (key === 'townHall' && spriteLvl === 1) {
                     visualEl.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 518 460"/>';
-                    visualEl.style.backgroundImage = "url('bld_townHall_lvl1.png')";
+                    visualEl.style.backgroundImage = "url('bld_townHall_lvl1.png?v=84')";
                     visualEl.style.backgroundRepeat = "no-repeat";
                     visualEl.style.backgroundSize = "600% 600%";
-                    visualEl.style.transition = "transform 300ms";
+                    visualEl.style.transitionProperty = "transform";
                 } else if (key === 'farm' && spriteLvl === 1) {
                     visualEl.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 408"/>';
-                    visualEl.style.backgroundImage = "url('bld_farm_lvl1.png')";
+                    visualEl.style.backgroundImage = "url('bld_farm_lvl1.png?v=84')";
                     visualEl.style.backgroundRepeat = "no-repeat";
                     visualEl.style.backgroundSize = "600% 600%";
-                    visualEl.style.transition = "transform 300ms";
+                    visualEl.style.transitionProperty = "transform";
                 } else {
                     visualEl.style.backgroundImage = "";
                     visualEl.style.backgroundSize = "";
                     visualEl.style.backgroundPosition = "";
-                    visualEl.style.transition = "";
+                    visualEl.style.transitionProperty = "";
                     imgSrc = `bld_${key}_lvl${spriteLvl}.png`;
                     visualEl.src = imgSrc;
                 }
@@ -4556,7 +4556,7 @@ function animateUnderConstructionBuildings() {
                 const posX = (col / 5) * 100;
                 const posY = (row / 5) * 100;
                 visualEl.style.backgroundPosition = `${posX}% ${posY}%`;
-                visualEl.style.transition = "transform 300ms";
+                visualEl.style.transitionProperty = "transform";
             }
         }
     }
