@@ -10,6 +10,49 @@ function getInitdbFlags() {
   };
 }
 
+function isAccessDenied(error) {
+  return error && (error.code === 'ER_ACCESS_DENIED_ERROR' || error?.original?.code === 'ER_ACCESS_DENIED_ERROR');
+}
+
+async function withRootConnection(task) {
+  const connection = await mysql.createConnection({
+    host: env.db.host,
+    port: env.db.port,
+    user: env.db.rootUser,
+    password: env.db.rootPassword,
+    connectTimeout: 20000,
+    multipleStatements: false
+  });
+
+  try {
+    return await task(connection);
+  } finally {
+    await connection.end();
+  }
+}
+
+async function ensureAppUserAndPrivileges() {
+  if (!env.db.rootPassword) {
+    throw new Error('DB_ROOT_PASSWORD nao definido para recuperar usuario da aplicacao');
+  }
+
+  await withRootConnection(async (connection) => {
+    const dbName = env.db.name.replace(/`/g, '');
+    const appUser = env.db.user.replace(/'/g, "''");
+    const appPassword = env.db.password.replace(/'/g, "''");
+
+    await connection.query(
+      `CREATE DATABASE IF NOT EXISTS \`${dbName}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`
+    );
+    await connection.query(`CREATE USER IF NOT EXISTS '${appUser}'@'%' IDENTIFIED BY '${appPassword}'`);
+    await connection.query(`ALTER USER '${appUser}'@'%' IDENTIFIED BY '${appPassword}'`);
+    await connection.query(`GRANT ALL PRIVILEGES ON \`${dbName}\`.* TO '${appUser}'@'%'`);
+    await connection.query('FLUSH PRIVILEGES');
+  });
+
+  console.log(`Usuario ${env.db.user}@% garantido com permissoes em ${env.db.name}`);
+}
+
 async function ensureDatabaseExists() {
   const connection = await mysql.createConnection({
     host: env.db.host,
@@ -69,7 +112,20 @@ async function initDatabase() {
     await ensureDatabaseExists();
   }
 
-  await sequelize.authenticate();
+  try {
+    await sequelize.authenticate();
+  } catch (error) {
+    if (isAccessDenied(error) && env.db.user !== env.db.rootUser) {
+      console.warn(
+        `Acesso negado para ${env.db.user}. Tentando recuperar permissoes via ${env.db.rootUser}...`
+      );
+      await ensureAppUserAndPrivileges();
+      await sequelize.authenticate();
+    } else {
+      throw error;
+    }
+  }
+
   await sequelize.sync({ alter: flags.alterSchema });
   await migrateAnimalImageColumn();
   await seedAccessories();

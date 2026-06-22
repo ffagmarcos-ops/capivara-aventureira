@@ -22,6 +22,8 @@ module.exports = {
     name: getEnv('DB_NAME', 'capivara'),
     user: getEnv('DB_USER', 'root'),
     password: process.env.DB_PASSWORD || '',
+    rootUser: process.env.DB_ROOT_USER || 'root',
+    rootPassword: process.env.DB_ROOT_PASSWORD || '',
     logging: process.env.DB_LOGGING === 'true'
   }
 };

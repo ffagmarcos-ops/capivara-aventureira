@@ -20,6 +20,8 @@ services:
       DB_NAME: ${DB_NAME:-capivara}
       DB_USER: ${DB_USER:-capivara_user}
       DB_PASSWORD: ${DB_PASSWORD:-30mariafn@}
+      DB_ROOT_USER: ${DB_ROOT_USER:-root}
+      DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-30mariafn@}
       CORS_ORIGINS: ${CORS_ORIGINS:-https://capivara.aporttec.com}
     networks:
       - traefik
