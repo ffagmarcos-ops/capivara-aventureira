@@ -2455,6 +2455,12 @@ function renderVillage() {
                     visualEl.style.backgroundRepeat = "no-repeat";
                     visualEl.style.backgroundSize = "600% 600%";
                     visualEl.style.transition = "transform 300ms";
+                } else if (key === 'farm' && spriteLvl === 1) {
+                    visualEl.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 408"/>';
+                    visualEl.style.backgroundImage = "url('bld_farm_lvl1.png')";
+                    visualEl.style.backgroundRepeat = "no-repeat";
+                    visualEl.style.backgroundSize = "600% 600%";
+                    visualEl.style.transition = "transform 300ms";
                 } else {
                     visualEl.style.backgroundImage = "";
                     visualEl.style.backgroundSize = "";
@@ -4541,7 +4547,7 @@ function animateUnderConstructionBuildings() {
         let maxSpriteLvl = maxAvailableLvl[key] || 3;
         let spriteLvl = Math.min(maxSpriteLvl, b.level);
         
-        const needsAnim = b.underConstruction || b.level === 0 || (key === 'townHall' && spriteLvl === 1);
+        const needsAnim = b.underConstruction || b.level === 0 || (key === 'townHall' && spriteLvl === 1) || (key === 'farm' && spriteLvl === 1);
         if (needsAnim) {
             const visualEl = document.getElementById(`visual-${key}`);
             if (visualEl) {
