@@ -2431,6 +2431,7 @@ function renderVillage() {
                 visualEl.style.backgroundImage = "url('bld_scaffolding.png')";
                 visualEl.style.backgroundRepeat = "no-repeat";
                 visualEl.style.backgroundSize = "600% 600%";
+                visualEl.style.transition = "transform 300ms";
             } else {
                 // Dicionário com o nível máximo de arte disponível para cada prédio
                 const maxAvailableLvl = {
@@ -2447,10 +2448,12 @@ function renderVillage() {
                     visualEl.style.backgroundImage = "url('bld_scaffolding.png')";
                     visualEl.style.backgroundRepeat = "no-repeat";
                     visualEl.style.backgroundSize = "600% 600%";
+                    visualEl.style.transition = "transform 300ms";
                 } else {
                     visualEl.style.backgroundImage = "";
                     visualEl.style.backgroundSize = "";
                     visualEl.style.backgroundPosition = "";
+                    visualEl.style.transition = "";
                     imgSrc = `bld_${key}_lvl${spriteLvl}.png`;
                     visualEl.src = imgSrc;
                 }
@@ -4530,6 +4533,7 @@ function animateUnderConstructionBuildings() {
                 const posX = (col / 5) * 100;
                 const posY = (row / 5) * 100;
                 visualEl.style.backgroundPosition = `${posX}% ${posY}%`;
+                visualEl.style.transition = "transform 300ms";
             }
         }
     }
