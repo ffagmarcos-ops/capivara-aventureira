@@ -392,6 +392,8 @@ let soundMode = localStorage.getItem('capy_sound_mode') || 'both'; // 'both' ou 
 let bgmVolume = parseFloat(localStorage.getItem('capy_bgm_volume') || '0.5');
 let sfxVolume = parseFloat(localStorage.getItem('capy_sfx_volume') || '0.5');
 let sfxVolumeNode = null;
+let constructionAnimFrame = 0;
+let constructionAnimInterval = null;
 
 // Procedural music sequencer variables (BGM)
 let bgmTimer = null;
@@ -2425,7 +2427,10 @@ function renderVillage() {
         if (visualEl) {
             let imgSrc = '';
             if (b.underConstruction) {
-                imgSrc = 'bld_scaffolding.png';
+                visualEl.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 626 462"/>';
+                visualEl.style.backgroundImage = "url('bld_scaffolding.png')";
+                visualEl.style.backgroundRepeat = "no-repeat";
+                visualEl.style.backgroundSize = "600% 600%";
             } else {
                 // Dicionário com o nível máximo de arte disponível para cada prédio
                 const maxAvailableLvl = {
@@ -2438,12 +2443,18 @@ function renderVillage() {
                 let maxSpriteLvl = maxAvailableLvl[key] || 3;
                 let spriteLvl = Math.min(maxSpriteLvl, b.level);
                 if (spriteLvl === 0) {
-                    imgSrc = 'bld_scaffolding.png';
+                    visualEl.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 626 462"/>';
+                    visualEl.style.backgroundImage = "url('bld_scaffolding.png')";
+                    visualEl.style.backgroundRepeat = "no-repeat";
+                    visualEl.style.backgroundSize = "600% 600%";
                 } else {
+                    visualEl.style.backgroundImage = "";
+                    visualEl.style.backgroundSize = "";
+                    visualEl.style.backgroundPosition = "";
                     imgSrc = `bld_${key}_lvl${spriteLvl}.png`;
+                    visualEl.src = imgSrc;
                 }
             }
-            visualEl.src = imgSrc;
         }
     }
     
@@ -2823,6 +2834,7 @@ window.onload = async () => {
     await hydrateRemoteState();
     checkTimeOfDay(); checkStreaks(); initVillageOfflineGains(); renderApp(); loadDailyQuiz();
     loadSilhouetteGame(); loadEndlessQuiz(); updateSoundModeUI(); initVolumeSliders(); updateMemoryGameUI();
+    startConstructionAnimation();
     initVillageMapGestures();
     if (currentUser) {
         showView('vila', false);
@@ -4502,6 +4514,33 @@ function changeHomeSupervisorSpeech() {
         const speech = homeSupervisorSpeeches[Math.floor(Math.random() * homeSupervisorSpeeches.length)];
         textEl.innerHTML = `"${speech}"`;
     }
+}
+
+function animateUnderConstructionBuildings() {
+    const vilaView = document.getElementById('vilaView');
+    if (!vilaView || vilaView.classList.contains('hidden')) return;
+
+    for (let key in villageState.buildings) {
+        const b = villageState.buildings[key];
+        if (b.underConstruction || b.level === 0) {
+            const visualEl = document.getElementById(`visual-${key}`);
+            if (visualEl) {
+                const col = constructionAnimFrame % 6;
+                const row = Math.floor(constructionAnimFrame / 6);
+                const posX = (col / 5) * 100;
+                const posY = (row / 5) * 100;
+                visualEl.style.backgroundPosition = `${posX}% ${posY}%`;
+            }
+        }
+    }
+}
+
+function startConstructionAnimation() {
+    if (constructionAnimInterval) return;
+    constructionAnimInterval = setInterval(() => {
+        constructionAnimFrame = (constructionAnimFrame + 1) % 36;
+        animateUnderConstructionBuildings();
+    }, 50);
 }
 
 // ==========================================================================

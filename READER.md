@@ -43,7 +43,7 @@ O projeto está organizado no formato SPA (Single Page Application) estático, c
     *   `curioData`: Frases rápidas para curiosidades básicas de descobertas.
     *   `premiumData`: Dicionário completo de fichas zoológicas detalhadas baseadas na Wikipédia (Dieta, Habitat, Família, Espécie, Papel Ecológico, Conservação e Dicas de Segurança).
     *   `endlessTriviaBank`: Perguntas e alternativas para o quiz infinito.
-*   **`service-worker.js`**: Gerenciador de cache offline PWA (versão `capivara-v79`).
+*   **`service-worker.js`**: Gerenciador de cache offline PWA (versão `capivara-v80`).
 *   **`manifest.json`**: Manifesto web para instalação do app na tela inicial do celular como um aplicativo nativo.
 *   **`privacy.html`**: Termos de privacidade para leitura obrigatória dos pais.
 
