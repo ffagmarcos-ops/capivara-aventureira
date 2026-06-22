@@ -654,15 +654,19 @@ body.night-mode .text-on-white {
     position: absolute;
     width: 32px;
     height: 32px;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%) scale(1.35);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-end;
     pointer-events: auto;
     cursor: pointer;
-    transition: left 0.3s linear, top 0.3s linear;
+    transition: left 0.3s linear, top 0.3s linear, transform 0.2s ease;
     z-index: 15;
+}
+
+.village-npc:hover {
+    transform: translate(-50%, -50%) scale(1.5);
 }
 
 .npc-sprite-container {
