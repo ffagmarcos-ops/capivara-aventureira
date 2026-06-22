@@ -13,12 +13,12 @@ services:
       PORT: 3000
       JWT_SECRET: ${JWT_SECRET:-troque-esta-chave-em-producao}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
-      INITDB_CREATE_DATABASE: ${INITDB_CREATE_DATABASE:-true}
+      INITDB_CREATE_DATABASE: ${INITDB_CREATE_DATABASE:-false}
       INITDB_ALTER: ${INITDB_ALTER:-true}
       DB_HOST: capivara_db
       DB_PORT: 3306
       DB_NAME: ${DB_NAME:-capivara}
-      DB_USER: ${DB_USER:-root}
+      DB_USER: ${DB_USER:-capivara_user}
       DB_PASSWORD: ${DB_PASSWORD:-30mariafn@}
       CORS_ORIGINS: ${CORS_ORIGINS:-https://capivara.aporttec.com}
     networks:
@@ -51,6 +51,8 @@ services:
     environment:
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-30mariafn@}
       MARIADB_DATABASE: ${DB_NAME:-capivara}
+      MARIADB_USER: ${DB_USER:-capivara_user}
+      MARIADB_PASSWORD: ${DB_PASSWORD:-30mariafn@}
       MARIADB_ROOT_HOST: ${DB_ROOT_HOST:-%}
     volumes:
       - capivara_db_data:/var/lib/mysql
@@ -78,6 +80,8 @@ services:
     environment:
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-30mariafn@}
       DB_NAME: ${DB_NAME:-capivara}
+      DB_USER: ${DB_USER:-capivara_user}
+      DB_PASSWORD: ${DB_PASSWORD:-30mariafn@}
     command:
       - /bin/sh
       - -ec
@@ -89,7 +93,7 @@ services:
         done
 
         if mariadb -h 127.0.0.1 -uroot -p"$$MARIADB_ROOT_PASSWORD" -e "SELECT 1" >/dev/null 2>&1; then
-          mariadb -h 127.0.0.1 -uroot -p"$$MARIADB_ROOT_PASSWORD" -e "CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY '$$MARIADB_ROOT_PASSWORD'; ALTER USER 'root'@'%' IDENTIFIED BY '$$MARIADB_ROOT_PASSWORD'; GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION; FLUSH PRIVILEGES;"
+          mariadb -h 127.0.0.1 -uroot -p"$$MARIADB_ROOT_PASSWORD" -e "CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY '$$MARIADB_ROOT_PASSWORD'; ALTER USER 'root'@'%' IDENTIFIED BY '$$MARIADB_ROOT_PASSWORD'; GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION; CREATE USER IF NOT EXISTS '$$DB_USER'@'%' IDENTIFIED BY '$$DB_PASSWORD'; ALTER USER '$$DB_USER'@'%' IDENTIFIED BY '$$DB_PASSWORD'; GRANT ALL PRIVILEGES ON \`$$DB_NAME\`.* TO '$$DB_USER'@'%'; FLUSH PRIVILEGES;"
           mariadb -h 127.0.0.1 -uroot -p"$$MARIADB_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS \`$$DB_NAME\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
           echo "Bootstrap MariaDB aplicado com sucesso."
         else
