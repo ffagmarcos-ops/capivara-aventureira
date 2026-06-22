@@ -89,6 +89,10 @@
     <div id="mainMenuScreen" class="fixed inset-0 z-[500] hidden flex-col items-center justify-between" style="background: url('main_menu_bg.png') center center / cover no-repeat;">
         <div class="absolute inset-0" style="background: linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.05) 35%, rgba(0,0,0,0.6) 75%, rgba(0,0,0,0.88) 100%);"></div>
         <div class="relative z-10 flex flex-col items-center justify-between w-full h-full max-w-sm mx-auto px-5 py-7">
+            <!-- Botão de Configurações (Engrenagem) -->
+            <button onclick="openParentalGate('settings')" class="absolute top-6 right-6 w-9 h-9 bg-amber-900/60 border border-amber-500/40 text-amber-100 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-90 hover:scale-105" title="Configurações">
+                <i class="fas fa-cog text-sm"></i>
+            </button>
             <!-- LOGO -->
             <div class="flex flex-col items-center">
                 <div class="relative flex flex-col items-center">
@@ -797,6 +801,23 @@
                         <button id="soundModeSound" onclick="setSoundMode('sound')" class="flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all text-center">
                             🔊 Apenas Som
                         </button>
+                    </div>
+                </div>
+                <!-- Controle de Volumes -->
+                <div class="p-4 bg-gray-50 rounded-2xl space-y-4 border border-gray-100/50">
+                    <div class="space-y-1">
+                        <div class="flex justify-between items-center text-xs font-bold text-green-900 uppercase tracking-wider">
+                            <span>🎵 Música</span>
+                            <span id="musicVolText">50%</span>
+                        </div>
+                        <input type="range" id="musicVolumeSlider" min="0" max="100" value="50" oninput="updateMusicVolume(this.value)" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600">
+                    </div>
+                    <div class="space-y-1">
+                        <div class="flex justify-between items-center text-xs font-bold text-green-900 uppercase tracking-wider">
+                            <span>🔊 Sons do Jogo</span>
+                            <span id="sfxVolText">50%</span>
+                        </div>
+                        <input type="range" id="sfxVolumeSlider" min="0" max="100" value="50" oninput="updateSfxVolume(this.value)" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600">
                     </div>
                 </div>
                 <button onclick="showPrivacy()" class="w-full text-left p-4 bg-gray-50 rounded-2xl flex items-center justify-between font-bold text-sm">

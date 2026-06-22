@@ -389,6 +389,9 @@ let pendingAction = null;
 let audioCtx = null;
 let audioUnlocked = false;
 let soundMode = localStorage.getItem('capy_sound_mode') || 'both'; // 'both' ou 'sound'
+let bgmVolume = parseFloat(localStorage.getItem('capy_bgm_volume') || '0.5');
+let sfxVolume = parseFloat(localStorage.getItem('capy_sfx_volume') || '0.5');
+let sfxVolumeNode = null;
 
 // Procedural music sequencer variables (BGM)
 let bgmTimer = null;
@@ -415,6 +418,11 @@ function initAudio() {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
         if (!AudioContextClass) return;
         audioCtx = new AudioContextClass();
+    }
+    if (audioCtx && !sfxVolumeNode) {
+        sfxVolumeNode = audioCtx.createGain();
+        sfxVolumeNode.gain.value = sfxVolume;
+        sfxVolumeNode.connect(audioCtx.destination);
     }
 }
 
@@ -496,6 +504,37 @@ function updateSoundModeUI() {
         btnBoth.className = "flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all text-center bg-transparent text-gray-400 hover:text-gray-600";
         btnSound.className = "flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all text-center bg-green-500 text-white shadow-sm";
     }
+}
+
+function updateMusicVolume(val) {
+    bgmVolume = parseFloat(val) / 100;
+    localStorage.setItem('capy_bgm_volume', bgmVolume.toString());
+    if (currentBgmAudio) currentBgmAudio.volume = bgmVolume * 0.3;
+    if (minigameBgmAudio) minigameBgmAudio.volume = bgmVolume * 0.3;
+    if (villageAmbientStream) villageAmbientStream.volume = bgmVolume * 0.35;
+    if (villageAmbientBirds) villageAmbientBirds.volume = bgmVolume * 0.25;
+    const txt = document.getElementById('musicVolText');
+    if (txt) txt.innerText = `${val}%`;
+}
+
+function updateSfxVolume(val) {
+    sfxVolume = parseFloat(val) / 100;
+    localStorage.setItem('capy_sfx_volume', sfxVolume.toString());
+    if (sfxVolumeNode) sfxVolumeNode.gain.setValueAtTime(sfxVolume, audioCtx.currentTime);
+    const txt = document.getElementById('sfxVolText');
+    if (txt) txt.innerText = `${val}%`;
+}
+
+function initVolumeSliders() {
+    const musicSlider = document.getElementById('musicVolumeSlider');
+    const sfxSlider = document.getElementById('sfxVolumeSlider');
+    const musicText = document.getElementById('musicVolText');
+    const sfxText = document.getElementById('sfxVolText');
+    
+    if (musicSlider) musicSlider.value = Math.round(bgmVolume * 100);
+    if (sfxSlider) sfxSlider.value = Math.round(sfxVolume * 100);
+    if (musicText) musicText.innerText = `${Math.round(bgmVolume * 100)}%`;
+    if (sfxText) sfxText.innerText = `${Math.round(sfxVolume * 100)}%`;
 }
 
 const bgmTracksSpec = {
@@ -701,7 +740,7 @@ function changeBgm(trackName) {
         if (!currentBgmAudio) {
             currentBgmAudio = new Audio(desiredSrc);
             currentBgmAudio.loop = true;
-            currentBgmAudio.volume = 0.3;
+            currentBgmAudio.volume = bgmVolume * 0.3;
         }
         
         if (currentBgmAudio.paused) {
@@ -726,6 +765,7 @@ function playSound(type) {
         if (!audioUnlocked) return;
         initAudio(); if (!audioCtx) return;
         const now = audioCtx.currentTime;
+        const outNode = sfxVolumeNode || audioCtx.destination;
         
         if (type === 'click') {
             // Clique bolha duplo ascendente
@@ -737,7 +777,7 @@ function playSound(type) {
             gain1.gain.setValueAtTime(0.12, now);
             gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
             osc1.connect(gain1);
-            gain1.connect(audioCtx.destination);
+            gain1.connect(outNode);
             osc1.start(now);
             osc1.stop(now + 0.05);
             
@@ -749,7 +789,7 @@ function playSound(type) {
             gain2.gain.setValueAtTime(0.08, now + 0.03);
             gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
             osc2.connect(gain2);
-            gain2.connect(audioCtx.destination);
+            gain2.connect(outNode);
             osc2.start(now + 0.03);
             osc2.stop(now + 0.08);
         } else if (type === 'alert') {
@@ -761,7 +801,7 @@ function playSound(type) {
             gain1.gain.setValueAtTime(0.12, now);
             gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
             osc1.connect(gain1);
-            gain1.connect(audioCtx.destination);
+            gain1.connect(outNode);
             osc1.start(now);
             osc1.stop(now + 0.16);
 
@@ -772,7 +812,7 @@ function playSound(type) {
             gain2.gain.setValueAtTime(0.12, now + 0.12);
             gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.27);
             osc2.connect(gain2);
-            gain2.connect(audioCtx.destination);
+            gain2.connect(outNode);
             osc2.start(now + 0.12);
             osc2.stop(now + 0.28);
         } else if (type === 'siren') {
@@ -791,7 +831,7 @@ function playSound(type) {
             gainNode.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
             
             osc.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
+            gainNode.connect(outNode);
             osc.start(now);
             osc.stop(now + 1.2);
         } else if (type === 'coin') {
@@ -806,7 +846,7 @@ function playSound(type) {
                 gain.gain.setValueAtTime(0.09, playTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, playTime + 0.22);
                 osc.connect(gain);
-                gain.connect(audioCtx.destination);
+                gain.connect(outNode);
                 osc.start(playTime);
                 osc.stop(playTime + 0.24);
             });
@@ -822,7 +862,7 @@ function playSound(type) {
                 gain.gain.setValueAtTime(0.12, playTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, playTime + 0.35);
                 osc.connect(gain);
-                gain.connect(audioCtx.destination);
+                gain.connect(outNode);
                 osc.start(playTime);
                 osc.stop(playTime + 0.38);
             });
@@ -843,7 +883,7 @@ function playSound(type) {
                     gain.gain.setValueAtTime(0.08, chordTime);
                     gain.gain.exponentialRampToValueAtTime(0.001, chordTime + 0.35);
                     osc.connect(gain);
-                    gain.connect(audioCtx.destination);
+                    gain.connect(outNode);
                     osc.start(chordTime);
                     osc.stop(chordTime + 0.38);
                 });
@@ -858,7 +898,7 @@ function playSound(type) {
                 gain.gain.setValueAtTime(0.12, noteTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, noteTime + 0.45);
                 osc.connect(gain);
-                gain.connect(audioCtx.destination);
+                gain.connect(outNode);
                 osc.start(noteTime);
                 osc.stop(noteTime + 0.48);
             });
@@ -880,7 +920,7 @@ function playSound(type) {
             gain.gain.setValueAtTime(0.14, now);
             gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
             osc.connect(gain);
-            gain.connect(audioCtx.destination);
+            gain.connect(outNode);
             
             lfo.start(now);
             osc.start(now);
@@ -904,7 +944,7 @@ function playSound(type) {
             gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
             noise.connect(filter);
             filter.connect(gain);
-            gain.connect(audioCtx.destination);
+            gain.connect(outNode);
             noise.start(now);
             noise.stop(now + 0.1);
         } else if (type === 'scan_beep') {
@@ -917,7 +957,7 @@ function playSound(type) {
             gain.gain.setValueAtTime(0.04, now);
             gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
             osc.connect(gain);
-            gain.connect(audioCtx.destination);
+            gain.connect(outNode);
             osc.start(now);
             osc.stop(now + 0.09);
         }
@@ -2782,7 +2822,7 @@ window.onload = async () => {
     }, 2000);
     await hydrateRemoteState();
     checkTimeOfDay(); checkStreaks(); initVillageOfflineGains(); renderApp(); loadDailyQuiz();
-    loadSilhouetteGame(); loadEndlessQuiz(); updateSoundModeUI(); updateMemoryGameUI();
+    loadSilhouetteGame(); loadEndlessQuiz(); updateSoundModeUI(); initVolumeSliders(); updateMemoryGameUI();
     initVillageMapGestures();
     if (currentUser) {
         showView('vila', false);
@@ -2810,12 +2850,12 @@ function initVillageAmbient() {
     if (!villageAmbientStream) {
         villageAmbientStream = new Audio('village_stream.ogg');
         villageAmbientStream.loop = true;
-        villageAmbientStream.volume = 0.35;
+        villageAmbientStream.volume = bgmVolume * 0.35;
     }
     if (!villageAmbientBirds) {
         villageAmbientBirds = new Audio('village_birds.ogg');
         villageAmbientBirds.loop = true;
-        villageAmbientBirds.volume = 0.25;
+        villageAmbientBirds.volume = bgmVolume * 0.25;
     }
 }
 
