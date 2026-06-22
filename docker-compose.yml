@@ -82,15 +82,22 @@ services:
       - /bin/sh
       - -ec
       - |
-        set -eu
+        set -u
 
         until mariadb-admin ping -h 127.0.0.1 -uroot -p"$$MARIADB_ROOT_PASSWORD" --silent; do
           sleep 2
         done
 
-        mariadb -h 127.0.0.1 -uroot -p"$$MARIADB_ROOT_PASSWORD" -e "CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY '$$MARIADB_ROOT_PASSWORD'; ALTER USER 'root'@'%' IDENTIFIED BY '$$MARIADB_ROOT_PASSWORD'; GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION; FLUSH PRIVILEGES;"
+        if mariadb -h 127.0.0.1 -uroot -p"$$MARIADB_ROOT_PASSWORD" -e "SELECT 1" >/dev/null 2>&1; then
+          mariadb -h 127.0.0.1 -uroot -p"$$MARIADB_ROOT_PASSWORD" -e "CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY '$$MARIADB_ROOT_PASSWORD'; ALTER USER 'root'@'%' IDENTIFIED BY '$$MARIADB_ROOT_PASSWORD'; GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION; FLUSH PRIVILEGES;"
+          mariadb -h 127.0.0.1 -uroot -p"$$MARIADB_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS \`$$DB_NAME\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+          echo "Bootstrap MariaDB aplicado com sucesso."
+        else
+          echo "Aviso: bootstrap pulado (senha root atual do volume difere de DB_ROOT_PASSWORD)."
+          echo "A stack segue ativa; para corrigir root remoto, ajuste a senha root real ou recrie o volume do MariaDB."
+        fi
 
-        mariadb -h 127.0.0.1 -uroot -p"$$MARIADB_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS \`$$DB_NAME\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+        exit 0
 
   capivara_phpmyadmin:
     image: phpmyadmin:5-apache
@@ -98,7 +105,7 @@ services:
     restart: always
     depends_on:
       capivara_db_bootstrap:
-        condition: service_completed_successfully
+        condition: service_started
       capivara_db:
         condition: service_healthy
     environment:
