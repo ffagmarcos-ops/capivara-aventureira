@@ -2449,6 +2449,12 @@ function renderVillage() {
                     visualEl.style.backgroundRepeat = "no-repeat";
                     visualEl.style.backgroundSize = "600% 600%";
                     visualEl.style.transition = "transform 300ms";
+                } else if (key === 'townHall' && spriteLvl === 1) {
+                    visualEl.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 518 460"/>';
+                    visualEl.style.backgroundImage = "url('bld_townHall_lvl1.png')";
+                    visualEl.style.backgroundRepeat = "no-repeat";
+                    visualEl.style.backgroundSize = "600% 600%";
+                    visualEl.style.transition = "transform 300ms";
                 } else {
                     visualEl.style.backgroundImage = "";
                     visualEl.style.backgroundSize = "";
@@ -4525,7 +4531,18 @@ function animateUnderConstructionBuildings() {
 
     for (let key in villageState.buildings) {
         const b = villageState.buildings[key];
-        if (b.underConstruction || b.level === 0) {
+        const maxAvailableLvl = {
+            townHall: 10,
+            farm: 10,
+            docks: 10,
+            lab: 10,
+            tower: 10
+        };
+        let maxSpriteLvl = maxAvailableLvl[key] || 3;
+        let spriteLvl = Math.min(maxSpriteLvl, b.level);
+        
+        const needsAnim = b.underConstruction || b.level === 0 || (key === 'townHall' && spriteLvl === 1);
+        if (needsAnim) {
             const visualEl = document.getElementById(`visual-${key}`);
             if (visualEl) {
                 const col = constructionAnimFrame % 6;

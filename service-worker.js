@@ -1,4 +1,4 @@
-const CACHE_NAME = 'capivara-v82';
+const CACHE_NAME = 'capivara-v83';
 const ASSETS = [
   './',
   './index.html',
