@@ -24,8 +24,9 @@ function capyApplyVillageArt() {
         if (b.underConstruction || !b.level) continue;
         const sl = villageSpriteLevel(key, b.level);
         if ((key === 'townHall' || key === 'farm') && sl === 1) continue;
-        const url = window.CAPY_VILLAGE_ART[key + '_' + sl];
-        if (!url) continue;
+        const raw = window.CAPY_VILLAGE_ART[key + '_' + sl];
+        if (!raw) continue;
+        const url = raw.indexOf('data:') === 0 ? raw : ('data:image/webp;base64,' + raw);
         el.style.backgroundImage = 'none';
         el.style.backgroundSize = '';
         el.style.backgroundPosition = '';
