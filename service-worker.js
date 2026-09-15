@@ -1,4 +1,4 @@
-const CACHE_NAME = 'capivara-v85';
+const CACHE_NAME = 'capivara-v87';
 const ASSETS = [
   './',
   './index.html',
@@ -171,17 +171,10 @@ self.addEventListener('fetch', event => {
   const request = event.request;
   const url = new URL(request.url);
 
-  // Nao intercepta requests externas: evita erro de CSP no service worker.
   if (request.method !== 'GET' || url.origin !== self.location.origin) {
     return;
   }
 
-  // IGNORAR INTERCEPTAÇÃO DE VÍDEOS/ÁUDIOS E RANGE REQUESTS:
-  // Navegadores baseados em WebKit (Safari no iOS/macOS) e Chrome utilizam cabeçalhos 'Range' para buscar 
-  // arquivos de mídia por partes (chunks). Se o Service Worker tentar responder com caches.match() retornando 
-  // uma resposta padrão 200 completa, a reprodução de tags <video> e <audio> falha imediatamente.
-  // Ignoramos a interceptação para permitir que essas requisições cheguem diretamente ao backend Express, 
-  // que suporta range requests (HTTP 206 Partial Content) nativamente.
   if (request.headers.get('range') || url.pathname.endsWith('.mp4') || url.pathname.endsWith('.ogg') || url.pathname.endsWith('.mp3')) {
     return;
   }
